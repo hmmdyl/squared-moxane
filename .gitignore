@@ -1,0 +1,15 @@
+.dub
+.vs
+docs.json
+__dummy.html
+docs/
+moxane.so
+moxane.dylib
+moxane.dll
+moxane.a
+moxane.lib
+moxane-test-*
+*.exe
+*.o
+*.obj
+*.lst
