@@ -16,6 +16,8 @@ class RenderTexture
 
 	GLState gl;
 
+	private static GLenum[] allAttachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
+
 	this(uint width, uint height, GLState gl)
 	{
 		this.gl = gl;
@@ -23,8 +25,9 @@ class RenderTexture
 		this.width = width;
 		this.height = height;
 
-		gl.texture2D.push(true);
-		scope(exit) gl.texture2D.pop();
+		//gl.texture2D.push(true);
+		//scope(exit) gl.texture2D.pop();
+		glEnable(GL_TEXTURE_2D);
 
 		glActiveTexture(GL_TEXTURE0);
 
@@ -54,8 +57,8 @@ class RenderTexture
 	{
 		assert(width > 0 && height > 0);
 
-		gl.texture2D.push(true);
-		scope(exit) gl.texture2D.pop;
+		//gl.texture2D.push(true);
+		//scope(exit) gl.texture2D.pop;
 
 		glBindTexture(GL_TEXTURE_2D, diffuse);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -101,6 +104,27 @@ class RenderTexture
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
 	}
 
+	void bindDraw()
+	{
+		glDrawBuffers(cast(int)allAttachments.length, allAttachments.ptr);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+	}
+
+	void unbindDraw()
+	{
+		glDrawBuffer(GL_NONE);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+
+	void clear()
+	{
+		glClearColor(1f, 0, 0, 0);
+		if(depthTexture is null)
+			glClear(GL_COLOR_BUFFER_BIT);
+		else
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
 	void bindAsTexture(uint[3] textureUnits)
 	{
 		glActiveTexture(GL_TEXTURE0 + textureUnits[0]);
@@ -124,9 +148,27 @@ class RenderTexture
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.fbo);
+		scope(exit)
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		}
 
+		if(depthTexture is null)
+			glBlitFramebuffer(0, 0, width, height, 0, 0, target.width, target.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		else
+			glBlitFramebuffer(0, 0, width, height, 0, 0, target.width, target.height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+	}
 
-		glBlitFramebuffer(0, 0, width, height, 0, 0, target.width, target.height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	void blitToScreen(uint x, uint y, uint screenWidth, uint screenHeight)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		scope(exit) glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glBlitFramebuffer(0, 0, width, height, x, y, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glDrawBuffer(GL_NONE);
 	}
 }
 
@@ -143,9 +185,23 @@ class DepthTexture
 		this.height = height;
 		this.gl = gl;
 
-		gl.texture2D.push(true);
-		scope(exit) gl.texture2D.pop();
+		//gl.texture2D.push(true);
+		//scope(exit) gl.texture2D.pop();
 
+		glActiveTexture(GL_TEXTURE0);
+
+		glGenTextures(1, &depth);
+	}
+
+	void createTextures()
+	{
+		assert(width > 0 && height > 0);
+
+		glBindTexture(GL_TEXTURE_2D, depth);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
 		
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }

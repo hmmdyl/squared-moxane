@@ -6,6 +6,6 @@ class GraphicsLog : Log
 {
 	this()
 	{
-		super("graphicsLogger", "Graphics");
+		super("graphicsLog", "Graphics");
 	}
 }

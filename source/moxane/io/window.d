@@ -1,10 +1,12 @@
 module moxane.io.window;
 
 import moxane.io.kbm;
-import moxane.utils.log;
+import moxane.core.engine;
+import moxane.core.log;
 import moxane.core.event;
 
 import derelict.glfw3;
+import derelict.opengl3.gl3;
 import dlib.math;
 import std.string;
 import std.conv;
@@ -74,12 +76,21 @@ final class Window
 	private int windowedWidth, windowedHeight;
 	private int windowedX, windowedY;
 
-	this(WindowBoot windowBoot, ApiBoot apiBoot) 
-	{
-		if(glfwInit() != GLFW_TRUE)
-			throw new Exception("Could not initialise GLFW3!");
+	Moxane moxane;
 
-		debug writeLog(LogType.info, "Creating window.");
+	this(Moxane moxane, WindowBoot windowBoot, ApiBoot apiBoot) 
+	{
+		this.moxane = moxane;
+		Log log = moxane.services.get!Log;
+		log.write(Log.Severity.info, "Loading windowing lib");
+		if(glfwInit() != GLFW_TRUE)
+		{
+			log.write(Log.Severity.panic, "Nein");
+
+			throw new Exception("Could not initialise GLFW3!");
+		}
+
+		log.write(Log.Severity.info, "Loaded windowing lib. Creating window");
 
 		windowedWidth = windowBoot.width;
 		windowedHeight = windowBoot.height;
@@ -96,6 +107,10 @@ final class Window
 		glfwMakeContextCurrent(ptr);
 		glfwShowWindow(ptr);
 
+		if(apiBoot.createOpenGL)
+			DerelictGL3.reload;
+		glfwMakeContextCurrent(ptr);
+
 		glfwSetWindowUserPointer(ptr, cast(void*)this);
 		glfwSetWindowSizeCallback(ptr, &onResizeCallback);
 		glfwSetFramebufferSizeCallback(ptr, &onFramebufferResizeCallback);
@@ -109,9 +124,9 @@ final class Window
 		windowedX = position.x;
 		windowedY = position.y;
 
-		glfwSwapInterval(0);
+		//glfwSwapInterval(16);
 
-		debug writeLog(LogType.info, "Created window");
+		log.write(Log.Severity.info, "Created window");
 	}
 
 	~this() 

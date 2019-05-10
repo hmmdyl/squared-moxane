@@ -7,6 +7,17 @@ import core.sync.mutex;
 import colorize;
 import std.datetime.systime;
 
+class NullLog : Log
+{
+	this()
+	{
+		super("nullLog", "Null");
+	}
+
+	override void write(Log.Severity s, string msg)
+	{return;}
+}
+
 class Log
 {
 	enum Severity

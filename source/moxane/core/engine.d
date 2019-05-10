@@ -5,7 +5,9 @@ import std.exception : enforce;
 import std.traits;
 
 import moxane.io.window;
+import moxane.graphics.renderer;
 import moxane.core.async;
+import moxane.core.log;
 import moxane.core.eventwaiter;
 
 /// Provides a singleton like system for systems, accessible by type.
@@ -29,7 +31,7 @@ class ServiceHandler
 
 	private void enforceIsInherited(T, TBase)(T inst)
 	{
-		enforce(cast(TBase)t !is null, T.stringof ~ " cannot be casted to " ~ TBase.stringof);
+		enforce(cast(TBase)inst !is null, T.stringof ~ " cannot be casted to " ~ TBase.stringof);
 		/*static if(is(TBase == class))
 		{
 			if(typeid(T).base == typeid(TBase)) return;
@@ -114,16 +116,48 @@ class Moxane
 		this.bootSettings = settings;
 		services = new ServiceHandler;
 
+		if(settings.logSystem) registerLog;
+		else registerNullLog;
 		if(settings.windowSystem) registerWindow;
+		if(settings.graphicsSystem) registerRenderer;
+		if(settings.asyncSystem) registerAsync;
+	}
+
+	protected Log registerLog()
+	{
+		Log log = new Log;
+		services.register!Log(log);
+		return log;
+	}
+
+	protected Log registerNullLog()
+	{
+		NullLog log = new NullLog;
+		services.registerBoth!(NullLog, Log)(log);
+		return cast(Log)log;
 	}
 
 	protected Window registerWindow()
 	{
+		import derelict.opengl3.gl3;
+		import derelict.glfw3;
+
+		DerelictGLFW3.load;
+		DerelictGL3.load;
+
 		ApiBoot api = ApiBoot.createOpenGL4Core;
 		WindowBoot winBoot = WindowBoot(1280, 720, "Moxane", false);
-		Window win = new Window(winBoot, api);
+		Window win = new Window(this, winBoot, api);
 		services.register!Window(win);
 		return win;
+	}
+
+	protected Renderer registerRenderer()
+	{
+		import dlib.math;
+		Renderer renderer = new Renderer(this, Vector2u(1280, 720), true);
+		services.register!Renderer(renderer);
+		return renderer;
 	}
 
 	protected AsyncSystem registerAsync()
@@ -136,6 +170,7 @@ class Moxane
 
 struct MoxaneBootSettings 
 {
+	bool logSystem;
 	bool windowSystem;
 	bool graphicsSystem;
 	bool assetSystem;
