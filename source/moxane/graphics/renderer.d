@@ -2,6 +2,7 @@ module moxane.graphics.renderer;
 
 import moxane.core.engine;
 import moxane.core.eventwaiter;
+import moxane.core.log;
 
 import moxane.graphics.gl;
 import moxane.graphics.log;
@@ -72,6 +73,8 @@ class Renderer
 
 	private IRenderable[] sceneRenderables;
 
+	Log log;
+
 	this(Moxane moxane, Vector2u winSize, bool debugMode = false)
 	{
 		this.moxane = moxane;
@@ -81,6 +84,8 @@ class Renderer
 			moxane.services.register!GraphicsLog(log);
 		}
 
+		log = moxane.services.getAOrB!(GraphicsLog, Log);
+
 		gl = new GLState(moxane, debugMode);
 
 		primaryCamera = new Camera;
@@ -88,15 +93,20 @@ class Renderer
 		primaryCamera.height = winSize.y;
 
 		scene = new RenderTexture(winSize.x, winSize.y, gl);
-		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
+
+		//sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
+		//scene.bindDepth(sceneDepth);
 	}
 
 	void scenePass()
 	{
-		scene.bindDepth(sceneDepth);
+		//scene.bindDepth(sceneDepth);
 		scene.bindDraw;
 		scene.clear;
-		scope(exit) scene.unbindDraw;
+		scope(exit) 
+		{
+			scene.unbindDraw;
+		}
 
 		LocalContext lc = 
 		{
@@ -115,7 +125,7 @@ class Renderer
 
 	void render()
 	{
-		if(scene is null) cameraUpdated;
+		//if(scene is null) cameraUpdated;
 
 		scenePass;
 		scene.blitToScreen(0, 0, primaryCamera.width, primaryCamera.height);

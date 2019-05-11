@@ -12,6 +12,7 @@ class RenderTexture
 
 	GLuint fbo;
 	GLuint diffuse, worldPos, normal, meta;
+	GLuint depth;
 	DepthTexture depthTexture;
 
 	GLState gl;
@@ -27,10 +28,10 @@ class RenderTexture
 
 		//gl.texture2D.push(true);
 		//scope(exit) gl.texture2D.pop();
-		glEnable(GL_TEXTURE_2D);
 
-		glActiveTexture(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
 
+		glGenTextures(1, &depth);
 		glGenTextures(1, &diffuse);
 		glGenTextures(1, &worldPos);
 		glGenTextures(1, &normal);
@@ -42,6 +43,7 @@ class RenderTexture
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, diffuse, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, worldPos, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normal, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depth, 0);
 
 		GLenum[] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
 		glDrawBuffers(cast(int)drawBuffers.length, drawBuffers.ptr);
@@ -60,9 +62,14 @@ class RenderTexture
 		//gl.texture2D.push(true);
 		//scope(exit) gl.texture2D.pop;
 
+		glBindTexture(GL_TEXTURE_2D, depth);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null);
+
 		glBindTexture(GL_TEXTURE_2D, diffuse);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_INT, null);
 
 		glBindTexture(GL_TEXTURE_2D, worldPos);
@@ -106,14 +113,16 @@ class RenderTexture
 
 	void bindDraw()
 	{
-		glDrawBuffers(cast(int)allAttachments.length, allAttachments.ptr);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		//glDrawBuffers(cast(int)allAttachments.length, allAttachments.ptr);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glViewport(0, 0, width, height);
 	}
 
 	void unbindDraw()
 	{
-		glDrawBuffer(GL_NONE);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glDrawBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
 	}
 
 	void clear()
@@ -148,6 +157,7 @@ class RenderTexture
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.fbo);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		scope(exit)
 		{
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -166,9 +176,10 @@ class RenderTexture
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		scope(exit) glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		//glReadBuffer(GL_COLOR_ATTACHMENT0);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glBlitFramebuffer(0, 0, width, height, x, y, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-		glDrawBuffer(GL_NONE);
+		//glDrawBuffer(GL_NONE);
 	}
 }
 
@@ -188,9 +199,11 @@ class DepthTexture
 		//gl.texture2D.push(true);
 		//scope(exit) gl.texture2D.pop();
 
-		glActiveTexture(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
 
 		glGenTextures(1, &depth);
+
+		createTextures;
 	}
 
 	void createTextures()

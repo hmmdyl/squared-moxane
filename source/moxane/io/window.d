@@ -97,6 +97,7 @@ final class Window
 
 		if(apiBoot.createOpenGL)
 		{
+			DerelictGL3.load();
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, apiBoot.openGLMajor);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, apiBoot.openGLMinor);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, apiBoot.openGLUseCoreProfile ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE);
@@ -108,7 +109,7 @@ final class Window
 		glfwShowWindow(ptr);
 
 		if(apiBoot.createOpenGL)
-			DerelictGL3.reload;
+			DerelictGL3.reload();
 		glfwMakeContextCurrent(ptr);
 
 		glfwSetWindowUserPointer(ptr, cast(void*)this);

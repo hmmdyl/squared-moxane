@@ -139,13 +139,11 @@ class Moxane
 
 	protected Window registerWindow()
 	{
-		import derelict.opengl3.gl3;
 		import derelict.glfw3;
 
 		DerelictGLFW3.load;
-		DerelictGL3.load;
 
-		ApiBoot api = ApiBoot.createOpenGL4Core;
+		ApiBoot api = ApiBoot.createOpenGL46Core;
 		WindowBoot winBoot = WindowBoot(1280, 720, "Moxane", false);
 		Window win = new Window(this, winBoot, api);
 		services.register!Window(win);
