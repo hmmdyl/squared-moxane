@@ -9,6 +9,7 @@ import moxane.graphics.renderer;
 import moxane.core.async;
 import moxane.core.log;
 import moxane.core.eventwaiter;
+import moxane.core.asset;
 
 /// Provides a singleton like system for systems, accessible by type.
 class ServiceHandler
@@ -118,9 +119,17 @@ class Moxane
 
 		if(settings.logSystem) registerLog;
 		else registerNullLog;
+		if(settings.assetSystem) registerAsset;
 		if(settings.windowSystem) registerWindow;
 		if(settings.graphicsSystem) registerRenderer;
 		if(settings.asyncSystem) registerAsync;
+	}
+
+	protected AssetManager registerAsset()
+	{
+		AssetManager am = new AssetManager(this);
+		services.register!AssetManager(am);
+		return am;
 	}
 
 	protected Log registerLog()
@@ -143,7 +152,7 @@ class Moxane
 
 		DerelictGLFW3.load;
 
-		ApiBoot api = ApiBoot.createOpenGL46Core;
+		ApiBoot api = ApiBoot.createOpenGL43Core;
 		WindowBoot winBoot = WindowBoot(1280, 720, "Moxane", false);
 		Window win = new Window(this, winBoot, api);
 		services.register!Window(win);

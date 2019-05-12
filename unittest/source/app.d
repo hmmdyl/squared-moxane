@@ -4,6 +4,7 @@ import moxane.core.engine;
 import moxane.core.log;
 import moxane.graphics.renderer;
 import moxane.io.window;
+import moxane.core.asset;
 
 void main()
 {
@@ -12,7 +13,7 @@ void main()
 		logSystem : true,
 		windowSystem : true,
 		graphicsSystem : true,
-		assetSystem : false,
+		assetSystem : true,
 		physicsSystem : false,
 		networkSystem : false,
 		settingsSystem : false,

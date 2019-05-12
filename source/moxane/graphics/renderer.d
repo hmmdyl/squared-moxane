@@ -3,10 +3,13 @@ module moxane.graphics.renderer;
 import moxane.core.engine;
 import moxane.core.eventwaiter;
 import moxane.core.log;
+import moxane.core.asset;
 
 import moxane.graphics.gl;
 import moxane.graphics.log;
 import moxane.graphics.rendertexture;
+import moxane.graphics.effect;
+import moxane.graphics.triangletest;
 
 import std.algorithm.mutation;
 import dlib.math;
@@ -71,6 +74,8 @@ class Renderer
 	RenderTexture scene;
 	DepthTexture sceneDepth;
 
+	TriangleTest tt;
+
 	private IRenderable[] sceneRenderables;
 
 	Log log;
@@ -86,6 +91,9 @@ class Renderer
 
 		log = moxane.services.getAOrB!(GraphicsLog, Log);
 
+		AssetManager am = moxane.services.get!AssetManager;
+		am.registerLoader!Shader(new ShaderLoader);
+
 		gl = new GLState(moxane, debugMode);
 
 		primaryCamera = new Camera;
@@ -93,6 +101,9 @@ class Renderer
 		primaryCamera.height = winSize.y;
 
 		scene = new RenderTexture(winSize.x, winSize.y, gl);
+
+		tt = new TriangleTest(moxane);
+		sceneRenderables ~= tt;
 
 		//sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		//scene.bindDepth(sceneDepth);
