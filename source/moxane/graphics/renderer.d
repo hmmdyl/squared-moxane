@@ -100,18 +100,15 @@ class Renderer
 		primaryCamera.width = winSize.x;
 		primaryCamera.height = winSize.y;
 
-		scene = new RenderTexture(winSize.x, winSize.y, gl);
+		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
+		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
 
 		tt = new TriangleTest(moxane);
 		sceneRenderables ~= tt;
-
-		//sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
-		//scene.bindDepth(sceneDepth);
 	}
 
 	void scenePass()
 	{
-		//scene.bindDepth(sceneDepth);
 		scene.bindDraw;
 		scene.clear;
 		scope(exit) 

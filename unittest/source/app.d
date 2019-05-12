@@ -6,6 +6,8 @@ import moxane.graphics.renderer;
 import moxane.io.window;
 import moxane.core.asset;
 
+import dlib.math;
+
 void main()
 {
 	const MoxaneBootSettings settings = 
@@ -26,6 +28,12 @@ void main()
 
 	Window win = moxane.services.get!Window;
 	Renderer r = moxane.services.get!Renderer;
+
+	win.onFramebufferResize.add((win, size) => {
+		r.primaryCamera.width = size.x;
+		r.primaryCamera.height = size.y;
+		r.cameraUpdated;
+	}());
 	
 	while(!win.shouldClose)
 	{

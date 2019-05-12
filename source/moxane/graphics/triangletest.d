@@ -40,7 +40,7 @@ class TriangleTest : IRenderable
 		];
 
 		glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
-		glBufferData(GL_ARRAY_BUFFER, vertices.length * Vector2f.sizeof, vertices.ptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices.length * Vector2f.sizeof, vertices.ptr, GL_STREAM_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, buffers[1]);
 		glBufferData(GL_ARRAY_BUFFER, colours.length * Vector3f.sizeof, colours.ptr, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

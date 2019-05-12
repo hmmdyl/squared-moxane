@@ -1,12 +1,2 @@
-[ ERROR] Graphics @ 2019-May-12 16:13:23.5706193: 33350, 33356, 1280, Error has been generated. GL error GL_INVALID_ENUM in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.59462: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.628616: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.6656271: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.6936162: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.7286138: Cannot compile OpenGL shader. 
-[ ERROR] Graphics @ 2019-May-12 16:13:23.7466266: 33350, 33356, 1280, Error has been generated. GL error GL_INVALID_ENUM in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.7826253: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.8196186: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.8536186: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.8846182: 33350, 33356, 1281, Error has been generated. GL error GL_INVALID_VALUE in (null): (ID: 173538523) Generic error
-[ ERROR] Graphics @ 2019-May-12 16:13:23.9156252: Cannot compile OpenGL shader. 
+[ INFO] Graphics @ 2019-May-12 17:39:15.5477902: 33350, 33361, 131185, Buffer detailed info: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
+[ INFO] Graphics @ 2019-May-12 17:39:15.5634116: 33350, 33361, 131185, Buffer detailed info: Buffer object 2 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.

@@ -19,19 +19,14 @@ class RenderTexture
 
 	private static GLenum[] allAttachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
 
-	this(uint width, uint height, GLState gl)
+	this(uint width, uint height, DepthTexture depthTexture, GLState gl)
 	{
 		this.gl = gl;
 
 		this.width = width;
 		this.height = height;
+		this.depthTexture = depthTexture;
 
-		//gl.texture2D.push(true);
-		//scope(exit) gl.texture2D.pop();
-
-		//glActiveTexture(GL_TEXTURE0);
-
-		glGenTextures(1, &depth);
 		glGenTextures(1, &diffuse);
 		glGenTextures(1, &worldPos);
 		glGenTextures(1, &normal);
@@ -43,7 +38,8 @@ class RenderTexture
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, diffuse, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, worldPos, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normal, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depth, 0);
+		if(depthTexture !is null)
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture.depth, 0);
 
 		GLenum[] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
 		glDrawBuffers(cast(int)drawBuffers.length, drawBuffers.ptr);
@@ -62,10 +58,10 @@ class RenderTexture
 		//gl.texture2D.push(true);
 		//scope(exit) gl.texture2D.pop;
 
-		glBindTexture(GL_TEXTURE_2D, depth);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null);
+		//glBindTexture(GL_TEXTURE_2D, depth);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null);
 
 		glBindTexture(GL_TEXTURE_2D, diffuse);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -95,22 +91,6 @@ class RenderTexture
 		glDeleteFramebuffers(1, &fbo);
 	}
 
-	void bindDepth(DepthTexture dt)
-	{
-		depthTexture = dt;
-		if(dt.width != width || dt.height != height)
-			throw new Exception("Dimensions must be equal.");
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, dt.depth, 0);
-	}
-
-	void unbindDepth()
-	{
-		assert(depthTexture !is null);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
-	}
-
 	void bindDraw()
 	{
 		//glDrawBuffers(cast(int)allAttachments.length, allAttachments.ptr);
@@ -127,7 +107,7 @@ class RenderTexture
 
 	void clear()
 	{
-		glClearColor(1f, 0, 0, 0);
+		glClearColor(0.2f, 0.2f, 0.2f, 0);
 		if(depthTexture is null)
 			glClear(GL_COLOR_BUFFER_BIT);
 		else

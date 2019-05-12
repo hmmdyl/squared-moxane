@@ -8,7 +8,7 @@ import moxane.core.log;
 import moxane.graphics.log;
 import moxane.core.asset;
 
-import std.string : toStringz;
+import std.string : toStringz, strip;
 
 struct EffectUniform
 {
@@ -72,9 +72,9 @@ class ShaderLoader : IAssetLoader
 		auto firstBreakIndex = countUntil(fullFile, '\n');
 		string type = fullFile[0 .. firstBreakIndex];
 		string sourceCode = fullFile[firstBreakIndex .. $];
-		log.write(Log.Severity.debug_, sourceCode);
+		//log.write(Log.Severity.debug_, sourceCode);
 
-		GLenum shaderType = strToShaderType(fullFile[0..firstBreakIndex]);
+		GLenum shaderType = strToShaderType(strip(fullFile[0..firstBreakIndex]));
 
 		shader.compile(sourceCode, shaderType, log);
 
@@ -108,7 +108,7 @@ class Shader
 		glGetShaderiv(id, GL_COMPILE_STATUS, &cs);
 		if(cs != GL_TRUE)
 		{
-			char[1024] logBuffer;
+			char[] logBuffer = new char[](1024);
 			int len;
 			glGetShaderInfoLog(id, 1024, &len, logBuffer.ptr);
 			string strLog = cast(string)logBuffer[0 .. len];
@@ -116,6 +116,7 @@ class Shader
 				log.write(Log.Severity.error, "Cannot compile OpenGL shader. " ~ strLog);
 			return false;
 		}
+		compiled_ = true;
 		return true;
 	}
 }
