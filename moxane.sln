@@ -1,58 +1,58 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "moxane", ".dub/moxane.visualdproj", "{B190DC00-C513-43AE-9598-54DC0121F569}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "moxane", ".dub/moxane.visualdproj", "{46A516B0-A93E-4EB9-A364-EA2C3F5388A0}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "colorize", ".dub/colorize.visualdproj", "{CF1E4C40-3FAB-42B9-BC93-48605D0B44A7}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "colorize", ".dub/colorize.visualdproj", "{4878D3AB-2CE4-4294-BADA-A565283CC0CC}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-enet", ".dub/derelict-enet.visualdproj", "{D4383136-3F28-43E6-A49D-E9C6477BDEAD}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-enet", ".dub/derelict-enet.visualdproj", "{731967B3-4EAA-42CC-8868-CB59F758D2A0}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-util", ".dub/derelict-util.visualdproj", "{E3A8A433-4EFB-4C46-874A-A51C719E5028}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-util", ".dub/derelict-util.visualdproj", "{C28819E3-8812-49B3-A5D0-576F1C27AE41}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-fi", ".dub/derelict-fi.visualdproj", "{92D66179-5636-44E0-A813-D034EBED1039}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-fi", ".dub/derelict-fi.visualdproj", "{5E8DC728-B6F5-4253-AB2B-7C794750630E}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-ft", ".dub/derelict-ft.visualdproj", "{9FFD3CC2-47A0-408D-8872-BD3FB759B698}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-ft", ".dub/derelict-ft.visualdproj", "{1F12608A-7DBD-4C16-9CEB-E44480C6795D}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-gl3", ".dub/derelict-gl3.visualdproj", "{419E2CE6-138B-46F9-B0E9-B25CA33C8669}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-gl3", ".dub/derelict-gl3.visualdproj", "{A3394017-5581-46E2-B0D2-F66106E7EB5D}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "derelict-glfw3", ".dub/derelict-glfw3.visualdproj", "{EC2B0EE0-3125-4A4D-8BA2-575C9AABAF0E}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "derelict-glfw3", ".dub/derelict-glfw3.visualdproj", "{5E2666AF-F0CB-4AF0-9C0D-FF2A13BB4629}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "dlib", ".dub/dlib.visualdproj", "{D6452DF1-FBE8-4EDC-B319-03700472E72E}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "dlib", ".dub/dlib.visualdproj", "{0043926F-FF26-4F30-8CDD-105D6E8DC6C0}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "emsi_containers", ".dub/emsi_containers.visualdproj", "{BD8E5089-6A7A-49B0-B183-92BC3D7064C6}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "emsi_containers", ".dub/emsi_containers.visualdproj", "{88FF6ABE-D6A1-48F7-AF99-511BF83C697D}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "stdx-allocator", ".dub/stdx-allocator.visualdproj", "{AC01E5A3-65F8-48F0-88AD-9F6DE0E3C4E5}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "stdx-allocator", ".dub/stdx-allocator.visualdproj", "{72427E62-E19D-4498-B35D-C308BA46B02B}"
 EndProject
-Project("{DCC21E06-4489-4056-B3D3-169BEBD9572B}") = "resusage", ".dub/resusage.visualdproj", "{D3777343-C5D4-4B0D-8A05-E66DC36EADA3}"
+Project("{A9C90622-87C9-4CE9-8447-96719F39F005}") = "resusage", ".dub/resusage.visualdproj", "{C5CF14AC-61DC-4C72-AD03-AF0C02B87B69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|x64 = debug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B190DC00-C513-43AE-9598-54DC0121F569}.debug|x64.ActiveCfg = debug|x64
-		{B190DC00-C513-43AE-9598-54DC0121F569}.debug|x64.Build.0 = debug|x64
-		{D6452DF1-FBE8-4EDC-B319-03700472E72E}.debug|x64.ActiveCfg = debug|x64
-		{D6452DF1-FBE8-4EDC-B319-03700472E72E}.debug|x64.Build.0 = debug|x64
-		{D3777343-C5D4-4B0D-8A05-E66DC36EADA3}.debug|x64.ActiveCfg = debug|x64
-		{D3777343-C5D4-4B0D-8A05-E66DC36EADA3}.debug|x64.Build.0 = debug|x64
-		{CF1E4C40-3FAB-42B9-BC93-48605D0B44A7}.debug|x64.ActiveCfg = debug|x64
-		{CF1E4C40-3FAB-42B9-BC93-48605D0B44A7}.debug|x64.Build.0 = debug|x64
-		{BD8E5089-6A7A-49B0-B183-92BC3D7064C6}.debug|x64.ActiveCfg = debug|x64
-		{BD8E5089-6A7A-49B0-B183-92BC3D7064C6}.debug|x64.Build.0 = debug|x64
-		{419E2CE6-138B-46F9-B0E9-B25CA33C8669}.debug|x64.ActiveCfg = debug|x64
-		{419E2CE6-138B-46F9-B0E9-B25CA33C8669}.debug|x64.Build.0 = debug|x64
-		{AC01E5A3-65F8-48F0-88AD-9F6DE0E3C4E5}.debug|x64.ActiveCfg = debug|x64
-		{AC01E5A3-65F8-48F0-88AD-9F6DE0E3C4E5}.debug|x64.Build.0 = debug|x64
-		{9FFD3CC2-47A0-408D-8872-BD3FB759B698}.debug|x64.ActiveCfg = debug|x64
-		{9FFD3CC2-47A0-408D-8872-BD3FB759B698}.debug|x64.Build.0 = debug|x64
-		{EC2B0EE0-3125-4A4D-8BA2-575C9AABAF0E}.debug|x64.ActiveCfg = debug|x64
-		{EC2B0EE0-3125-4A4D-8BA2-575C9AABAF0E}.debug|x64.Build.0 = debug|x64
-		{E3A8A433-4EFB-4C46-874A-A51C719E5028}.debug|x64.ActiveCfg = debug|x64
-		{E3A8A433-4EFB-4C46-874A-A51C719E5028}.debug|x64.Build.0 = debug|x64
-		{92D66179-5636-44E0-A813-D034EBED1039}.debug|x64.ActiveCfg = debug|x64
-		{92D66179-5636-44E0-A813-D034EBED1039}.debug|x64.Build.0 = debug|x64
-		{D4383136-3F28-43E6-A49D-E9C6477BDEAD}.debug|x64.ActiveCfg = debug|x64
-		{D4383136-3F28-43E6-A49D-E9C6477BDEAD}.debug|x64.Build.0 = debug|x64
+		{46A516B0-A93E-4EB9-A364-EA2C3F5388A0}.debug|x64.ActiveCfg = debug|x64
+		{46A516B0-A93E-4EB9-A364-EA2C3F5388A0}.debug|x64.Build.0 = debug|x64
+		{0043926F-FF26-4F30-8CDD-105D6E8DC6C0}.debug|x64.ActiveCfg = debug|x64
+		{0043926F-FF26-4F30-8CDD-105D6E8DC6C0}.debug|x64.Build.0 = debug|x64
+		{C5CF14AC-61DC-4C72-AD03-AF0C02B87B69}.debug|x64.ActiveCfg = debug|x64
+		{C5CF14AC-61DC-4C72-AD03-AF0C02B87B69}.debug|x64.Build.0 = debug|x64
+		{4878D3AB-2CE4-4294-BADA-A565283CC0CC}.debug|x64.ActiveCfg = debug|x64
+		{4878D3AB-2CE4-4294-BADA-A565283CC0CC}.debug|x64.Build.0 = debug|x64
+		{88FF6ABE-D6A1-48F7-AF99-511BF83C697D}.debug|x64.ActiveCfg = debug|x64
+		{88FF6ABE-D6A1-48F7-AF99-511BF83C697D}.debug|x64.Build.0 = debug|x64
+		{A3394017-5581-46E2-B0D2-F66106E7EB5D}.debug|x64.ActiveCfg = debug|x64
+		{A3394017-5581-46E2-B0D2-F66106E7EB5D}.debug|x64.Build.0 = debug|x64
+		{72427E62-E19D-4498-B35D-C308BA46B02B}.debug|x64.ActiveCfg = debug|x64
+		{72427E62-E19D-4498-B35D-C308BA46B02B}.debug|x64.Build.0 = debug|x64
+		{1F12608A-7DBD-4C16-9CEB-E44480C6795D}.debug|x64.ActiveCfg = debug|x64
+		{1F12608A-7DBD-4C16-9CEB-E44480C6795D}.debug|x64.Build.0 = debug|x64
+		{5E2666AF-F0CB-4AF0-9C0D-FF2A13BB4629}.debug|x64.ActiveCfg = debug|x64
+		{5E2666AF-F0CB-4AF0-9C0D-FF2A13BB4629}.debug|x64.Build.0 = debug|x64
+		{C28819E3-8812-49B3-A5D0-576F1C27AE41}.debug|x64.ActiveCfg = debug|x64
+		{C28819E3-8812-49B3-A5D0-576F1C27AE41}.debug|x64.Build.0 = debug|x64
+		{5E8DC728-B6F5-4253-AB2B-7C794750630E}.debug|x64.ActiveCfg = debug|x64
+		{5E8DC728-B6F5-4253-AB2B-7C794750630E}.debug|x64.Build.0 = debug|x64
+		{731967B3-4EAA-42CC-8868-CB59F758D2A0}.debug|x64.ActiveCfg = debug|x64
+		{731967B3-4EAA-42CC-8868-CB59F758D2A0}.debug|x64.Build.0 = debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

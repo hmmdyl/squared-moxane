@@ -1,2 +1,2 @@
-[ INFO] Graphics @ 2019-May-12 17:39:15.5477902: 33350, 33361, 131185, Buffer detailed info: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
-[ INFO] Graphics @ 2019-May-12 17:39:15.5634116: 33350, 33361, 131185, Buffer detailed info: Buffer object 2 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
+[ INFO] Graphics @ 2019-May-14 13:59:54.7265809: 33350, 33361, 131185, Buffer detailed info: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
+[ INFO] Graphics @ 2019-May-14 13:59:54.7375889: 33350, 33361, 131185, Buffer detailed info: Buffer object 2 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations.
