@@ -4,7 +4,7 @@ import moxane.core.entity;
 
 import moxane.graphics.renderer;
 
-class EntityRenderer : System, IRenderable
+/*class EntityRenderer : System, IRenderable
 {
 	
 
@@ -12,4 +12,4 @@ class EntityRenderer : System, IRenderable
 	{
 		
 	}
-}
+}*/

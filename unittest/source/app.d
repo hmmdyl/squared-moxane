@@ -6,7 +6,33 @@ import moxane.graphics.renderer;
 import moxane.io.window;
 import moxane.core.asset;
 
+import moxane.graphics.imgui;
+
 import dlib.math;
+
+class BasicWin : IImguiRenderable
+{
+	float dummy = 0.5f;
+	float[4] col;
+
+	this()
+	{
+		col[] = 1f;
+	}
+
+	void renderUI(ImguiRenderer r0, Renderer r1, ref LocalContext lc)
+	{
+		import derelict.imgui.imgui;
+		igBegin("THE HELLO");
+		igText("HELLO WORLD");
+		igButton("Test");
+		igSameLine();
+		igSliderFloat("Yeetus", &dummy, 0f, 1f);
+		igColorEdit4("Color", col);
+		igTextColored(ImVec4(col[0], col[1], col[2], 1f), "Stuff");
+		igEnd();
+	}
+}
 
 void main()
 {
@@ -34,6 +60,12 @@ void main()
 		r.primaryCamera.height = size.y;
 		r.cameraUpdated;
 	}());
+
+	ImguiRenderer imgui = new ImguiRenderer(moxane);
+	r.uiRenderables ~= imgui;
+
+	BasicWin imguiWin = new BasicWin;
+	imgui.renderables ~= imguiWin;
 	
 	while(!win.shouldClose)
 	{

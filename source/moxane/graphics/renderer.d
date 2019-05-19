@@ -24,8 +24,20 @@ class Camera
 	Vector3f rotation;
 	Matrix4f viewMatrix;
 
-	float fieldOfView;
-	float near, far;
+	struct Ortho
+	{
+		float left, right, top, bottom, near, far;
+	}
+	struct Perspective
+	{
+		float fieldOfView, near, far;
+	}
+	union
+	{
+		Ortho ortho;
+		Perspective perspective;
+	}
+	bool isOrtho;
 	Matrix4f projection;
 
 	uint width, height;
@@ -40,7 +52,10 @@ class Camera
 
 	void buildProjection()
 	{
-		projection = perspectiveMatrix(fieldOfView, cast(float)height / cast(float)width, near, far);
+		if(isOrtho)
+			projection = orthoMatrix(ortho.left, ortho.right, ortho.bottom, ortho.top, ortho.near, ortho.far);
+		else
+			projection = perspectiveMatrix(perspective.fieldOfView, cast(float)height / cast(float)width, perspective.near, perspective.far);
 	}
 }
 
@@ -70,6 +85,7 @@ class Renderer
 	GLState gl;
 
 	Camera primaryCamera;
+	Camera uiCamera;
 
 	RenderTexture scene;
 	DepthTexture sceneDepth;
@@ -77,6 +93,7 @@ class Renderer
 	TriangleTest tt;
 
 	private IRenderable[] sceneRenderables;
+	IRenderable[] uiRenderables;
 
 	Log log;
 
@@ -99,6 +116,18 @@ class Renderer
 		primaryCamera = new Camera;
 		primaryCamera.width = winSize.x;
 		primaryCamera.height = winSize.y;
+		
+		uiCamera = new Camera;
+		uiCamera.width = winSize.x;
+		uiCamera.height = winSize.y;
+		uiCamera.ortho.left = 0f;
+		uiCamera.ortho.right = cast(float)winSize.x;
+		uiCamera.ortho.bottom = cast(float)winSize.y;
+		uiCamera.ortho.top = 0f;
+		uiCamera.ortho.near = -1f;
+		uiCamera.ortho.far = 1f;
+		uiCamera.isOrtho = true;
+		uiCamera.buildProjection;
 
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
@@ -137,6 +166,18 @@ class Renderer
 
 		scenePass;
 		scene.blitToScreen(0, 0, primaryCamera.width, primaryCamera.height);
+
+		LocalContext uilc = 
+		{
+			projection : uiCamera.projection, 
+			view : Matrix4f.identity, 
+			model : Matrix4f.identity, 
+			camera : uiCamera,
+			type : PassType.scene
+		};
+
+		foreach(IRenderable r; uiRenderables)
+			r.render(this, uilc);
 	}
 
 	void cameraUpdated()

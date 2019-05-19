@@ -5,6 +5,8 @@ import moxane.graphics.effect;
 class Material
 {
 	Effect effect;
+
+
 }
 
 class Model

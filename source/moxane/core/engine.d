@@ -112,6 +112,8 @@ class Moxane
 	const MoxaneBootSettings bootSettings;
 	ServiceHandler services;
 
+	float deltaTime;
+
 	this(const MoxaneBootSettings settings) 
 	{
 		this.bootSettings = settings;

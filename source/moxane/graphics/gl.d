@@ -78,9 +78,11 @@ class GLState
 	{
 		mixin(Setting!(bool, "blend", enable!GL_BLEND));
 		mixin(Setting!(GLenum, "blendEquation", "glBlendEquation(par);"));
-		mixin(Setting!(Tuple!(GLenum, GLenum), "sourceFactor", "glBlendFunc(par[0], par[1]);"));
+		mixin(Setting!(Tuple!(GLenum, GLenum), "blendFunc", "glBlendFunc(par[0], par[1]);"));
 		mixin(Setting!(bool, "depthTest", enable!GL_DEPTH_TEST));
 		mixin(Setting!(GLenum, "depthTestExpr", "glDepthFunc(par);"));
+		mixin(Setting!(GLenum, "polyMode", "glPolygonMode(GL_FRONT_AND_BACK, par);"));
+		mixin(Setting!(bool, "scissorTest", enable!GL_SCISSOR_TEST));
 
 		mixin(Setting!(bool, "texture2D", enable!GL_TEXTURE_2D));
 		mixin(Setting!(bool, "texture2DArray", enable!GL_TEXTURE_2D_ARRAY));
