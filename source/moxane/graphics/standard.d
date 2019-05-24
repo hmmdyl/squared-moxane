@@ -11,7 +11,7 @@ import containers;
 
 import derelict.opengl3.gl3;
 
-final class MaterialGroup
+/*final class MaterialGroup
 {
 	Effect effect;
 }
@@ -33,7 +33,7 @@ final class Material : MaterialBase
 	bool hasLighting;
 	bool castsShadow;
 
-	override void bindSettings(Renderer r) 
+	override void bindSettings() 
 	{
 		switch(diffuse.type)
 		{
@@ -193,27 +193,37 @@ struct VertexChannel
 		return data_.peek!(T[]);
 	}
 
-	this(T)(T[] dat, size_t vectorElemCount, bool normalise = false)
+	static void create(T)(T[] dat, size_t vectorElemCount, bool normalise = false)
 		if(!is(T == Vector))
 	{
-		data_ = dat;
-		dataPtr = dat.ptr;
-		dataType = DetermineDataType!T;
-		this.normalise = normalise;
-		this.vectorElemCount = vectorElemCount;
-		sizeInBytes = dat.length * T.sizeof;
-		glGenBuffers(1, &bufferHandle);
+		VertexChannel c;
+		with(c)
+		{
+			data_ = dat;
+			dataPtr = dat.ptr;
+			dataType = DetermineDataType!T;
+			this.normalise = normalise;
+			this.vectorElemCount = vectorElemCount;
+			sizeInBytes = dat.length * T.sizeof;
+			glGenBuffers(1, &bufferHandle);
+		}
+		return c;
 	}
 
-	this(T, int N)(Vector!(T, N)[] dat, bool normalise = false)
+	static VertexChannel create(T, int N)(Vector!(T, N)[] dat, bool normalise = false)
 	{
-		data_ = dat;
-		dataPtr = dat.ptr;
-		dataType = DetermineDataType!T;
-		this.normalise = normalise;
-		vectorElemCount = N;
-		sizeInBytes = dat.length * Vector!(T, N).sizeof;
-		glGenBuffers(1, &bufferHandle);
+		VertexChannel c;
+		with(c)
+		{
+			data_ = dat;
+			dataPtr = dat.ptr;
+			dataType = DetermineDataType!T;
+			this.normalise = normalise;
+			vectorElemCount = N;
+			sizeInBytes = dat.length * Vector!(T, N).sizeof;
+			glGenBuffers(1, &bufferHandle);
+		}
+		return c;
 	}
 
 	void upload()
@@ -243,10 +253,10 @@ class StaticModel
 	{
 		stdRenderer = r;
 		vertexCount = cast(int)vertices.length;
-		vertexChannels ~= VertexChannel!(float, 3)(vertices, false);
-		vertexChannels ~= VertexChannel!(float, 3)(normals, false);
+		vertexChannels ~= VertexChannel.create!(float, 3)(vertices, false);
+		vertexChannels ~= VertexChannel.create!(float, 3)(normals, false);
 		if(texCoords !is null)
-			vertexChannels ~= VertexChannel!(float, 2)(texCoords, false);
+			vertexChannels ~= VertexChannel.create!(float, 2)(texCoords, false);
 	}
 }
 
@@ -312,4 +322,4 @@ class StandardRenderer : IRenderable
 		}
 		staticModels[new_.group] ~= model;
 	}
-}
+}*/

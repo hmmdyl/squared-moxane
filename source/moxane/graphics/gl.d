@@ -54,6 +54,7 @@ private static extern(Windows) nothrow void debugCallback(GLenum source, GLenum 
 			case GL_DEBUG_SEVERITY_LOW: s = Log.Severity.warning; break;
 			case GL_DEBUG_SEVERITY_NOTIFICATION: s = Log.Severity.info; break;
 		}
+		if(s == Log.Severity.info) return;
 		log.write(s, msg);
 	}
 	catch(Exception e)

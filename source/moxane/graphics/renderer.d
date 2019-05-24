@@ -149,6 +149,9 @@ class Renderer
 
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
+
+		tt = new TriangleTest(moxane);
+		sceneRenderables ~= tt;
 	}
 
 	void scenePass()
