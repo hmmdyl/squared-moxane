@@ -16,7 +16,9 @@
 		"dlib": "~>0.15.0",
 		"emsi_containers": "~>0.8.0-alpha.12",
 		"derelict-enet": "~>3.0.0",
-		"derelict-imgui": "~>0.10.0"
+		"d-cimgui": {
+			"path": "../../D Projects/d.cimgui/"
+		}
 	},
 	"targetType": "staticLibrary",
 	"buildRequirements": [ "allowWarnings" ],	

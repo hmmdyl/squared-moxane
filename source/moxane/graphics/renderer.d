@@ -11,6 +11,10 @@ import moxane.graphics.rendertexture;
 import moxane.graphics.effect;
 import moxane.graphics.triangletest;
 
+import moxane.graphics.imgui;
+import cimgui.funcs;
+import cimgui.types;
+
 import std.algorithm.mutation;
 import dlib.math;
 
@@ -50,6 +54,14 @@ class Camera
 		viewMatrix *= rotationMatrix(Axis.z, degtorad(rotation.z));
 	}
 
+	void deduceOrtho()
+	{
+		ortho.left = 0f;
+		ortho.right = cast(float)width;
+		ortho.bottom = cast(float)height;
+		ortho.top = 0f;
+	}
+
 	void buildProjection()
 	{
 		if(isOrtho)
@@ -76,7 +88,7 @@ struct LocalContext
 
 interface IRenderable
 {
-	void render(Renderer, ref LocalContext);
+	void render(Renderer, ref LocalContext, out uint drawCalls, out uint numVerts);
 }
 
 class Renderer 
@@ -96,6 +108,15 @@ class Renderer
 	IRenderable[] uiRenderables;
 
 	Log log;
+
+	private struct DebugData
+	{
+		uint sceneDrawCalls, sceneNumVerts;
+		uint uiDrawCalls, uiNumVerts;
+	}
+
+	DebugData lastFrameDebug;
+	DebugData currentFrameDebug;
 
 	this(Moxane moxane, Vector2u winSize, bool debugMode = false)
 	{
@@ -120,10 +141,7 @@ class Renderer
 		uiCamera = new Camera;
 		uiCamera.width = winSize.x;
 		uiCamera.height = winSize.y;
-		uiCamera.ortho.left = 0f;
-		uiCamera.ortho.right = cast(float)winSize.x;
-		uiCamera.ortho.bottom = cast(float)winSize.y;
-		uiCamera.ortho.top = 0f;
+		uiCamera.deduceOrtho;
 		uiCamera.ortho.near = -1f;
 		uiCamera.ortho.far = 1f;
 		uiCamera.isOrtho = true;
@@ -131,9 +149,6 @@ class Renderer
 
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
-
-		tt = new TriangleTest(moxane);
-		sceneRenderables ~= tt;
 	}
 
 	void scenePass()
@@ -141,9 +156,7 @@ class Renderer
 		scene.bindDraw;
 		scene.clear;
 		scope(exit) 
-		{
 			scene.unbindDraw;
-		}
 
 		LocalContext lc = 
 		{
@@ -156,39 +169,56 @@ class Renderer
 
 		foreach(IRenderable r; sceneRenderables)
 		{
-			r.render(this, lc);
+			uint drawCalls, numVerts;
+			r.render(this, lc, drawCalls, numVerts);
+			currentFrameDebug.sceneDrawCalls += drawCalls;
+			currentFrameDebug.sceneNumVerts += numVerts;
 		}
 	}
 
 	void render()
 	{
-		//if(scene is null) cameraUpdated;
+		lastFrameDebug = currentFrameDebug;
+		currentFrameDebug = DebugData();
 
 		scenePass;
-		scene.blitToScreen(0, 0, primaryCamera.width, primaryCamera.height);
+		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
-		LocalContext uilc = 
 		{
-			projection : uiCamera.projection, 
-			view : Matrix4f.identity, 
-			model : Matrix4f.identity, 
-			camera : uiCamera,
-			type : PassType.scene
-		};
+			import derelict.opengl3.gl3 : glViewport;
+			glViewport(0, 0, uiCamera.width, uiCamera.height);
 
-		foreach(IRenderable r; uiRenderables)
-			r.render(this, uilc);
+			LocalContext uilc = 
+			{
+				projection : uiCamera.projection, 
+				view : Matrix4f.identity, 
+				model : Matrix4f.identity, 
+				camera : uiCamera,
+				type : PassType.scene
+			};
+			
+			foreach(IRenderable r; uiRenderables) 
+			{
+				uint dc, nv;
+				r.render(this, uilc, dc, nv);
+				currentFrameDebug.uiDrawCalls += dc;
+				currentFrameDebug.uiNumVerts += nv;
+			}
+		}
 	}
 
 	void cameraUpdated()
 	{
-		scene.width = primaryCamera.width;
-		scene.height = primaryCamera.height;
-		scene.createTextures;
+		if(scene.width != primaryCamera.width || scene.height != primaryCamera.height)
+		{
+			scene.width = primaryCamera.width;
+			scene.height = primaryCamera.height;
+			scene.createTextures;
 
-		sceneDepth.width = primaryCamera.width;
-		sceneDepth.height = primaryCamera.height;
-		sceneDepth.createTextures;
+			sceneDepth.width = primaryCamera.width;
+			sceneDepth.height = primaryCamera.height;
+			sceneDepth.createTextures;
+		}
 	}
 
 	void addSceneRenderable(IRenderable renderable)
@@ -209,5 +239,40 @@ class Renderer
 		}
 		if(!found) throw new Exception("Item not found.");
 		sceneRenderables.remove(index);
+	}
+}
+
+class RendererDebugAttachment : IImguiRenderable
+{
+	Renderer renderer;
+
+	this(Renderer renderer)
+	{
+		this.renderer = renderer;
+	}
+
+	void renderUI(ImguiRenderer imgui, Renderer renderer, ref LocalContext lc)
+	{
+		import std.conv : to;
+		igBegin("Renderer Statistics");
+		if(igCollapsingHeader("Basic", 0))
+		{
+			igText("Delta: %0.6fs", renderer.moxane.deltaTime);
+			igText("Frames: %d", renderer.moxane.frames);
+
+			igText("Scene");
+			igIndent();
+			igText("Draw calls: %d Vertices: %d", renderer.lastFrameDebug.sceneDrawCalls, renderer.lastFrameDebug.sceneNumVerts);
+			igUnindent();
+
+			igText("UI");
+			igIndent();
+			igText("Draw calls: %d Vertices: %d", renderer.lastFrameDebug.uiDrawCalls, renderer.lastFrameDebug.uiNumVerts);
+			igUnindent();
+
+			char[1024] buf;
+			igInputTextMultiline("???????", buf.ptr, 1024);
+		}
+		igEnd();
 	}
 }

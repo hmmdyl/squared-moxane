@@ -9,8 +9,11 @@ import moxane.io;
 
 import containers.unrolledlist;
 import derelict.opengl3.gl3;
-import derelict.imgui.imgui;
+//import derelict.imgui.imgui;
 import dlib.math;
+import cimgui.funcs;
+import cimgui.types;
+import cimgui.imgui;
 
 import std.typecons;
 
@@ -34,7 +37,6 @@ class ImguiRenderer : IRenderable
 		//win_.onMouseButton.add(&onMouseButton);
 	}
 
-	private bool[3] mouseButtons;
 	private float mouseWheel;
 
 	Moxane moxane;
@@ -55,12 +57,41 @@ class ImguiRenderer : IRenderable
 		effect.findUniform("Texture");
 		effect.unbind;
 
+		igCreateContext(null);
 		auto io = igGetIO();
+		igStyleColorsClassic();
+		io.KeyMap[ImGuiKey_Tab] = Keys.tab;
+		io.KeyMap[ImGuiKey_LeftArrow] = Keys.left;
+		io.KeyMap[ImGuiKey_RightArrow] = Keys.right;
+		io.KeyMap[ImGuiKey_UpArrow] = Keys.up;
+		io.KeyMap[ImGuiKey_DownArrow] = Keys.down;
+		io.KeyMap[ImGuiKey_PageUp] = Keys.pageUp;
+		io.KeyMap[ImGuiKey_PageDown] = Keys.pageDown;
+		io.KeyMap[ImGuiKey_Home] = Keys.home;
+		io.KeyMap[ImGuiKey_End] = Keys.pageUp;
+		io.KeyMap[ImGuiKey_PageUp] = Keys.pageUp;
+		io.KeyMap[ImGuiKey_Home] = Keys.home;
+		io.KeyMap[ImGuiKey_End] = Keys.end;             
+		io.KeyMap[ImGuiKey_Insert] = Keys.insert;
+		io.KeyMap[ImGuiKey_Delete] = Keys.delete_;
+		io.KeyMap[ImGuiKey_Backspace] = Keys.backspace;
+		io.KeyMap[ImGuiKey_Space] = Keys.space;
+		io.KeyMap[ImGuiKey_Enter] = Keys.enter;
+		io.KeyMap[ImGuiKey_Escape] = Keys.escape;
+		io.KeyMap[ImGuiKey_A] = Keys.a;
+		io.KeyMap[ImGuiKey_C] = Keys.c;
+		io.KeyMap[ImGuiKey_V] = Keys.v;
+		io.KeyMap[ImGuiKey_X] = Keys.x;
+		io.KeyMap[ImGuiKey_Y] = Keys.y;
+		io.KeyMap[ImGuiKey_Z] = Keys.z;
 
 		Vector2i size = win.size;
 		Vector2i framebufferSize = win.framebufferSize;
 		io.DisplaySize = ImVec2(cast(float)size.x, cast(float)size.y);
 		io.DisplayFramebufferScale = ImVec2(size.x > 0 ? (cast(float)framebufferSize.x / size.x) : 0, size.y > 0 ? (cast(float)framebufferSize.y / size.y) : 0);
+
+		win.onKey.add(&onKey);
+		win.onChar.add(&onChar);
 
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
@@ -88,17 +119,18 @@ class ImguiRenderer : IRenderable
 		destroy(effect);
 	}
 
-	void render(Renderer renderer, ref LocalContext lc)
+	void render(Renderer renderer, ref LocalContext lc, out uint drawCalls, out uint numVerts)
 	{
 		auto io = igGetIO();
 
 		{
-			io.DeltaTime = 0.016666f;
+			io.DeltaTime = moxane.deltaTime;
 
 			Vector2i size = win.size;
 			Vector2i framebufferSize = win.framebufferSize;
 			io.DisplaySize = ImVec2(cast(float)size.x, cast(float)size.y);
-			io.DisplayFramebufferScale = ImVec2(size.x > 0 ? (cast(float)framebufferSize.x / size.x) : 0, size.y > 0 ? (cast(float)framebufferSize.y / size.y) : 0);
+			io.DisplayFramebufferScale = ImVec2(cast(float)framebufferSize.x / cast(float)size.x, cast(float)framebufferSize.y / cast(float)size.y);
+			//io.DisplayFramebufferScale.x = io.DisplayFramebufferScale.y = 2f;
 
 			if(win.isFocused)
 			{
@@ -162,7 +194,8 @@ class ImguiRenderer : IRenderable
 		ImDrawData* drawData = igGetDrawData();
 
 		Vector2i framebufferSize = Vector2i(cast(int)(io.DisplaySize.x * io.DisplayFramebufferScale.x), cast(int)(io.DisplaySize.y * io.DisplayFramebufferScale.y));
-		drawData.ScaleClipRects(io.DisplayFramebufferScale);
+		//drawData.ScaleClipRects(io.DisplayFramebufferScale);
+		//ImDrawData_ScaleClipRects(drawData, io.DisplayFramebufferScale);
 
 		glActiveTexture(GL_TEXTURE0);
 		effect["Texture"].set(0);
@@ -172,25 +205,33 @@ class ImguiRenderer : IRenderable
 			ImDrawList* cmdList = drawData.CmdLists[i];
 			ImDrawIdx* indexOffset;
 
-			auto vertexCount = ImDrawList_GetVertexBufferSize(cmdList);
-			auto indexCount = ImDrawList_GetIndexBufferSize(cmdList);
+			//auto vertexCount = ImDrawList_GetVertexBufferSize(cmdList);
+			//auto indexCount = ImDrawList_GetIndexBufferSize(cmdList);
+
+			auto vertexCount = cmdList.VtxBuffer.size;
+			auto indexCount = cmdList.IdxBuffer.size;
+			numVerts += vertexCount;
 
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, vertexCount * ImDrawVert.sizeof, cast(GLvoid*)ImDrawList_GetVertexPtr(cmdList, 0), GL_STREAM_DRAW);
+			//glBufferData(GL_ARRAY_BUFFER, vertexCount * ImDrawVert.sizeof, cast(GLvoid*)ImDrawList_GetVertexPtr(cmdList, 0), GL_STREAM_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, vertexCount * ImDrawVert.sizeof, cast(GLvoid*)cmdList.VtxBuffer.data, GL_STREAM_DRAW);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * ImDrawIdx.sizeof, cast(GLvoid*)ImDrawList_GetIndexPtr(cmdList, 0), GL_STREAM_DRAW);
+			//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * ImDrawIdx.sizeof, cast(GLvoid*)ImDrawList_GetIndexPtr(cmdList, 0), GL_STREAM_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * ImDrawIdx.sizeof, cast(GLvoid*)cmdList.IdxBuffer.data, GL_STREAM_DRAW);
 
-			auto cmdCount = ImDrawList_GetCmdSize(cmdList);
+			//auto cmdCount = ImDrawList_GetCmdSize(cmdList);
+			auto cmdCount = cmdList.CmdBuffer.size;
 
 			foreach(j; 0 .. cmdCount)
 			{
-				ImDrawCmd* cmd = ImDrawList_GetCmdPtr(cmdList, j);
-				
-				glScissor(
+				//ImDrawCmd* cmd = ImDrawList_GetCmdPtr(cmdList, j);
+				ImDrawCmd* cmd = &cmdList.CmdBuffer.data[j];
+
+				/*glScissor(
 						  cast(int)cmd.ClipRect.x,
 						  cast(int)(framebufferSize.x - cmd.ClipRect.w),
 						  cast(int)(cmd.ClipRect.z - cmd.ClipRect.x),
-						  cast(int)(cmd.ClipRect.w - cmd.ClipRect.y));
+						  cast(int)(cmd.ClipRect.w - cmd.ClipRect.y));*/
 
 				glBindBuffer(GL_ARRAY_BUFFER, vbo);
 				glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, ImDrawVert.sizeof, cast(void*)ImDrawVert.pos.offsetof);
@@ -200,10 +241,31 @@ class ImguiRenderer : IRenderable
 
 				glBindTexture(GL_TEXTURE_2D, fontTexture);
 				glDrawElements(GL_TRIANGLES, cast(GLsizei)cmd.ElemCount, ImDrawIdx.sizeof == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, cast(void*)indexOffset);
+				drawCalls += 1;
 
 				indexOffset += cmd.ElemCount;
 			}
 		}
+	}
+
+	private void onKey(Window win, Keys key, ButtonAction a)
+	{
+		ImGuiIO* io = igGetIO();
+		if(a == ButtonAction.press)
+			io.KeysDown[key] = true;
+		if(a == ButtonAction.release)
+			io.KeysDown[key] = false;
+
+		io.KeyCtrl = io.KeysDown[Keys.leftControl] || io.KeysDown[Keys.rightControl];
+		io.KeyShift = io.KeysDown[Keys.leftShift] || io.KeysDown[Keys.rightShift];
+		io.KeyAlt = io.KeysDown[Keys.leftAlt] || io.KeysDown[Keys.rightAlt];
+		io.KeySuper = io.KeysDown[Keys.leftSuper] || io.KeysDown[Keys.rightSuper];
+	}
+
+	private void onChar(Window win, char c)
+	{
+		ImGuiIO* io = igGetIO();
+		ImGuiIO_AddInputCharacter(io, cast(ushort)c);
 	}
 
 	/*private void onMouseButton(Window win, MouseButton button, ButtonAction action)
@@ -247,6 +309,9 @@ shared static this()
 			default: return ShouldThrow.Yes;
 		}
 	}
-	DerelictImgui.missingSymbolCallback = &missing;
-	DerelictImgui.load;
+	DerelictCImgui.missingSymbolCallback = &missing;
+	DerelictCImgui.load;
+	import std.stdio;
+	import std.string;
+	writeln(fromStringz(igGetVersion()));
 }

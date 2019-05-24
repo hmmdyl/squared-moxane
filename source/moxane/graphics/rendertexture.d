@@ -102,7 +102,6 @@ class RenderTexture
 	{
 		//glDrawBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
 	}
 
 	void clear()

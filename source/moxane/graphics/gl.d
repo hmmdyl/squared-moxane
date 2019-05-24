@@ -80,6 +80,7 @@ class GLState
 		mixin(Setting!(GLenum, "blendEquation", "glBlendEquation(par);"));
 		mixin(Setting!(Tuple!(GLenum, GLenum), "blendFunc", "glBlendFunc(par[0], par[1]);"));
 		mixin(Setting!(bool, "depthTest", enable!GL_DEPTH_TEST));
+		mixin(Setting!(bool, "depthMask", "glDepthMask(par);"));
 		mixin(Setting!(GLenum, "depthTestExpr", "glDepthFunc(par);"));
 		mixin(Setting!(GLenum, "polyMode", "glPolygonMode(GL_FRONT_AND_BACK, par);"));
 		mixin(Setting!(bool, "scissorTest", enable!GL_SCISSOR_TEST));

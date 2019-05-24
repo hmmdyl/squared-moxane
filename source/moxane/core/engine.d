@@ -113,6 +113,7 @@ class Moxane
 	ServiceHandler services;
 
 	float deltaTime;
+	uint frames;
 
 	this(const MoxaneBootSettings settings) 
 	{

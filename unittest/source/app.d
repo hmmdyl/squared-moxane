@@ -10,6 +10,8 @@ import moxane.graphics.imgui;
 
 import dlib.math;
 
+import std.datetime.stopwatch;
+
 class BasicWin : IImguiRenderable
 {
 	float dummy = 0.5f;
@@ -22,7 +24,11 @@ class BasicWin : IImguiRenderable
 
 	void renderUI(ImguiRenderer r0, Renderer r1, ref LocalContext lc)
 	{
-		import derelict.imgui.imgui;
+//		import derelict.imgui.imgui;
+		import cimgui.funcs;
+		import cimgui.types;
+		import cimgui.imgui;
+		igShowAboutWindow();
 		igBegin("THE HELLO");
 		igText("HELLO WORLD");
 		igButton("Test");
@@ -58,6 +64,10 @@ void main()
 	win.onFramebufferResize.add((win, size) => {
 		r.primaryCamera.width = size.x;
 		r.primaryCamera.height = size.y;
+		r.uiCamera.width = size.x;
+		r.uiCamera.height = size.y;
+		r.uiCamera.deduceOrtho;
+		r.uiCamera.buildProjection;
 		r.cameraUpdated;
 	}());
 
@@ -65,10 +75,31 @@ void main()
 	r.uiRenderables ~= imgui;
 
 	BasicWin imguiWin = new BasicWin;
+	RendererDebugAttachment rda = new RendererDebugAttachment(r);
 	imgui.renderables ~= imguiWin;
-	
+	imgui.renderables ~= rda;
+
+	StopWatch sw = StopWatch(AutoStart.yes);
+	StopWatch oneSecond = StopWatch(AutoStart.yes);
+	int frameCount = 0;
+
 	while(!win.shouldClose)
 	{
+		sw.stop;
+		moxane.deltaTime = sw.peek.total!"nsecs" / 1_000_000_000f;
+	
+		if(oneSecond.peek.total!"msecs" >= 1000)
+		{
+			oneSecond.reset;
+			moxane.frames = frameCount;
+			frameCount = 0;
+		}
+
+		frameCount++;
+
+		sw.reset;
+		sw.start;
+
 		r.render;
 	
 		win.swapBuffers;

@@ -52,7 +52,7 @@ class TriangleTest : IRenderable
 		effect.attachAndLink(vs, fs);
 	}
 
-	void render(Renderer renderer, ref LocalContext lc)
+	void render(Renderer renderer, ref LocalContext lc, out uint dc, out uint nv)
 	{
 		effect.bind;
 		scope(exit) effect.unbind;
@@ -75,5 +75,8 @@ class TriangleTest : IRenderable
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		dc = 1;
+		nv = 3;
 	}
 }

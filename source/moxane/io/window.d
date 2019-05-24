@@ -72,6 +72,7 @@ final class Window
 	Event!(Window, Vector2d) onMouseMove;
 	Event!(Window, MouseButton, ButtonAction) onMouseButton;
 	Event!(Window, Keys, ButtonAction) onKey;
+	Event!(Window, char) onChar;
 
 	private int windowedWidth, windowedHeight;
 	private int windowedX, windowedY;
@@ -121,6 +122,7 @@ final class Window
 		glfwSetCursorPosCallback(ptr, &onMouseMoveCallback);
 		glfwSetMouseButtonCallback(ptr, &onMouseButtonCallback);
 		glfwSetKeyCallback(ptr, &onKeyCallback);
+		glfwSetCharCallback(ptr, &onCharCallback);
 
 		windowedX = position.x;
 		windowedY = position.y;
@@ -345,6 +347,16 @@ extern(C) nothrow
 		{
 			Window winclass = getWindowFromPtr(win);
 			winclass.onKey.emit(winclass, cast(Keys)key, cast(ButtonAction)action);
+		}
+		catch(Exception) {}
+	}
+
+	void onCharCallback(GLFWwindow* win, uint cp)
+	{
+		try
+		{
+			Window winclass = getWindowFromPtr(win);
+			winclass.onChar.emit(winclass, cast(char)cp);
 		}
 		catch(Exception) {}
 	}

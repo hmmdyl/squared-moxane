@@ -1,4 +1,4 @@
-[ INFO] Default @ 2019-May-19 13:24:30.0285168: Loading windowing lib
-[ INFO] Default @ 2019-May-19 13:24:30.1916693: Loaded windowing lib. Creating window
-[ INFO] Default @ 2019-May-19 13:24:31.1205132: Created window
-[ DEBUG] Default @ 2019-May-19 13:24:31.1505415: Hello
+[ INFO] Default @ 2019-May-22 11:38:57.2830595: Loading windowing lib
+[ INFO] Default @ 2019-May-22 11:38:57.715336: Loaded windowing lib. Creating window
+[ INFO] Default @ 2019-May-22 11:38:58.1403389: Created window
+[ DEBUG] Default @ 2019-May-22 11:38:58.1703368: Hello
