@@ -150,8 +150,8 @@ class Renderer
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
 
-		tt = new TriangleTest(moxane);
-		sceneRenderables ~= tt;
+		//tt = new TriangleTest(moxane);
+		//sceneRenderables ~= tt;
 	}
 
 	void scenePass()
@@ -169,6 +169,7 @@ class Renderer
 			camera : primaryCamera,
 			type : PassType.scene
 		};
+		scope(exit) lc.destroy;
 
 		foreach(IRenderable r; sceneRenderables)
 		{
@@ -257,24 +258,25 @@ class RendererDebugAttachment : IImguiRenderable
 	void renderUI(ImguiRenderer imgui, Renderer renderer, ref LocalContext lc)
 	{
 		import std.conv : to;
+		import std.string : toStringz;
 		igBegin("Renderer Statistics");
 		if(igCollapsingHeader("Basic", 0))
 		{
-			igText("Delta: %0.6fs", renderer.moxane.deltaTime);
-			igText("Frames: %d", renderer.moxane.frames);
+			igText("Delta: %0.6f s", renderer.moxane.deltaTime);
+			igText("Frames: %u", renderer.moxane.frames);
 
 			igText("Scene");
 			igIndent();
-			igText("Draw calls: %d Vertices: %d", renderer.lastFrameDebug.sceneDrawCalls, renderer.lastFrameDebug.sceneNumVerts);
+			igText("Draw calls: %u Vertices: %u", renderer.lastFrameDebug.sceneDrawCalls, renderer.lastFrameDebug.sceneNumVerts);
 			igUnindent();
 
 			igText("UI");
 			igIndent();
-			igText("Draw calls: %d Vertices: %d", renderer.lastFrameDebug.uiDrawCalls, renderer.lastFrameDebug.uiNumVerts);
+			igText("Draw calls: %u Vertices: %u", renderer.lastFrameDebug.uiDrawCalls, renderer.lastFrameDebug.uiNumVerts);
 			igUnindent();
 
-			char[1024] buf;
-			igInputTextMultiline("???????", buf.ptr, 1024);
+			//char[1024] buf;
+			//igInputTextMultiline("???????".toStringz, buf.ptr, 1024);
 		}
 		igEnd();
 	}

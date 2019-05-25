@@ -4,14 +4,19 @@ import moxane.core.engine;
 import moxane.graphics.effect;
 import moxane.graphics.texture;
 import moxane.graphics.renderer;
+import moxane.core.asset;
+import moxane.core.log;
+import moxane.graphics.log;
 
 import dlib.math;
 import std.variant;
+import std.file : readText;
+import std.exception;
 import containers;
 
 import derelict.opengl3.gl3;
 
-/*final class MaterialGroup
+final class MaterialGroup
 {
 	Effect effect;
 }
@@ -20,8 +25,8 @@ abstract class MaterialBase
 {
 	MaterialGroup group;
 
-	abstract void bindSettings();
-	abstract void unbindSettings();
+	abstract void bindSettings(Renderer r, ref LocalContext lc, bool canUseTextures);
+	abstract void unbindSettings(Renderer r, ref LocalContext lc, bool canUseTextures);
 }
 
 final class Material : MaterialBase
@@ -33,50 +38,58 @@ final class Material : MaterialBase
 	bool hasLighting;
 	bool castsShadow;
 
-	override void bindSettings() 
+	this(MaterialGroup group)
 	{
-		switch(diffuse.type)
+		super.group = group;
+	}
+
+	override void bindSettings(Renderer r, ref LocalContext lc, bool canUseTextures) 
+	{
+		if(diffuse.type == typeid(Texture2D) && canUseTextures)
 		{
-			case typeid(Texture2D):
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, diffuse.peek!Texture2D().handle);
-				group.effect["DiffuseTexture"].set(0);
-				group.effect["UseDiffuseTexture"].set(true);
-				break;
-			case typeid(Vector3f):
-				group.effect["Diffuse"].set(diffuse.peek!Vector3f);
-				group.effect["UseDiffuseTexture"].set(false);
-				break;
-			default: throw new Exception("Error! Unsupported type");
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, diffuse.peek!Texture2D().handle);
+			group.effect["DiffuseTexture"].set(0);
+			group.effect["UseDiffuseTexture"].set(true);
 		}
-		switch(specular.type)
+		else if(diffuse.type == typeid(Vector3f))
 		{
-			case typeid(Texture2D):
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, diffuse.peek!Texture2D().handle);
-				group.effect["SpecularTexture"].set(1);
-				group.effect["UseSpecularTexture"].set(true);
-				break;
-			case typeid(Vector3f):
-				group.effect["Specular"].set(specular.peek!Vector3f);
-				group.effect["UseSpecularTexture"].set(false);
-				break;
-			default: throw new Exception("Error! Unsupported type");
+			group.effect["Diffuse"].set(diffuse.peek!Vector3f);
+			group.effect["UseDiffuseTexture"].set(false);
 		}
+		else throw new Exception("Error! Unsupported type");
+
+		if(diffuse.type == typeid(Texture2D) && canUseTextures)
+		{
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, diffuse.peek!Texture2D().handle);
+			group.effect["SpecularTexture"].set(1);
+			group.effect["UseSpecularTexture"].set(true);
+		}
+		else if(diffuse.type == typeid(Vector3f))
+		{
+			group.effect["Specular"].set(specular.peek!Vector3f);
+			group.effect["UseSpecularTexture"].set(false);
+		}
+		else throw new Exception("Error! Unsupported type");
 
 		if(normal !is null)
 		{
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, normal.peek!Texture2D().handle);
+			glBindTexture(GL_TEXTURE_2D, normal.handle);
 			group.effect["NormalTexture"].set(2);
 			group.effect["UseNormalTexture"].set(true);
 		}
 		else group.effect["UseNormalTexture"].set(false);
 
-		r.gl.depthMask.push(writeDepth);
+		Matrix4f mvp = lc.model * lc.view * lc.projection;
+		group.effect["Model"].set(&lc.model);
+		group.effect["MVP"].set(&mvp);
+
+		r.gl.depthMask.push(depthWrite);
 	}
 
-	override void unbindSettings() 
+	override void unbindSettings(Renderer r, ref LocalContext lc, bool canUseTextures) 
 	{
 		r.gl.depthMask.pop;
 	}
@@ -175,7 +188,7 @@ struct VertexChannel
 
 	VertexDataType dataType;
 	bool normalise;
-	size_t vectorElemCount;
+	int vectorElemCount;
 	size_t sizeInBytes;
 
 	bool uploaded = false;
@@ -193,36 +206,30 @@ struct VertexChannel
 		return data_.peek!(T[]);
 	}
 
-	static void create(T)(T[] dat, size_t vectorElemCount, bool normalise = false)
+	static void create(T)(T[] dat, int vectorElemCount, bool normalise = false)
 		if(!is(T == Vector))
 	{
 		VertexChannel c;
-		with(c)
-		{
-			data_ = dat;
-			dataPtr = dat.ptr;
-			dataType = DetermineDataType!T;
-			this.normalise = normalise;
-			this.vectorElemCount = vectorElemCount;
-			sizeInBytes = dat.length * T.sizeof;
-			glGenBuffers(1, &bufferHandle);
-		}
+		c.data_ = dat;
+		c.dataPtr = dat.ptr;
+		c.dataType = DetermineDataType!T;
+		c.normalise = normalise;
+		c.vectorElemCount = vectorElemCount;
+		c.sizeInBytes = dat.length * T.sizeof;
+		glGenBuffers(1, &c.bufferHandle);
 		return c;
 	}
 
 	static VertexChannel create(T, int N)(Vector!(T, N)[] dat, bool normalise = false)
 	{
 		VertexChannel c;
-		with(c)
-		{
-			data_ = dat;
-			dataPtr = dat.ptr;
-			dataType = DetermineDataType!T;
-			this.normalise = normalise;
-			vectorElemCount = N;
-			sizeInBytes = dat.length * Vector!(T, N).sizeof;
-			glGenBuffers(1, &bufferHandle);
-		}
+		c.data_ = dat;
+		c.dataPtr = dat.ptr;
+		c.dataType = DetermineDataType!T;
+		c.normalise = normalise;
+		c.vectorElemCount = N;
+		c.sizeInBytes = dat.length * Vector!(T, N).sizeof;
+		glGenBuffers(1, &c.bufferHandle);
 		return c;
 	}
 
@@ -241,7 +248,7 @@ class StaticModel
 	@property MaterialBase material() { return material_; }
 	@property void material(MaterialBase mb)
 	{
-		stdRenderer.modelMaterialChange(this, material_, mb);
+		stdRenderer.staticModelMaterialChange(this, material_, mb);
 		material_ = mb;
 	}
 
@@ -249,14 +256,16 @@ class StaticModel
 	int vertexCount;
 	StandardRenderer stdRenderer;
 	
-	this(StandardRenderer r, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null)
+	this(StandardRenderer r, Material material, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null)
 	{
 		stdRenderer = r;
+		this.material_ = material;
 		vertexCount = cast(int)vertices.length;
 		vertexChannels ~= VertexChannel.create!(float, 3)(vertices, false);
 		vertexChannels ~= VertexChannel.create!(float, 3)(normals, false);
 		if(texCoords !is null)
 			vertexChannels ~= VertexChannel.create!(float, 2)(texCoords, false);
+		foreach(c; vertexChannels) c.upload;
 	}
 }
 
@@ -268,20 +277,55 @@ class LodModel
 
 class StandardRenderer : IRenderable
 {
-	private UnrolledList!StaticModel[][MaterialGroup] staticModels;
+	private uint vao;
+	private UnrolledList!StaticModel[MaterialGroup] staticModels;
+
+	Moxane moxane;
+	this(Moxane moxane)
+	{
+		this.moxane = moxane;
+		glGenVertexArrays(1, &vao);
+	}
+	
+	private MaterialGroup standardMaterial_;
+	private void createStandardMaterial()
+	{
+		Log log = moxane.services.getAOrB!(GraphicsLog, Log);
+		Shader vs = new Shader, fs = new Shader;
+		enforce(vs.compile(readText(AssetManager.translateToAbsoluteDir("content/shaders/standardMaterial.vs.glsl")), GL_VERTEX_SHADER, log));
+		enforce(fs.compile(readText(AssetManager.translateToAbsoluteDir("content/shaders/standardMaterial.fs.glsl")), GL_FRAGMENT_SHADER, log));
+		standardMaterial_ = new MaterialGroup;
+		standardMaterial_.effect = new Effect(moxane, "StandardMaterialEffect");
+		standardMaterial_.effect.attachAndLink(vs, fs);
+		standardMaterial_.effect.bind;
+		standardMaterial_.effect.findUniform("Model");
+		standardMaterial_.effect.findUniform("MVP");
+		standardMaterial_.effect.findUniform("DiffuseTexture");
+		standardMaterial_.effect.findUniform("Diffuse");
+		standardMaterial_.effect.findUniform("UseDiffuseTexture");
+		standardMaterial_.effect.findUniform("SpecularTexture");
+		standardMaterial_.effect.findUniform("Specular");
+		standardMaterial_.effect.findUniform("UseSpecularTexture");
+		standardMaterial_.effect.findUniform("NormalTexture");
+		standardMaterial_.effect.findUniform("UseNormalTexture");
+		standardMaterial_.effect.findUniform("Model");
+		standardMaterial_.effect.findUniform("MVP");
+		standardMaterial_.effect.unbind;
+	}
+	@property MaterialGroup standardMaterialGroup() { if(standardMaterial_ is null) createStandardMaterial(); return standardMaterial_; }
 
 	void render(Renderer renderer, ref LocalContext lc, out uint drawCalls, out uint numVerts)
 	{
 		glBindVertexArray(vao);
 		scope(exit) glBindVertexArray(0);
 
-		foreach(i; 0 .. 3)
+		foreach(i; 0 .. 2)
 			glEnableVertexAttribArray(i);
 		scope(exit)
-			foreach_reverse(i; 0 .. 3)
-				glEnableVertexAttribArray(i);
+			foreach_reverse(i; 0 .. 2)
+				glDisableVertexAttribArray(i);
 
-		foreach(MaterialGroup group, StaticModel[] models; staticModels)
+		foreach(MaterialGroup group, ref UnrolledList!StaticModel models; staticModels)
 		{
 			group.effect.bind;
 			scope(exit) group.effect.unbind;
@@ -292,12 +336,10 @@ class StandardRenderer : IRenderable
 				import std.algorithm.searching : any;
 				assert(model.vertexChannels.any!(a => !a.uploaded));
 
-				model.material_.bindSettings;
-				scope(exit) model.material_.unbindSettings;
+				model.material_.bindSettings(renderer, lc, model.vertexChannels.length > 2);
+				scope(exit) model.material_.unbindSettings(renderer, lc, model.vertexChannels.length > 2);
 
-				group.effect["UseTextures"].set(model.vertexChannels.length == 3);
-
-				foreach(uint i; 0 .. model.vertexChannels.length)
+				foreach(uint i; 0 .. cast(uint)model.vertexChannels.length)
 				{
 					VertexChannel* c = &model.vertexChannels[i];
 					glBindBuffer(GL_ARRAY_BUFFER, c.bufferHandle);
@@ -313,13 +355,19 @@ class StandardRenderer : IRenderable
 		}
 	}
 
+	void addStaticModel(StaticModel model)
+	{
+		if((model.material.group in staticModels) is null) staticModels[model.material.group] = UnrolledList!StaticModel();
+		staticModels[model.material.group].insertBack(model);
+	}
+
 	private void staticModelMaterialChange(StaticModel model, MaterialBase old, MaterialBase new_)
 	{
+		if(old is new_) return;
 		if(old !is null)
 		{
-			group = old.group;
-			staticModels[group].remove(model);
+			staticModels[old.group].remove(model);
 		}
-		staticModels[new_.group] ~= model;
+		staticModels[new_.group].insertBack(model);
 	}
-}*/
+}

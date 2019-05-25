@@ -8,10 +8,9 @@
 		"derelict-ft": "1.1.3",
 		"derelict-gl3": "1.0.19",
 		"derelict-glfw3": "3.1.3",
-		"derelict-imgui": "0.10.0",
 		"derelict-util": "2.0.6",
 		"dlib": "0.15.0",
-		"emsi_containers": "0.8.0-alpha.14",
+		"emsi_containers": "0.8.0-alpha.15",
 		"moxane": {"path":"../"},
 		"resusage": "0.2.8",
 		"stdx-allocator": "2.77.5"

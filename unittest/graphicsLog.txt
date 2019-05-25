@@ -1,0 +1,5 @@
+[ WARNING] Graphics @ 2019-May-25 23:23:35.1274007: Could not get uniform Model for effect StandardMaterialEffect
+[ WARNING] Graphics @ 2019-May-25 23:23:35.1324044: Could not get uniform SpecularTexture for effect StandardMaterialEffect
+[ WARNING] Graphics @ 2019-May-25 23:23:35.1374105: Could not get uniform Specular for effect StandardMaterialEffect
+[ WARNING] Graphics @ 2019-May-25 23:23:35.1404162: Could not get uniform UseSpecularTexture for effect StandardMaterialEffect
+[ WARNING] Graphics @ 2019-May-25 23:23:35.1464191: Could not get uniform Model for effect StandardMaterialEffect

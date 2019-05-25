@@ -14,7 +14,7 @@ interface IAssetLoader
 class AssetManager
 {
 	IAssetLoader[TypeInfo] loaders;
-	private Object[Tuple!(TypeInfo, string)] instances;
+	private Tuple!(int, Object)[Tuple!(TypeInfo, string)] instances;
 
 	Moxane moxane;
 
@@ -37,15 +37,18 @@ class AssetManager
 	T load(T)(string dir)
 	{
 		auto type = Tuple!(TypeInfo, string)(typeid(T), dir);
-		Object* inst = type in instances;
+		Tuple!(int, Object)* inst = type in instances;
 		if(inst is null)
 		{
 			T item = uniqueLoad!T(dir);
-			instances[type] = item;
+			instances[type] = tuple(1, item);
 			return item;
 		}
 		else
-			return cast(T)(*inst);
+		{
+			inst[0] += 1;
+			return cast(T)(*inst[1]);
+		}
 	}
 
 	T uniqueLoad(T)(string dir)

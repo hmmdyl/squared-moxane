@@ -28,7 +28,7 @@ class ImguiRenderer : IRenderable
 	private GLuint vbo, ibo, vao;
 	private GLuint fontTexture;
 
-	UnrolledList!IImguiRenderable renderables;
+	IImguiRenderable[] renderables;
 
 	private Window win_;
 	@property Window win() { return win_; }
@@ -40,6 +40,8 @@ class ImguiRenderer : IRenderable
 	private float mouseWheel;
 
 	Moxane moxane;
+
+	private ImGuiContext* imguiContext;
 
 	this(Moxane moxane)
 	{
@@ -57,7 +59,8 @@ class ImguiRenderer : IRenderable
 		effect.findUniform("Texture");
 		effect.unbind;
 
-		igCreateContext(null);
+		imguiContext = igCreateContext(null);
+		igSetCurrentContext(imguiContext);
 		auto io = igGetIO();
 		igStyleColorsClassic();
 		io.KeyMap[ImGuiKey_Tab] = Keys.tab;
@@ -121,10 +124,14 @@ class ImguiRenderer : IRenderable
 
 	void render(Renderer renderer, ref LocalContext lc, out uint drawCalls, out uint numVerts)
 	{
+		import std.stdio;
+
 		auto io = igGetIO();
 
 		{
-			io.DeltaTime = moxane.deltaTime;
+			//writeln("begin io");
+			//scope(exit) writeln("end IO update");
+			io.DeltaTime = 1f / 60f;
 
 			Vector2i size = win.size;
 			Vector2i framebufferSize = win.framebufferSize;
@@ -140,12 +147,15 @@ class ImguiRenderer : IRenderable
 				foreach(i; 0 .. 3)
 					io.MouseDown[i] = win.isMouseButtonDown(i);
 			}
+			//writeln("end io");
 		}
 
+		//writeln("Begin update");
 		igNewFrame();
 		foreach(IImguiRenderable r; renderables)
 			r.renderUI(this, renderer, lc);
 		igRender();
+		//writeln("End update");
 
 		/*with(renderer.gl)
 		{
@@ -309,7 +319,7 @@ shared static this()
 			default: return ShouldThrow.Yes;
 		}
 	}
-	DerelictCImgui.missingSymbolCallback = &missing;
+	//DerelictCImgui.missingSymbolCallback = &missing;
 	DerelictCImgui.load;
 	import std.stdio;
 	import std.string;

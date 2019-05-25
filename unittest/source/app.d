@@ -6,39 +6,13 @@ import moxane.graphics.renderer;
 import moxane.io.window;
 import moxane.core.asset;
 
-import moxane.graphics.imgui;
+import moxane.graphics.standard;
 
 import dlib.math;
 
 import std.datetime.stopwatch;
 
-class BasicWin : IImguiRenderable
-{
-	float dummy = 0.5f;
-	float[4] col;
-
-	this()
-	{
-		col[] = 1f;
-	}
-
-	void renderUI(ImguiRenderer r0, Renderer r1, ref LocalContext lc)
-	{
-//		import derelict.imgui.imgui;
-		import cimgui.funcs;
-		import cimgui.types;
-		import cimgui.imgui;
-		igShowAboutWindow();
-		igBegin("THE HELLO");
-		igText("HELLO WORLD");
-		igButton("Test");
-		igSameLine();
-		igSliderFloat("Yeetus", &dummy, 0f, 1f);
-		igColorEdit4("Color", col);
-		igTextColored(ImVec4(col[0], col[1], col[2], 1f), "Stuff");
-		igEnd();
-	}
-}
+//extern(C) __gshared string[] rt_options = ["gcopt=gc:precise profile:1"];
 
 void main()
 {
@@ -61,23 +35,52 @@ void main()
 	Window win = moxane.services.get!Window;
 	Renderer r = moxane.services.get!Renderer;
 
-	win.onFramebufferResize.add((win, size) => {
+	r.primaryCamera.perspective.fieldOfView = 90f;
+	r.primaryCamera.perspective.near = 0.1f;
+	r.primaryCamera.perspective.far = 10f;
+	r.primaryCamera.isOrtho = false;
+	r.primaryCamera.position = Vector3f(0f, 0f, 0f);
+	r.primaryCamera.rotation = Vector3f(0f, 0f, 0f);
+	r.primaryCamera.buildView;
+	r.primaryCamera.buildProjection;
+
+	win.onFramebufferResize.add((win, size) {
 		r.primaryCamera.width = size.x;
 		r.primaryCamera.height = size.y;
+		r.primaryCamera.buildProjection;
 		r.uiCamera.width = size.x;
 		r.uiCamera.height = size.y;
 		r.uiCamera.deduceOrtho;
 		r.uiCamera.buildProjection;
 		r.cameraUpdated;
-	}());
+		writeln("CALL");
+	});
 
-	ImguiRenderer imgui = new ImguiRenderer(moxane);
-	r.uiRenderables ~= imgui;
+	StandardRenderer sr = new StandardRenderer(moxane);
+	moxane.services.register!StandardRenderer(sr);
+	r.addSceneRenderable(sr);
 
-	BasicWin imguiWin = new BasicWin;
-	RendererDebugAttachment rda = new RendererDebugAttachment(r);
-	imgui.renderables ~= imguiWin;
-	imgui.renderables ~= rda;
+	Material material = new Material(sr.standardMaterialGroup);
+	material.diffuse = Vector3f(1f, 0.5f, 0f);
+	material.specular = Vector3f(0f, 0f, 0f);
+	material.normal = null;
+	material.depthWrite = true;
+	material.hasLighting = true;
+	material.castsShadow = true;
+	Vector3f[] verts =
+	[
+		Vector3f(-1f, -1f, -2f),
+		Vector3f(0f, 1f, -5f),
+		Vector3f(1f, -1f, -5f)
+	];
+	Vector3f[] normals =
+	[
+		Vector3f(0f, 0f, 1f),
+		Vector3f(0f, 0f, 1f),
+		Vector3f(0f, 0f, 1f)
+	];
+	StaticModel sm = new StaticModel(sr, material, verts, normals);
+	sr.addStaticModel(sm);
 
 	StopWatch sw = StopWatch(AutoStart.yes);
 	StopWatch oneSecond = StopWatch(AutoStart.yes);
@@ -101,7 +104,7 @@ void main()
 		sw.start;
 
 		r.render;
-	
+
 		win.swapBuffers;
 		win.pollEvents;
 	}
