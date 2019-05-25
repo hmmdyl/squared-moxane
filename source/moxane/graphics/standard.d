@@ -7,6 +7,7 @@ import moxane.graphics.renderer;
 import moxane.core.asset;
 import moxane.core.log;
 import moxane.graphics.log;
+import moxane.graphics.transformation;
 
 import dlib.math;
 import std.variant;
@@ -82,16 +83,16 @@ final class Material : MaterialBase
 		}
 		else group.effect["UseNormalTexture"].set(false);
 
-		Matrix4f mvp = lc.model * lc.view * lc.projection;
+		Matrix4f mvp = lc.projection * lc.view * lc.model;
 		group.effect["Model"].set(&lc.model);
 		group.effect["MVP"].set(&mvp);
 
-		r.gl.depthMask.push(depthWrite);
+		//r.gl.depthMask.push(depthWrite);
 	}
 
 	override void unbindSettings(Renderer r, ref LocalContext lc, bool canUseTextures) 
 	{
-		r.gl.depthMask.pop;
+		//r.gl.depthMask.pop;
 	}
 }
 
@@ -255,6 +256,8 @@ class StaticModel
 	VertexChannel[] vertexChannels;
 	int vertexCount;
 	StandardRenderer stdRenderer;
+
+	Transform transformation;
 	
 	this(StandardRenderer r, Material material, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null)
 	{
@@ -336,8 +339,10 @@ class StandardRenderer : IRenderable
 				import std.algorithm.searching : any;
 				assert(model.vertexChannels.any!(a => !a.uploaded));
 
-				model.material_.bindSettings(renderer, lc, model.vertexChannels.length > 2);
-				scope(exit) model.material_.unbindSettings(renderer, lc, model.vertexChannels.length > 2);
+				LocalContext lc1 = lc;
+				lc1.model *= model.transformation.matrix;
+				model.material_.bindSettings(renderer, lc1, model.vertexChannels.length > 2);
+				scope(exit) model.material_.unbindSettings(renderer, lc1, model.vertexChannels.length > 2);
 
 				foreach(uint i; 0 .. cast(uint)model.vertexChannels.length)
 				{

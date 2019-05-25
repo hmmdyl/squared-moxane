@@ -155,10 +155,18 @@ class RenderTexture
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		scope(exit) glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-		//glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glBlitFramebuffer(0, 0, width, height, x, y, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		//glDrawBuffer(GL_NONE);
+
+		debug
+		{
+			glReadBuffer(GL_COLOR_ATTACHMENT2);
+			glBlitFramebuffer(0, 0, width, height, x, y, screenWidth/8, screenHeight/8, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glReadBuffer(GL_COLOR_ATTACHMENT1);
+			glBlitFramebuffer(0, 0, width, height, screenWidth/8, y, screenWidth/8*2, screenHeight/8, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		}
 	}
 }
 

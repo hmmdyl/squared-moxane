@@ -73,6 +73,10 @@ class GLState
 			glEnable(GL_DEBUG_OUTPUT);
 			glDebugMessageCallback(&debugCallback, cast(void*)this);
 		}
+
+		depthTest.push(false);
+		depthTestExpr.push(GL_LESS);
+		depthMask.push(true);
 	}
 
 	@nogc nothrow

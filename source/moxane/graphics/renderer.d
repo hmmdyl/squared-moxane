@@ -161,6 +161,9 @@ class Renderer
 		scope(exit) 
 			scene.unbindDraw;
 
+		gl.depthTest.push(true);
+		scope(exit) gl.depthTest.pop();
+
 		LocalContext lc = 
 		{
 			projection : primaryCamera.projection, 

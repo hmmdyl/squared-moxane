@@ -5,6 +5,7 @@ import moxane.core.log;
 import moxane.graphics.renderer;
 import moxane.io.window;
 import moxane.core.asset;
+import moxane.graphics.transformation;
 
 import moxane.graphics.standard;
 
@@ -61,7 +62,7 @@ void main()
 	r.addSceneRenderable(sr);
 
 	Material material = new Material(sr.standardMaterialGroup);
-	material.diffuse = Vector3f(1f, 0.5f, 0f);
+	material.diffuse = Vector3f(1f, 0.5f, 0.9f);
 	material.specular = Vector3f(0f, 0f, 0f);
 	material.normal = null;
 	material.depthWrite = true;
@@ -69,9 +70,15 @@ void main()
 	material.castsShadow = true;
 	Vector3f[] verts =
 	[
-		Vector3f(-1f, -1f, -2f),
-		Vector3f(0f, 1f, -5f),
-		Vector3f(1f, -1f, -5f)
+		Vector3f(-1f, -1f, 0f),
+		Vector3f(0f, 1f, 0f),
+		Vector3f(1f, -1f, 0f)
+	];
+	Vector3f[] verts1 =
+	[
+		Vector3f(1f, 1f, 0f),
+		Vector3f(0f, -1f, 0f),
+		Vector3f(-1f, 1f, 0f)
 	];
 	Vector3f[] normals =
 	[
@@ -81,6 +88,27 @@ void main()
 	];
 	StaticModel sm = new StaticModel(sr, material, verts, normals);
 	sr.addStaticModel(sm);
+	sm.transformation = Transform.init;
+	sm.transformation.position.x = -2f;
+	sm.transformation.position.z = 5f;
+	sm.transformation.scale.y = 2.5f;
+	sm.transformation.scale.x = 0.5f;
+
+	Material material1 = new Material(sr.standardMaterialGroup);
+	material1.diffuse = Vector3f(0f, 0.5f, 0.9f);
+	material1.specular = Vector3f(0f, 0f, 0f);
+	material1.normal = null;
+	material1.depthWrite = true;
+	material1.hasLighting = true;
+	material1.castsShadow = true;
+	StaticModel sm1 = new StaticModel(sr, material1, verts1, normals);
+	sr.addStaticModel(sm1);
+	sm1.transformation = Transform.init;
+	sm1.transformation.position.x = 2f;
+	sm1.transformation.position.z = 5f;
+	sm1.transformation.scale.y = 2.5f;
+	sm1.transformation.scale.x = 0.5f;
+	sm1.transformation.rotation.y = 90f;
 
 	StopWatch sw = StopWatch(AutoStart.yes);
 	StopWatch oneSecond = StopWatch(AutoStart.yes);
@@ -102,7 +130,9 @@ void main()
 
 		sw.reset;
 		sw.start;
-
+		
+		sm.transformation.rotation.y += moxane.deltaTime * 180;
+		sm1.transformation.rotation.y -= moxane.deltaTime * 180;
 		r.render;
 
 		win.swapBuffers;

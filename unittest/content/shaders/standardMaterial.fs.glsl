@@ -30,4 +30,6 @@ void main()
 	
 	if(UseNormalTexture) OutNormal = texture(NormalTexture, fTexCoord).rgb;
 	else OutNormal = fNormal;
+	
+	OutWorldPos = fWorldPos;
 }
