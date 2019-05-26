@@ -158,6 +158,13 @@ class EntityManager
 	EventWaiter!OnEntityAdd onEntityAdd;
 	EventWaiter!OnEntityAdd onEntityRemove;
 
+	Moxane moxane;
+	this(Moxane moxane)
+	{
+		this.moxane = moxane;
+		add(new ScriptSystem(moxane, this));
+	}
+
 	void add(Entity entity)
 	{
 		enforce(entity !is null, "Entity must not be null.");
@@ -316,6 +323,12 @@ class EntityManager
 		this(System system, EntityManager manager) { this.system = system; this.manager = manager; }
 	}
 	EventWaiter!OnSystemAdded onSystemAdded;
+
+	void add(System system)
+	{
+		systems.insertBack(system);
+		onSystemAdded.emit(OnSystemAdded(system, this));
+	}
 
 	void update()
 	{

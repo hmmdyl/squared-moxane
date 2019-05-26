@@ -3,6 +3,7 @@ module moxane.core.engine;
 
 import std.exception : enforce;
 import std.traits;
+import std.datetime.stopwatch : StopWatch, AutoStart;
 
 import moxane.io.window;
 import moxane.graphics.renderer;
@@ -10,6 +11,7 @@ import moxane.core.async;
 import moxane.core.log;
 import moxane.core.eventwaiter;
 import moxane.core.asset;
+import moxane.core.entity;
 
 /// Provides a singleton like system for systems, accessible by type.
 class ServiceHandler
@@ -112,8 +114,12 @@ class Moxane
 	const MoxaneBootSettings bootSettings;
 	ServiceHandler services;
 
+	private StopWatch deltaSw, oneSecondSw;
 	float deltaTime;
 	uint frames;
+	private uint frameCount;
+
+	bool exit = false;
 
 	this(const MoxaneBootSettings settings) 
 	{
@@ -126,6 +132,78 @@ class Moxane
 		if(settings.windowSystem) registerWindow;
 		if(settings.graphicsSystem) registerRenderer;
 		if(settings.asyncSystem) registerAsync;
+		if(settings.entitySystem) registerEntityManager;
+
+		deltaTime = 0f;
+		deltaSw = StopWatch(AutoStart.yes);
+		oneSecondSw = StopWatch(AutoStart.yes);
+	}
+
+	void run()
+	{
+		while(!exit)
+		{
+			deltaSw.stop;
+			enum oneBillionInv = 1f / 1_000_000_000f;
+			deltaTime = deltaSw.peek.total!"nsecs" * oneBillionInv;
+
+			if(oneSecondSw.peek.total!"msecs" >= 1000)
+			{
+				oneSecondSw.reset;
+				frames = frameCount;
+				frameCount = 0;
+			}
+
+			frameCount++;
+
+			deltaSw.reset;
+			deltaSw.start;
+
+			update;
+			render;
+
+			Window win = services.get!Window;
+			exit |= win !is null ? win.shouldClose : false;
+		}
+	}
+
+	void update()
+	{
+		AsyncSystem asyncSystem = services.get!AsyncSystem;
+		if(asyncSystem !is null)
+		{
+			asyncSystem.callAllNextFrame;
+			asyncSystem.callAllWaitTime;
+		}
+
+		EntityManager entityManager = services.get!EntityManager;
+		if(entityManager !is null)
+		{
+			entityManager.update;
+		}
+	}
+
+	void render()
+	{
+		//if(!bootSettings.graphicsSystem && !bootSettings.windowSystem) return;
+
+		Window window = services.get!Window;
+		Renderer renderer = services.get!Renderer;
+
+		if(renderer !is null) 
+			renderer.render;
+		if(window !is null)
+		{
+			window.swapBuffers;
+			window.pollEvents;
+		}
+	}
+	
+	protected EntityManager registerEntityManager()
+	{
+		EntityManager em = new EntityManager(this);
+		services.register!EntityManager(em);
+		return em;
 	}
 
 	protected AssetManager registerAsset()
@@ -188,6 +266,7 @@ struct MoxaneBootSettings
 	bool networkSystem;
 	bool settingsSystem;
 	bool asyncSystem;
+	bool entitySystem;
 
 	static MoxaneBootSettings defaultBoot() 
 	{

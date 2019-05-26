@@ -26,7 +26,8 @@ void main()
 		physicsSystem : false,
 		networkSystem : false,
 		settingsSystem : false,
-		asyncSystem : false
+		asyncSystem : false,
+		entitySystem : true
 	};
 	Moxane moxane = new Moxane(settings);
 	
@@ -104,13 +105,15 @@ void main()
 	StaticModel sm1 = new StaticModel(sr, material1, verts1, normals);
 	sr.addStaticModel(sm1);
 	sm1.transformation = Transform.init;
-	sm1.transformation.position.x = 2f;
+	sm1.transformation.position.x = 0.01f;
 	sm1.transformation.position.z = 5f;
 	sm1.transformation.scale.y = 2.5f;
 	sm1.transformation.scale.x = 0.5f;
 	sm1.transformation.rotation.y = 90f;
 
-	StopWatch sw = StopWatch(AutoStart.yes);
+	moxane.run;
+
+	/*StopWatch sw = StopWatch(AutoStart.yes);
 	StopWatch oneSecond = StopWatch(AutoStart.yes);
 	int frameCount = 0;
 
@@ -137,5 +140,5 @@ void main()
 
 		win.swapBuffers;
 		win.pollEvents;
-	}
+	}*/
 }
