@@ -6,7 +6,9 @@ import core.thread : Fiber;
 
 import containers;
 
-struct EventWaiterSimple(T)
+@safe:
+
+@trusted struct EventWaiterSimple(T)
 {
 	private UnrolledList!Fiber waits;
 	private alias EventSlot = void delegate(ref T);
@@ -14,7 +16,7 @@ struct EventWaiterSimple(T)
 
 	T data;
 
-	void await(Fiber fiber) 
+	void await(Fiber fiber)
 	{
 		waits ~= fiber;
 		fiber.yield;

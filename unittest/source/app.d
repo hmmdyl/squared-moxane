@@ -6,6 +6,8 @@ import moxane.graphics.renderer;
 import moxane.io.window;
 import moxane.core.asset;
 import moxane.graphics.transformation;
+import moxane.core.entity;
+import moxane.graphics.ecs;
 
 import moxane.graphics.standard;
 
@@ -36,6 +38,10 @@ void main()
 
 	Window win = moxane.services.get!Window;
 	Renderer r = moxane.services.get!Renderer;
+	StandardRenderer sr = new StandardRenderer(moxane);
+	moxane.services.register!StandardRenderer(sr);
+	EntityManager entityManager = moxane.services.get!EntityManager;
+	EntityRenderSystem ers = new EntityRenderSystem(moxane);
 
 	r.primaryCamera.perspective.fieldOfView = 90f;
 	r.primaryCamera.perspective.near = 0.1f;
@@ -46,7 +52,7 @@ void main()
 	r.primaryCamera.buildView;
 	r.primaryCamera.buildProjection;
 
-	win.onFramebufferResize.add((win, size) {
+	win.onFramebufferResize.add((win, size) @trusted {
 		r.primaryCamera.width = size.x;
 		r.primaryCamera.height = size.y;
 		r.primaryCamera.buildProjection;
@@ -58,8 +64,6 @@ void main()
 		writeln("CALL");
 	});
 
-	StandardRenderer sr = new StandardRenderer(moxane);
-	moxane.services.register!StandardRenderer(sr);
 	r.addSceneRenderable(sr);
 
 	Material material = new Material(sr.standardMaterialGroup);
@@ -88,14 +92,11 @@ void main()
 		Vector3f(0f, 0f, 1f)
 	];
 	StaticModel sm = new StaticModel(sr, material, verts, normals);
-	sr.addStaticModel(sm);
-	sm.transformation = Transform.init;
-	sm.transformation.position.x = -2f;
-	sm.transformation.position.z = 5f;
-	sm.transformation.scale.y = 2.5f;
-	sm.transformation.scale.x = 0.5f;
+	//sr.addStaticModel(sm);
+	sm.localTransform = Transform.init;
+	sm.localTransform.rotation.y = 125f;
 
-	Material material1 = new Material(sr.standardMaterialGroup);
+	/*Material material1 = new Material(sr.standardMaterialGroup);
 	material1.diffuse = Vector3f(0f, 0.5f, 0.9f);
 	material1.specular = Vector3f(0f, 0f, 0f);
 	material1.normal = null;
@@ -104,12 +105,20 @@ void main()
 	material1.castsShadow = true;
 	StaticModel sm1 = new StaticModel(sr, material1, verts1, normals);
 	sr.addStaticModel(sm1);
-	sm1.transformation = Transform.init;
-	sm1.transformation.position.x = 0.01f;
-	sm1.transformation.position.z = 5f;
-	sm1.transformation.scale.y = 2.5f;
-	sm1.transformation.scale.x = 0.5f;
-	sm1.transformation.rotation.y = 90f;
+	sm1.finalTransform = Transform.init;
+	sm1.finalTransform.position.x = 0.01f;
+	sm1.finalTransform.position.z = 5f;
+	sm1.finalTransform.scale.y = 2.5f;
+	sm1.finalTransform.scale.x = 0.5f;
+	sm1.finalTransform.rotation.y = 90f;*/
+
+	Entity entity = new Entity;
+	entityManager.add(entity);
+	Transform* transform = entity.createComponent!Transform;
+	*transform = Transform.init;
+	RenderComponent* rc = entity.createComponent!RenderComponent;
+	transform.position = Vector3f(0f, 0f, 5f);
+	ers.addModel(sm, *rc);
 
 	moxane.run;
 

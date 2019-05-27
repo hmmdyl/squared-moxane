@@ -2,6 +2,8 @@ module moxane.graphics.transformation;
 
 import dlib.math;
 
+@safe:
+
 struct Transform
 {
 	Vector3f position;
@@ -17,7 +19,7 @@ struct Transform
 		return t;
 	}
 
-	@property Matrix4f matrix()
+	@property Matrix4f matrix() @trusted
 	{
 		Matrix4f m = translationMatrix(-position);
 		m *= rotationMatrix(Axis.x, degtorad(rotation.x));

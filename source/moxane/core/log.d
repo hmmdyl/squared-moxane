@@ -7,7 +7,7 @@ import core.sync.mutex;
 import colorize;
 import std.datetime.systime;
 
-class NullLog : Log
+@safe class NullLog : Log
 {
 	this()
 	{
@@ -18,7 +18,7 @@ class NullLog : Log
 	{return;}
 }
 
-class Log
+@trusted class Log
 {
 	enum Severity
 	{

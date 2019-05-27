@@ -12,6 +12,7 @@ import moxane.core.log;
 import moxane.core.eventwaiter;
 import moxane.core.asset;
 import moxane.core.entity;
+import moxane.core.scene;
 
 /// Provides a singleton like system for systems, accessible by type.
 class ServiceHandler
@@ -133,6 +134,7 @@ class Moxane
 		if(settings.graphicsSystem) registerRenderer;
 		if(settings.asyncSystem) registerAsync;
 		if(settings.entitySystem) registerEntityManager;
+		if(settings.sceneSystem) registerSceneManager;
 
 		deltaTime = 0f;
 		deltaSw = StopWatch(AutoStart.yes);
@@ -199,6 +201,13 @@ class Moxane
 		}
 	}
 	
+	protected SceneManager registerSceneManager()
+	{
+		SceneManager sm = new SceneManager(this);
+		services.register!SceneManager(sm);
+		return sm;
+	}
+
 	protected EntityManager registerEntityManager()
 	{
 		EntityManager em = new EntityManager(this);
@@ -267,6 +276,7 @@ struct MoxaneBootSettings
 	bool settingsSystem;
 	bool asyncSystem;
 	bool entitySystem;
+	bool sceneSystem;
 
 	static MoxaneBootSettings defaultBoot() 
 	{

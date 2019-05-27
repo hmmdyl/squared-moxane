@@ -11,6 +11,8 @@ import dlib.math;
 import std.string;
 import std.conv;
 
+@trusted:
+
 struct ApiBoot 
 {
 	uint openGLMinor;
@@ -59,7 +61,6 @@ struct WindowBoot
 	}
 }
 
-
 final class Window 
 {
 	private GLFWwindow* ptr;
@@ -79,7 +80,7 @@ final class Window
 
 	Moxane moxane;
 
-	this(Moxane moxane, WindowBoot windowBoot, ApiBoot apiBoot) 
+	this(Moxane moxane, WindowBoot windowBoot, ApiBoot apiBoot)
 	{
 		this.moxane = moxane;
 		Log log = moxane.services.get!Log;
@@ -132,14 +133,14 @@ final class Window
 		log.write(Log.Severity.info, "Created window");
 	}
 
-	~this() 
+	~this()
 	{
 		glfwDestroyWindow(ptr);
 	}
 
 	bool isFullscreen = false;
 
-	void fullscreen(bool full, int width = 0, int height = 0) 
+	void fullscreen(bool full, int width = 0, int height = 0)
 	{
 		if(!((width > 0 && height > 0) || (width == 0 && height == 0)))
 			throw new Exception("[window.fullscreen] Both width and height must be 0, 0 or both greater than zero.");
@@ -269,7 +270,7 @@ Window getWindowFromPtr(GLFWwindow* ptr) nothrow
 	return cast(Window)glfwGetWindowUserPointer(ptr);
 }
 
-extern(C) nothrow 
+extern(C) nothrow @safe
 {
 	void onResizeCallback(GLFWwindow* win, int x, int y) 
 	{

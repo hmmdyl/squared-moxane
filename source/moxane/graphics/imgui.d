@@ -258,7 +258,7 @@ class ImguiRenderer : IRenderable
 		}
 	}
 
-	private void onKey(Window win, Keys key, ButtonAction a)
+	private void onKey(Window win, Keys key, ButtonAction a) @trusted
 	{
 		ImGuiIO* io = igGetIO();
 		if(a == ButtonAction.press)
@@ -272,7 +272,7 @@ class ImguiRenderer : IRenderable
 		io.KeySuper = io.KeysDown[Keys.leftSuper] || io.KeysDown[Keys.rightSuper];
 	}
 
-	private void onChar(Window win, char c)
+	private void onChar(Window win, char c) @trusted
 	{
 		ImGuiIO* io = igGetIO();
 		ImGuiIO_AddInputCharacter(io, cast(ushort)c);

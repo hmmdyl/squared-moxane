@@ -2,6 +2,8 @@ module moxane.core.event;
 
 import containers.dynamicarray;
 
+@safe:
+
 struct Event(Args...) 
 {
 	alias EventSlot = void delegate(Args);
@@ -13,7 +15,7 @@ struct Event(Args...)
 		foreach(slot; slots) slot(a);
 	}
 
-	void add(EventSlot slot) 
+	void add(EventSlot slot) @trusted
 	{
 		slots ~= slot;
 	}

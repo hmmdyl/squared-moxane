@@ -257,7 +257,8 @@ class StaticModel
 	int vertexCount;
 	StandardRenderer stdRenderer;
 
-	Transform transformation;
+	Transform localTransform;
+	Transform finalTransform;
 	
 	this(StandardRenderer r, Material material, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null)
 	{
@@ -340,7 +341,7 @@ class StandardRenderer : IRenderable
 				assert(model.vertexChannels.any!(a => !a.uploaded));
 
 				LocalContext lc1 = lc;
-				lc1.model *= model.transformation.matrix;
+				lc1.model *= model.finalTransform.matrix;
 				model.material_.bindSettings(renderer, lc1, model.vertexChannels.length > 2);
 				scope(exit) model.material_.unbindSettings(renderer, lc1, model.vertexChannels.length > 2);
 
@@ -364,6 +365,19 @@ class StandardRenderer : IRenderable
 	{
 		if((model.material.group in staticModels) is null) staticModels[model.material.group] = UnrolledList!StaticModel();
 		staticModels[model.material.group].insertBack(model);
+	}
+
+	bool hasModel(StaticModel model)
+	{
+		foreach(StaticModel candidate; staticModels[model.material.group])
+			if(candidate == model)
+				return true;
+		return false;
+	}
+
+	void removeModel(StaticModel model)
+	{
+		staticModels[model.material.group].remove(model);
 	}
 
 	private void staticModelMaterialChange(StaticModel model, MaterialBase old, MaterialBase new_)

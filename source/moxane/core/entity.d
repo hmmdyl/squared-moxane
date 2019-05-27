@@ -13,6 +13,8 @@ import core.memory;
 import core.thread : Fiber;
 import containers;
 
+@safe:
+
 /++ This is an Entity. Its functionality is represented by the components it encapsulates. +/
 class Entity
 {
@@ -27,7 +29,7 @@ class Entity
 	private AsyncScript[] asyncScripts;
 
 	/++ Checks if Entity has a component of type T. +/
-	bool has(T)() nothrow
+	bool has(T)() nothrow @trusted
 	{
 		TypeInfo ti = typeid(T);
 		void** t = typeid(T) in components; // do not cast here to increase perf
@@ -36,7 +38,7 @@ class Entity
 
 	/++ Attempts to get a component for this entity of type T.
 	 +	Returns: A pointer to component of type T if found, or null if not. +/
-	T* get(T)() nothrow
+	T* get(T)() nothrow @trusted
 	{
 		TypeInfo ti = typeid(T);
 		T** t = cast(T**)(typeid(T) in components);
@@ -44,12 +46,12 @@ class Entity
 		else return *t;
 	}
 
-	private void assertUnattached(T)() { enforce(!has!T(), "Component of type " ~ T.stringof ~ " is already attached."); }
+	private void assertUnattached(T)() @trusted { enforce(!has!T(), "Component of type " ~ T.stringof ~ " is already attached."); }
 
 	/++ Allocates a component of type T and adds it to this Entity.
 		Returns: A pointer to component of type T 
 		Throws: Exception if component of type T is already attached. +/
-	T* createComponent(T)()
+	T* createComponent(T)() @trusted
 	{
 		assertUnattached!T();
 		T* t = entityManager_.allocateComponent!T();
@@ -59,17 +61,18 @@ class Entity
 
 	/++ Attaches an already allocated component. 
 		Throws: Exception if component type T is already attached. +/
-	void attachComponent(T)(T* t) 
+	void attachComponent(T)(T* t) @trusted
 	{
 		assertUnattached!T();
 		components[typeid(T)] = cast(void*)t;
+		entityManager_.onComponentAttached(OnComponentAttach(*t, this, typeid(T), false));
 	}
 
-	private void attemptDetach(T)() { enforce(components.remove(typeid(T)), "Could not remove component of type " ~ T.stringof ~ "from AA"); }
+	private void attemptDetach(T)() @trusted { enforce(components.remove(typeid(T)), "Could not remove component of type " ~ T.stringof ~ "from AA"); }
 
 	/++ Deallocated the attached component of type T. 
 		Throws: Exception if component type T could not be detached. +/
-	void destroyComponent(T)()
+	void destroyComponent(T)() @trusted
 	{
 		T** t = cast(T**)(typeid(T) in components);
 		if(t is null) return;
@@ -79,36 +82,37 @@ class Entity
 
 	/++ Detaches component of type and returns pointer to it.
 		Throws: Exception if type is not attached or could not be removed. +/
-	T* detachComponent(T)()
+	T* detachComponent(T)() @trusted
 	{
 		T** t = cast(T**)(typeid(T) in components);
 		enforce(t !is null, "Component of type " ~ T.stringof ~ " is not attached to current " ~ Entity.stringof);
+		entityManager_.onComponentAttached(OnComponentAttach(*t, this, typeid(T), false));
 		attemptDetach;
 		return *t;
 	}
 
-	void attachScript(Script script)
+	void attachScript(Script script) @trusted
 	{
 		enforce(!canFind(scripts, script), "This script is already present.");
 		scripts ~= script;
 		script.entity = this;
 	}
 
-	void attachScript(AsyncScript script)
+	void attachScript(AsyncScript script) @trusted
 	{
 		enforce(!canFind(asyncScripts, script), "This script is already present.");
 		asyncScripts ~= script;
 		script.entity = this;
 	}
 
-	void removeScript(Script script)
+	void removeScript(Script script) @trusted
 	{
 		enforce(canFind(scripts, script), "Script not present");
 		scripts = remove!(a => a == script)(scripts);
 		script.entity = null;
 	}
 
-	void removeScript(AsyncScript script)
+	void removeScript(AsyncScript script) @trusted
 	{
 		enforce(canFind(scripts, script), "Script not present.");
 		asyncScripts = remove!(a => a == script)(asyncScripts);
@@ -126,7 +130,7 @@ bool hasComponents(Components...)(Entity entity)
 		if((type in entity.components) is null)
 			return false;
 	}
-	return false;
+	return true;
 }
 
 struct OnEntityAdd 
@@ -144,10 +148,27 @@ struct OnComponentAllocation
 {
 	void* ptr;
 	TypeInfo typeInfo;
-	this(void* ptr, TypeInfo typeInfo) 
+	bool allocated;
+	this(void* ptr, TypeInfo typeInfo, bool allocated) 
 	{ 
 		this.ptr = ptr; 
 		this.typeInfo = typeInfo; 
+		this.allocated = allocated;
+	}
+}
+
+struct OnComponentAttach
+{
+	void* ptr;
+	Entity entity;
+	TypeInfo typeInfo;
+	bool attach;
+	this(void* ptr, Entity entity, TypeInfo typeInfo, bool attach)
+	{
+		this.ptr = ptr;
+		this.entity = entity;
+		this.typeInfo = typeInfo;
+		this.attach = attach;
 	}
 }
 
@@ -173,7 +194,7 @@ class EntityManager
 		onEntityAdd.emit(OnEntityAdd(entity, this));
 	}
 
-	private void entityRemoveEnforce(Entity entity, out size_t index) const
+	private void entityRemoveEnforce(Entity entity, out size_t index) const @trusted
 	{
 		bool found = false;
 		foreach(size_t i, const Entity e; entities)
@@ -237,6 +258,8 @@ class EntityManager
 	 ************************/
 	
 	EventWaiter!OnComponentAllocation onComponentAllocated;
+	EventWaiter!OnComponentAttach onComponentAttached;
+	EventWaiter!OnComponentAttach onComponentDetached;
 
 	private ubyte[][TypeInfo] componentMemByType;
 	private bool[][TypeInfo] cellsFree;
@@ -246,7 +269,7 @@ class EntityManager
 			T = the type to allocate
 			args = arguments to pass to type's constructor
 		Returns: A pointer to the location of created component +/
-	T* allocateComponent(T, Args...)(Args args)
+	T* allocateComponent(T, Args...)(Args args) @trusted
 	{
 		static assert(is(T == struct));
 
@@ -264,7 +287,8 @@ class EntityManager
 			memArr = typeid(T) in componentMemByType;
 		}
 
-		ubyte[T.sizeof] componentBytes = (*cast(ubyte[T.sizeof]*)&T(args));
+		T temp = T();
+		ubyte[T.sizeof] componentBytes = (*cast(ubyte[T.sizeof]*)&temp);
 
 		size_t cellFreeIndex = -1;
 		foreach(size_t i, bool free; cellsFree[typeid(T)])
@@ -295,14 +319,14 @@ class EntityManager
 	void deallocateComponent(T)(T* t) { deallocateComponent(typeid(T), cast(void*)t); }
 
 	/// ditto
-	void deallocateComponent(TypeInfo type, void* t)
+	void deallocateComponent(TypeInfo type, void* t) @trusted
 	{
 		enforce(cast(ulong)t >= cast(ulong)componentMemByType[type].ptr, "This does not belong in the memory region. Invalid pointer");
 		size_t l = componentMemByType[type].length;
 		enforce(cast(ulong)t <= cast(ulong)&componentMemByType[type][l-1], "This does not belong in the memory region. Invalid pointer");
 		enforce(cast(ulong)t % type.tsize == 0, "Pointer does not align to memory region. Invalid pointer");
 
-		onComponentAllocated.emit(OnComponentAllocation(cast(void*)t, type));
+		onComponentAllocated.emit(OnComponentAllocation(cast(void*)t, type, false));
 
 		ulong indexStart = cast(ulong)t - cast(ulong)componentMemByType[type].ptr;
 		foreach(b; 0 .. type.tsize)
@@ -324,7 +348,7 @@ class EntityManager
 	}
 	EventWaiter!OnSystemAdded onSystemAdded;
 
-	void add(System system)
+	void add(System system) @trusted
 	{
 		systems.insertBack(system);
 		onSystemAdded.emit(OnSystemAdded(system, this));
@@ -362,7 +386,7 @@ abstract class AsyncScript
 	Entity entity;
 	Moxane moxane;
 
-	this(Moxane moxane, bool runByDefault = true)
+	this(Moxane moxane, bool runByDefault = true) @trusted
 	{
 		this.moxane = moxane;
 		fiber = new Fiber(&execute);
@@ -370,14 +394,14 @@ abstract class AsyncScript
 			run;
 	}
 
-	void run()
+	void run() @trusted
 	{
 		enforce(!running, "Cannot run an already executing " ~ AsyncScript.stringof);
 		fiber.call;
 		running = true;
 	}
 
-	void cancel()
+	void cancel() @trusted
 	{
 		if(!running || cancellationFlag) return;
 
