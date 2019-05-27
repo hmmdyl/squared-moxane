@@ -185,7 +185,7 @@ class Moxane
 
 	void render()
 	{
-		//if(!bootSettings.graphicsSystem && !bootSettings.windowSystem) return;
+		if(!bootSettings.graphicsSystem && !bootSettings.windowSystem) return;
 
 		Window window = services.get!Window;
 		Renderer renderer = services.get!Renderer;
