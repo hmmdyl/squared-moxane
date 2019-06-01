@@ -122,9 +122,13 @@ class Moxane
 
 	bool exit = false;
 
-	this(const MoxaneBootSettings settings) 
+	string appName;
+	string toResourceName(string mod, string submod, string name) { return appName ~ ":" ~ mod ~ ":" ~ submod ~ ":" ~ name; }
+
+	this(const MoxaneBootSettings settings, string appName) 
 	{
 		this.bootSettings = settings;
+		this.appName = appName;
 		services = new ServiceHandler;
 
 		if(settings.logSystem) registerLog;
@@ -171,6 +175,11 @@ class Moxane
 
 	void update()
 	{
+		SceneManager sceneManager = services.get!SceneManager;
+		if(sceneManager !is null)
+			sceneManager.onUpdateBegin;
+		scope(success) if(sceneManager !is null) sceneManager.onUpdateEnd;
+
 		AsyncSystem asyncSystem = services.get!AsyncSystem;
 		if(asyncSystem !is null)
 		{
@@ -183,17 +192,27 @@ class Moxane
 		{
 			entityManager.update;
 		}
+
+		if(sceneManager !is null)
+			sceneManager.onUpdate;
 	}
 
 	void render()
 	{
 		if(!bootSettings.graphicsSystem && !bootSettings.windowSystem) return;
 
+		SceneManager sceneManager = services.get!SceneManager;
+		if(sceneManager !is null)
+			sceneManager.onRenderBegin;
+		scope(success) if(sceneManager !is null) sceneManager.onRenderEnd;
+
 		Window window = services.get!Window;
 		Renderer renderer = services.get!Renderer;
 
 		if(renderer !is null) 
 			renderer.render;
+		if(sceneManager !is null)
+			sceneManager.onRender;
 		if(window !is null)
 		{
 			window.swapBuffers;
@@ -283,6 +302,7 @@ struct MoxaneBootSettings
 		MoxaneBootSettings mbs;
 		foreach(fieldName; FieldNameTuple!MoxaneBootSettings)
 			__traits(getMember, mbs, fieldName) = true;
+
 		return mbs;
 	}
 

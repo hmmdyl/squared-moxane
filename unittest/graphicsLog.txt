@@ -1,3 +1,0 @@
-[ WARNING] Graphics @ 2019-May-27 22:53:22.7021175: Could not get uniform SpecularTexture for effect StandardMaterialEffect
-[ WARNING] Graphics @ 2019-May-27 22:53:22.7051204: Could not get uniform Specular for effect StandardMaterialEffect
-[ WARNING] Graphics @ 2019-May-27 22:53:22.7091216: Could not get uniform UseSpecularTexture for effect StandardMaterialEffect

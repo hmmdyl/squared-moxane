@@ -46,6 +46,11 @@ class Entity
 		else return *t;
 	}
 
+	/*bool opBinaryRight(string op)(T* t) if(op == "in")
+	{ return get!T == t; }*/
+	bool opBinaryRight(string op)(TypeInfo ti) if(op == "in")
+	{ return (ti in components) !is null; }
+
 	private void assertUnattached(T)() @trusted { enforce(!has!T(), "Component of type " ~ T.stringof ~ " is already attached."); }
 
 	/++ Allocates a component of type T and adds it to this Entity.
@@ -236,14 +241,11 @@ class EntityManager
 	}
 
 	void opOpAssign(string op)(Entity e) if(op == "~")
-	{
-		add(e);
-	}
-
+	{ add(e); }
 	void opOpAssign(string op)(Entity e) if(op == "-")
-	{
-		removeAndDealloc(e);
-	}
+	{ removeAndDealloc(e); }
+	bool opBinaryRight(string op)(Entity e) if(op == "in")
+	{ return canFind!(a => a is e)(entities, e); }
 
 	/++ Gets a range over entites that contain all specified components +/
 	auto entitiesWith(C...)()
@@ -353,6 +355,9 @@ class EntityManager
 		systems.insertBack(system);
 		onSystemAdded.emit(OnSystemAdded(system, this));
 	}
+
+	void opOpAssign(string op)(System system) if(op == "~")
+	{ add(system); }
 
 	void update()
 	{

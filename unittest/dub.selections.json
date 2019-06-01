@@ -1,7 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
+		"cerealed": "0.6.11",
 		"colorize": "1.0.5",
+		"concepts": "0.0.8",
 		"d-cimgui": "0.51.0",
 		"derelict-enet": "3.0.0",
 		"derelict-fi": "2.0.3",
@@ -13,6 +15,7 @@
 		"emsi_containers": "0.8.0-alpha.15",
 		"moxane": {"path":"../"},
 		"resusage": "0.2.8",
-		"stdx-allocator": "2.77.5"
+		"stdx-allocator": "2.77.5",
+		"unit-threaded": "0.7.55"
 	}
 }
