@@ -32,6 +32,7 @@ struct EffectUniform
 	public void set(Vector2f* v) { glUniform2fv(location, 1, v.arrayof.ptr); }
 	public void set(Vector2d v) { glUniform2d(location, v.x, v.y); }
 	public void set(Vector2d* v) { glUniform2dv(location, 1, v.arrayof.ptr); }
+	void set(Vector2i v) { glUniform2i(location, v.x, v.y); }
 
 	public void set(Vector3f v) { glUniform3f(location, v.x, v.y, v.z); }
 	public void set(Vector3f* v) { glUniform3fv(location, 1, v.arrayof.ptr); }

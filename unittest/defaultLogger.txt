@@ -1,4 +1,943 @@
-[ INFO] Default @ 2019-May-28 09:33:59.0898084: Loading windowing lib
-[ INFO] Default @ 2019-May-28 09:33:59.5712153: Loaded windowing lib. Creating window
-[ INFO] Default @ 2019-May-28 09:34:00.0950875: Created window
-[ DEBUG] Default @ 2019-May-28 09:34:00.1264058: Hello
+[ INFO] Default @ 2019-Jun-02 14:17:31.9381452: Loading windowing lib
+[ INFO] Default @ 2019-Jun-02 14:17:32.1112994: Loaded windowing lib. Creating window
+[ INFO] Default @ 2019-Jun-02 14:17:33.0961974: Created window
+[ DEBUG] Default @ 2019-Jun-02 14:17:33.1032066: Hello
+[ INFO] Default @ 2019-Jun-02 14:17:33.1202191: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.12322: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.1252256: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1282261: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1422408: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.1442406: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1472402: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.1492467: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1542505: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.1562507: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1582521: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.1612569: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1632615: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.166261: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1682646: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.170266: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1722667: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.1752711: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1772709: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.1792732: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1832791: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.1862805: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.1892815: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.1922835: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.1952887: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.1982902: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2012945: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.204296: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.2072998: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.2113019: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2143048: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.2173072: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.2243136: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.2273165: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2293188: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.2333227: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.2413289: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.2443318: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2473346: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.2513386: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.2573439: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.2613474: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2643512: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.2673536: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.27436: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.277361: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2803653: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.2833696: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.2903765: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.2953783: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.2983812: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3003839: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.3073908: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.3103918: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.3133947: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3163976: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.3244051: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.3274075: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.3304099: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3334156: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.342421: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.3454248: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.3484262: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3514291: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.3574349: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.3614389: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.3634425: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3674437: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.3744501: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.377453: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.3804559: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3834607: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.3904652: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.3944678: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.397472: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.3994729: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4074804: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4104833: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.4134843: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4164886: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4244957: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4274986: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.4295003: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4325032: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4405098: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4445157: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.4465156: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4495184: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4575273: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4605283: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.4635316: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4665336: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4745403: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4775454: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.4805483: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4825501: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.4915568: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.4945592: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.497564: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.4995639: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.5075738: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.5105738: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5125784: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.5165792: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.5245872: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.5275891: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5305925: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.5335958: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.5416028: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.5446048: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5476086: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.5516112: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.557618: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.5616196: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5646229: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.5676272: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.5746308: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.5776332: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5806342: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.5846395: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.5906449: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.593654: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.5976541: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.600656: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6076634: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.6106658: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.6136678: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6176699: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6246782: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.6276801: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.6306849: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6336887: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6406932: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.6446977: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.6487003: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6517022: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6577061: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.6617115: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.6637147: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6667157: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6747222: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.677726: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.6807289: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6837323: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.6907377: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.6937401: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.696743: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.6997459: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7077572: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7107573: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7127576: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7167612: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7247696: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7277702: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7297734: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7337793: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7407847: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7447882: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7467886: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7497915: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7577995: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7608024: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7638047: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7668076: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7748152: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7778171: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7808205: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7828255: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.7908312: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.7938341: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.7968341: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.7998389: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.8078445: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8108478: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.812851: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.8168536: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.8248607: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8288614: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.8318666: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.8348695: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.8408785: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8448783: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.8478807: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.8508822: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.85789: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8608939: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.8638953: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.8668977: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.8749067: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8779077: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.8809111: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.883914: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.8909207: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.8939227: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.8969251: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.8999299: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.907935: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9109393: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.912944: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.9169437: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.9249517: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9279536: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.9299568: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.9339608: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.9419646: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9459705: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.9489743: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.9529774: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.9579811: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9619855: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.964987: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.9689896: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.9750005: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9799985: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.984004: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:33.9880089: Update
+[ INFO] Default @ 2019-Jun-02 14:17:33.9920158: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:33.9950144: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:33.9990184: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0020222: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.0090295: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.0130326: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.0160326: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0190364: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.0250427: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.028046: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.031048: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0340504: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.042057: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.0450599: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.0480628: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0510666: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.0580721: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.0610745: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.0640779: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0670798: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.0750873: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.0790899: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.0830925: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.0860949: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.092103: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.0971086: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.1021122: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1071131: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1111181: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.1141229: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.118124: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1221276: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1261316: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.129133: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.1321406: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1361404: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1411511: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.1451486: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.1481529: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1521569: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1581636: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.1621676: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.1651676: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1681724: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1751821: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.1801825: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.184186: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.1871898: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.1921964: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.1951945: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.1991999: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.2022037: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.2082067: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2112114: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2162157: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.2192185: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.2252234: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2282267: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2312277: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.234232: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.2412407: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2452433: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2482448: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.2512482: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.258255: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2622567: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2662612: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.2692641: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.2752684: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2782698: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2812752: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.2842751: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.291292: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.2942864: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.2982898: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.3012927: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3083006: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.311302: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3143058: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.3173082: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3253144: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.3283178: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3313182: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.334323: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3413308: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.345332: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3473361: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.3503376: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3583451: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.3623505: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3653492: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.368354: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3753613: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.3783651: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3813657: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.3853701: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.3923751: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.395377: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.3983813: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.4013842: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4083912: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4113941: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.4143964: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.4174003: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4254073: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4284083: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.4304105: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.4334153: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4594373: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4624392: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.4654426: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.468445: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4714493: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4744503: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.4774532: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.4804575: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4834613: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4864604: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.4894638: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.492469: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.4954719: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.4984724: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.5014753: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5044787: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.5084845: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.5114841: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.514487: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5174903: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.5254969: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.5284998: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.530501: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5335068: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.5415119: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.5445129: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.5465156: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5505221: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.558529: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.561531: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.5645306: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5675349: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.5745418: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.5785462: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.5815482: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.5845511: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.591558: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.5955615: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.5975628: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.6005671: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6085741: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.6115728: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6155786: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.6185815: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6245882: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.6285903: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6315932: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.6345961: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6416034: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.6456064: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6486089: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.6526124: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6586211: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.6626217: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6676245: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.671629: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6776315: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.6806386: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6836419: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.6876431: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.6916499: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.695652: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.6986549: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7016568: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7086642: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.7116671: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7156716: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7186726: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7246788: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.7286828: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7306841: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7346872: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7426946: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.745697: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7486999: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7517004: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7587055: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.7627137: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7657142: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7687199: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7747257: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.7787278: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7827304: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.7867335: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.7927392: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.795743: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.7987455: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8027475: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.809754: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.8127607: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.8157616: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8197652: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.8257709: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.8297735: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.8327778: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8367814: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.8417855: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.8457881: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.848792: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8517933: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.8588007: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.8628037: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.8658071: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8688091: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.8748148: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.878816: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.8828219: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.8858243: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.8918315: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.8958336: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.898836: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9018389: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9088481: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.9118482: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.9158522: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9188546: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9258634: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.9298645: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.9338695: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9378715: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9418789: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.9458791: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.948882: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9518849: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9588903: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.9638965: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.9668983: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9699012: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9759065: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.978908: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.9829124: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:34.9869174: Update
+[ INFO] Default @ 2019-Jun-02 14:17:34.9929217: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:34.9969257: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:34.9999295: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0039326: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0099379: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.0129365: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.0159442: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0199448: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0259506: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.0289544: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.0319573: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0359609: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0419685: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.0469712: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.0499736: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0529775: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0589827: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.0629878: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.066988: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0699927: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0759971: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.079: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.0830067: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.0860068: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.0920329: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.0960161: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.0990181: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1020219: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.1090283: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1120302: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.1150326: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1180365: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.1250434: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1290469: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.1320493: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1350527: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.14206: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1450619: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.1490621: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1515995: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.1586016: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1625985: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.1656014: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1686043: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.1766109: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1796137: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.1816155: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.1856195: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.1926274: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.1976273: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2006344: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.204637: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2086424: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2126436: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2156479: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.2186512: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2256543: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2286581: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2326626: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.2356645: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2426738: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2456738: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2486772: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.254684: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2596867: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2626891: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2656938: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.2686953: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2757045: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2787046: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2817066: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.2847094: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.2917158: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.2957204: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.2987228: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.3017266: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3087325: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.3117344: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.3147378: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.3177398: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3257472: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.3287496: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.3317534: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.3337566: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3417599: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.3447652: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.347768: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.35077: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3587794: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.3617799: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.3647823: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.3677848: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3757932: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.3787932: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.3817981: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.3848009: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.3928099: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.395809: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.3988147: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.4018171: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.408824: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4118254: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.4148278: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.4178303: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.4258393: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4308424: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.4338472: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.4358467: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.442853: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4458559: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.4488583: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.450861: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.4588671: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4618705: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.4648733: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.4678772: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.4768858: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4798882: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.4828907: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.4858931: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.4939006: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.4999049: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5059107: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5089141: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5119164: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5159196: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5179217: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5219267: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5259293: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5289317: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5309339: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5349375: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5429407: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5469499: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5519744: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5559694: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5619743: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5659787: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5689811: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5729866: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5779893: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5819924: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.5859959: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.5899985: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.5930095: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.5960061: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.6000097: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6040123: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6090179: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6120193: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.6170249: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6200264: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6260331: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6290356: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.632036: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6360396: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6420477: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6470518: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.6490531: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6525997: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6596027: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6636096: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.6686137: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6726158: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6766174: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6806243: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.6836234: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.6866272: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.6926406: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.6996404: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7036443: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.7066481: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.7116505: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.7146538: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7186587: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.7216607: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.7256633: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.7316695: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7346701: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.738676: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.74268: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.7456829: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7496864: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.7526906: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.7596956: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.762698: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7657009: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.7677023: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.7757102: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.7787126: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7817155: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.7847179: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.7937237: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.7967289: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.7997313: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8037358: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8097436: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8137461: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8167471: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8207511: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8257515: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8307608: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8337628: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8367652: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8427771: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8467745: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8497788: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8527807: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8597848: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8637903: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8677932: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8717982: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8768033: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8808054: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8838078: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.8878123: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.8928165: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.8968199: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.8998238: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.9038288: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.9098298: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.9138366: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9168395: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.919841: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.92585: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.9298489: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9328536: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.9358565: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.9428653: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.9458644: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9498684: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.9518697: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.9598805: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.9628782: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9658844: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.9688854: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.9758919: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.9788961: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9818971: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:35.9849: Update
+[ INFO] Default @ 2019-Jun-02 14:17:35.9929094: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:35.99691: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:35.9999144: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.0039184: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0099223: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.0139262: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.0159281: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.0199334: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0259382: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.0289416: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.032946: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.035947: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0429539: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.045954: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.0489588: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.0519621: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0599683: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.0629744: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.0659736: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.0689769: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0759833: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.0789857: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.0819886: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.084991: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.0930028: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.0960009: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.0990043: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.1030111: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.1090112: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.1130143: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1160181: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.1180223: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.1260306: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.1290312: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1320336: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.1350374: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.143045: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.1460464: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1490493: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.1520522: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.1600593: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.1630645: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1650635: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.1680663: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.1760743: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.1790753: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1820791: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.185082: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.1930929: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.196092: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.1980932: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2010961: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2101052: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.213111: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.2151099: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2181123: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2261218: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.2301243: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.2331268: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2351289: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2431398: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.2461379: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.2491399: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2531425: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2601512: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.263155: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.266156: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2691585: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2761654: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.2791692: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.2821702: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.2851716: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.2931858: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.2961825: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.2991854: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.3031917: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.3101963: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.3131992: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.3151985: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.3182038: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.3262109: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.3292133: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.3322156: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.335219: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.3432284: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.3462285: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.3492309: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.3522342: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.359242: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.3622417: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.3652455: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.3682488: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.3762568: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.3802576: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.3852636: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.3952724: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.400279: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4062823: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4102883: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.4162922: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.420297: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4232994: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4283008: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.4313055: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.4343089: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.438312: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4413154: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.4463171: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.4503235: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4543279: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4573304: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.463338: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.4663428: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4693405: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4733445: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.4773471: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.4823518: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4853547: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.4883571: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.4923592: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.4963679: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.4993689: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.503369: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5073736: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.511378: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5143818: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5173805: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5223889: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.5263967: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5313952: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5343985: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5384025: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.5434091: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5474103: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5514147: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5544194: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.5594223: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5634225: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5664286: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5694324: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.5764398: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5804401: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5834467: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.5864472: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.5934551: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.5974567: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.5994556: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6034644: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.6104712: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6134746: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.6174762: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6204757: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.6264854: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6304898: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.6344914: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6364922: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.643502: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6465016: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.649504: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6525068: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.6605139: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6635168: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.6665196: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6695225: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.6765323: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6795314: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.6825343: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.6855371: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.693547: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.6965471: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.6995509: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7025533: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7095602: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.7135627: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7165637: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7185674: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7265778: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.7305785: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7325822: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7355826: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7435945: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.7465926: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7495949: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7526253: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7596166: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.7636196: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7666225: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7696249: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7766337: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.779636: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7826375: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.7856404: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.7936484: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.7966499: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.7996523: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8026581: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8106628: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.8136661: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8166666: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8196709: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8266783: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.8306804: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8336847: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8366861: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8436959: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.8466955: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8496979: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8530258: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8600194: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.863018: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8660199: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8690237: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8770318: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.8790316: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8820354: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.8850374: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.8930468: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.8970485: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.8990507: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9020517: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9100635: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9130649: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.9160654: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9190688: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9270764: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9300784: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.9330854: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9350824: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9430933: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9460938: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.9490957: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9520977: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9601185: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9631237: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.9651212: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9691247: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9771332: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9801361: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:36.9821369: ASync end
+[ INFO] Default @ 2019-Jun-02 14:17:36.9861409: Update
+[ INFO] Default @ 2019-Jun-02 14:17:36.9931497: Async begin
+[ INFO] Default @ 2019-Jun-02 14:17:36.9971504: yeet
+[ INFO] Default @ 2019-Jun-02 14:17:37.0001537: ASync end

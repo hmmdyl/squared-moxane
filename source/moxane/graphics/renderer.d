@@ -74,7 +74,8 @@ class Camera
 enum PassType
 {
 	shadow,
-	scene
+	scene,
+	ui
 }
 
 struct LocalContext
@@ -170,7 +171,7 @@ class Renderer
 			view : primaryCamera.viewMatrix, 
 			model : Matrix4f.identity, 
 			camera : primaryCamera,
-			type : PassType.scene
+			type : PassType.ui
 		};
 		scope(exit) lc.destroy;
 

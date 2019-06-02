@@ -8,6 +8,7 @@ import moxane.core.asset;
 import moxane.graphics.transformation;
 import moxane.core.entity;
 import moxane.graphics.ecs;
+import moxane.core.async;
 
 import moxane.graphics.standard;
 
@@ -16,6 +17,30 @@ import dlib.math;
 import std.datetime.stopwatch;
 
 //extern(C) __gshared string[] rt_options = ["gcopt=gc:precise profile:1"];
+
+class TriangleRotateScript : AsyncScript
+{
+	this(Moxane moxane) @trusted
+	{
+		super(moxane, true, false);
+	}
+
+	override protected void deinit() @trusted
+	{}
+
+	override protected void execute() @trusted
+	{
+		while(!moxane.exit)
+		{
+			moxane.services.get!Log().write(Log.Severity.info, "yeet");
+			Transform* t = entity.get!Transform;
+			t.rotation.y += 10f;
+
+			moxane.services.get!AsyncSystem().awaitNextFrame(this);
+			mixin(checkCancel);
+		}
+	}
+}
 
 void main()
 {
@@ -28,10 +53,10 @@ void main()
 		physicsSystem : false,
 		networkSystem : false,
 		settingsSystem : false,
-		asyncSystem : false,
+		asyncSystem : true,
 		entitySystem : true
 	};
-	Moxane moxane = new Moxane(settings);
+	Moxane moxane = new Moxane(settings, "Moxane Unittest");
 	
 	Log log = moxane.services.get!Log;
 	log.write(Log.Severity.debug_, "Hello");
@@ -119,6 +144,7 @@ void main()
 	RenderComponent* rc = entity.createComponent!RenderComponent;
 	transform.position = Vector3f(0f, 0f, 5f);
 	ers.addModel(sm, *rc);
+	entity.attachScript(new TriangleRotateScript(moxane));
 
 	moxane.run;
 

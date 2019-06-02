@@ -37,7 +37,18 @@ class Texture2D
 	this(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps)
 	{
 		glGenTextures(1, &handle);
-		
+		bind;
+		scope(exit) unbind;
+
+		this.width = width;
+		this.height = height;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minification);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnification);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		if(genMipMaps)
+			glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	this(string dir, Filter minification = Filter.linear, Filter magnification = Filter.linear, bool genMipMaps = false)
@@ -49,6 +60,10 @@ class Texture2D
 		if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
 			bitmap = FreeImage_Load(fif, filez, 0);
 		if(bitmap is null) throw new Exception("Could not load Texture2D " ~ dir);
+
+		scope(success) FreeImage_Unload(bitmap);
+
+		this(FreeImage_GetBits(bitmap), FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap), minification, magnification, genMipMaps);
 	}
 
 	void bind() { glBindTexture(GL_TEXTURE_2D, handle); }

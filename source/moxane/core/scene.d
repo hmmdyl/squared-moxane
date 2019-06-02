@@ -16,17 +16,17 @@ abstract class Scene
 	Scene parent;
 	Scene[] children;
 	mixin template PropagateChildren(string name)
-	{ mixin("foreach(child; children) child." ~ name ~ "();"); }
+	{ const char[] PropagateChildren = "foreach(child; children) child." ~ name ~ "();"; }
 
 	abstract void setToCurrent(Scene overwrote);
 	abstract void removedCurrent(Scene overwroteBy);
 
-	abstract void onUpdateBegin();
-	abstract void onUpdateEnd();
+	void onUpdateBegin() { mixin PropagateChildren!("onUpdateBegin"); }
+	void onUpdateEnd() { mixin PropagateChildren!("onUpdateEnd"); }
 	abstract void onUpdate();
 
-	abstract void onRenderBegin();
-	abstract void onRenderEnd();
+	void onRenderBegin() { mixin PropagateChildren!("onRenderBegin"); }
+	void onRenderEnd() { mixin PropagateChildren!("onRenderBegin"); }
 	abstract void onRender();
 }
 

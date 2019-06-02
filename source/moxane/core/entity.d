@@ -385,13 +385,16 @@ abstract class System
 abstract class AsyncScript
 {
 	package Fiber fiber;
-	private bool cancellationFlag;
+	protected bool cancellationFlag;
 	private bool running;
+	private bool runOnAttach;
 
-	Entity entity;
+	private Entity entity_;
+	@property Entity entity() { return entity_; }
+	@property void entity(Entity e) { entity_ = e; if(!running && runOnAttach) run; }
 	Moxane moxane;
 
-	this(Moxane moxane, bool runByDefault = true) @trusted
+	this(Moxane moxane, bool runOnAttach = true, bool runByDefault = false) @trusted
 	{
 		this.moxane = moxane;
 		fiber = new Fiber(&execute);
