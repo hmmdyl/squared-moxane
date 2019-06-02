@@ -77,6 +77,9 @@ class GLState
 		depthTest.push(false);
 		depthTestExpr.push(GL_LESS);
 		depthMask.push(true);
+		blend.push(false);
+		blendEquation.push(GL_FUNC_ADD);
+		blendFunc.push(Tuple!(GLenum, GLenum)(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	}
 
 	@nogc nothrow

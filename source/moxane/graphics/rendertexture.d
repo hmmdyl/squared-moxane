@@ -106,7 +106,7 @@ class RenderTexture
 
 	void clear()
 	{
-		glClearColor(0.2f, 0.2f, 0.2f, 0);
+		glClearColor(0f, 0f, 0f, 0);
 		if(depthTexture is null)
 			glClear(GL_COLOR_BUFFER_BIT);
 		else

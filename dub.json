@@ -21,4 +21,5 @@
 	},
 	"targetType": "staticLibrary",
 	"buildRequirements": [ "allowWarnings" ],	
+	"copyFiles-windows-x86_64": ["content/final/content/"]
 }

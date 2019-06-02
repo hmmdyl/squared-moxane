@@ -6,6 +6,7 @@ import moxane.graphics.transformation;
 import moxane.graphics.sprite;
 import moxane.io;
 import moxane.core;
+import moxane.core.asset;
 
 import dlib.math : Vector2i, Vector4f;
 
@@ -78,7 +79,7 @@ final class UISystem : System
 		SpriteRenderer sprites = moxane.services.get!SpriteRenderer;
 		if(sprites is null) return;
 
-		auto entities = entityManager.entitiesWith!(UIButton);
+		auto entities = entityManager.entitiesWith!(Transform, UIButton);
 		Window window = moxane.services.get!Window;
 
 		Vector2i cursorPos = cast(Vector2i)window.cursorPos;
