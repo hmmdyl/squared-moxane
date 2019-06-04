@@ -327,22 +327,3 @@ final class SpriteFont
 			glDeleteTextures(1, &cd.textureID);
 	}
 }
-
-shared static this()
-{
-	import derelict.util.exception;
-	ShouldThrow missingFTSymbol(string symbol) {
-		if(symbol == "FT_Stream_OpenBzip2")
-			return ShouldThrow.No;
-		else if(symbol == "FT_Get_CID_Registry_Ordering_Supplement")
-			return ShouldThrow.No;
-		else if(symbol == "FT_Get_CID_Is_Internally_CID_Keyed")
-			return ShouldThrow.No;
-		else if(symbol == "FT_Get_CID_From_Glyph_Index")
-			return ShouldThrow.No;
-		else
-			return ShouldThrow.Yes;
-	}
-	DerelictFT.missingSymbolCallback = &missingFTSymbol;
-	DerelictFT.load();
-}

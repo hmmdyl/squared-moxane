@@ -7,12 +7,14 @@ import moxane.core.engine;
 abstract class Scene
 {
 	Moxane moxane;
-	this(Moxane moxane, Scene parent = null) 
+	this(Moxane moxane, SceneManager manager, Scene parent = null) 
 	{
+		this.manager = manager;
 		this.moxane = moxane; 
 		this.parent = parent; 
 	}
 
+	SceneManager manager;
 	Scene parent;
 	Scene[] children;
 	mixin template PropagateChildren(string name)

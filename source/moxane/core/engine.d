@@ -65,10 +65,13 @@ class ServiceHandler
 	void register(T)(T obj, bool forceOverwrite = false)
 		if(is(T == class) || is(T == interface))
 	{
-		T i = get!T();
-		if(i !is null && !forceOverwrite) throw new Exception("Service of " ~ T.stringof ~ " already exists and the overwrite flag is not set.");
-		services[typeid(T)] = obj;
-		onRegister.emit(OnRegister(typeid(T), null, cast(Object)obj));
+		synchronized(this)
+		{
+			T i = get!T();
+			if(i !is null && !forceOverwrite) throw new Exception("Service of " ~ T.stringof ~ " already exists and the overwrite flag is not set.");
+			services[typeid(T)] = obj;
+			onRegister.emit(OnRegister(typeid(T), null, cast(Object)obj));
+		}
 	}
 	
 	/++ Takes an instance of type T and represents it as a service of type TBase.
@@ -79,34 +82,46 @@ class ServiceHandler
 	void registerAsBase(T, TBase)(T obj, bool forceOverwrite = false)
 		if((is(T == class) || is(T == interface)) && (is(TBase == class) || is(TBase == interface)))
 	{
-		enforceIsInherited!(T, TBase)(obj);
-		TBase i = get!TBase();
-		if(i !is null && !forceOverwrite) throw new Exception("Service of " ~ TBase.stringof ~ " already exists and the overwrite flag is not set.");
-		services[typeid(TBase)] = obj;
-		onRegister.emit(OnRegister(typeid(T), null, cast(Object)obj));
+		synchronized(this)
+		{
+			enforceIsInherited!(T, TBase)(obj);
+			TBase i = get!TBase();
+			if(i !is null && !forceOverwrite) throw new Exception("Service of " ~ TBase.stringof ~ " already exists and the overwrite flag is not set.");
+			services[typeid(TBase)] = obj;
+			onRegister.emit(OnRegister(typeid(T), null, cast(Object)obj));
+		}
 	}
 
 	void registerBoth(T, TBase)(T obj, bool forceOverwrite = false)
 		if((is(T == class) || is(T == interface)) && (is(TBase == class) || is(TBase == interface)))
 	{
-		register!T(obj, forceOverwrite);
-		registerAsBase!(T, TBase)(obj, forceOverwrite);
+		synchronized(this)
+		{
+			register!T(obj, forceOverwrite);
+			registerAsBase!(T, TBase)(obj, forceOverwrite);
+		}
 	}
 
 	T get(T)() if(is(T == class) || is(T == interface))
 	{
-		Object* obj = typeid(T) in services;
-		if(obj is null) return null;
-		else return cast(T)*obj;
+		synchronized(this)
+		{
+			Object* obj = typeid(T) in services;
+			if(obj is null) return null;
+			else return cast(T)*obj;
+		}
 	}
 
 	B getAOrB(A, B)() 
 		if((is(A == class) || is(A == interface)) && (is(B == class) || is(B == interface)))
 	{
-		A a = get!A;
-		if(a !is null) return cast(B)a;
-		B b = get!B;
-		return b;
+		synchronized(this)
+		{
+			A a = get!A;
+			if(a !is null) return cast(B)a;
+			B b = get!B;
+			return b;
+		}
 	}
 }
 
@@ -123,13 +138,17 @@ class Moxane
 	bool exit = false;
 
 	string appName;
-	string toResourceName(string mod, string submod, string name) { return appName ~ ":" ~ mod ~ ":" ~ submod ~ ":" ~ name; }
+	string toResourceName(string mod, string submod, string name) { return toResourceName(appName, mod, submod, name); }
+	static string toResourceName(string app, string mod, string submod, string name) { return app ~ ":" ~ mod ~ ":" ~ submod ~ ":" ~ name; }
 
 	this(const MoxaneBootSettings settings, string appName) 
 	{
 		this.bootSettings = settings;
 		this.appName = appName;
 		services = new ServiceHandler;
+	
+		import moxane.utils.deps;
+		loadDependencies;
 
 		if(settings.logSystem) registerLog;
 		else registerNullLog;
@@ -257,10 +276,6 @@ class Moxane
 
 	protected Window registerWindow()
 	{
-		import derelict.glfw3;
-
-		DerelictGLFW3.load;
-
 		ApiBoot api = ApiBoot.createOpenGL43Core;
 		WindowBoot winBoot = WindowBoot(1280, 720, "Moxane", false);
 		Window win = new Window(this, winBoot, api);

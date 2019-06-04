@@ -28,6 +28,19 @@ class Entity
 	private Script[] scripts;
 	private AsyncScript[] asyncScripts;
 
+	this(EntityManager em)
+	{
+		entityManager = em;
+	}
+
+	invariant { assert(entityManager_ !is null); }
+
+	~this()
+	{
+		foreach(TypeInfo t, void* p; components)
+			entityManager_.deallocateComponent(t, p);
+	}
+
 	/++ Checks if Entity has a component of type T. +/
 	bool has(T)() nothrow @trusted
 	{
@@ -60,6 +73,14 @@ class Entity
 	{
 		assertUnattached!T();
 		T* t = entityManager_.allocateComponent!T();
+		components[typeid(T)] = cast(void*)t;
+		return t;
+	}
+
+	T* createComponent(T, Args...)(Args args) @trusted
+	{
+		assertUnattached!T();
+		T* t = entityManager_.allocateComponent!T(args);
 		components[typeid(T)] = cast(void*)t;
 		return t;
 	}
@@ -199,7 +220,7 @@ class EntityManager
 		onEntityAdd.emit(OnEntityAdd(entity, this));
 	}
 
-	private void entityRemoveEnforce(Entity entity, out size_t index) const @trusted
+	private void entityRemoveEnforce(Entity entity, out size_t index, bool shouldEnforce = true) const @trusted
 	{
 		bool found = false;
 		foreach(size_t i, const Entity e; entities)
@@ -211,8 +232,24 @@ class EntityManager
 			}
 		}
 
+		if(!shouldEnforce) return;
+
 		enforce(found, "Could not find entity.");
 		enforce(entity.components.length == 0, "Entity must not have any components.");
+	}
+
+	void removeSoftAndDealloc(Entity entity)
+	{
+		size_t index;
+		entityRemoveEnforce(entity, index, false);
+
+		foreach(type, comp; entity.components)
+			deallocateComponent(type, comp);
+
+		onEntityRemove.emit(OnEntityAdd(entity, this));
+		entity.entityManager_ = null;
+
+		entities = std.algorithm.mutation.remove(entities, index);
 	}
 
 	void removeAndDealloc(Entity entity)
@@ -245,7 +282,7 @@ class EntityManager
 	void opOpAssign(string op)(Entity e) if(op == "-")
 	{ removeAndDealloc(e); }
 	bool opBinaryRight(string op)(Entity e) if(op == "in")
-	{ return canFind!(a => a is e)(entities, e); }
+	{ return canFind!(a => a is e)(entities); }
 
 	/++ Gets a range over entites that contain all specified components +/
 	auto entitiesWith(C...)()
@@ -289,7 +326,7 @@ class EntityManager
 			memArr = typeid(T) in componentMemByType;
 		}
 
-		T temp = T();
+		T temp = T(args);
 		ubyte[T.sizeof] componentBytes = (*cast(ubyte[T.sizeof]*)&temp);
 
 		size_t cellFreeIndex = -1;

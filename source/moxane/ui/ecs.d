@@ -72,6 +72,7 @@ final class UISystem : System
 	override void update()
 	{
 		updateButtons;
+		updatePictures;
 	}
 
 	private void updateButtons() @trusted
@@ -119,6 +120,23 @@ final class UISystem : System
 
 			Vector4f colour = button.state == UIButtonState.click ? button.clickColour : button.state == UIButtonState.hover ? button.hoverColour : button.inactiveColour;
 			sprites.drawSprite(buttonBegin, button.dimensions, colour.xyz, colour.w);
+		}
+	}
+
+	private void updatePictures() @trusted
+	{
+		SpriteRenderer sprites = moxane.services.get!SpriteRenderer;
+		if(sprites is null) return;
+
+		auto entities = entityManager.entitiesWith!(Transform, UIPicture);
+		//Window win = moxane.services.get!Window;
+
+		foreach(Entity entity; entities)
+		{
+			Transform* transform = entity.get!Transform;
+			UIPicture* pic = entity.get!UIPicture;
+			Vector2i begin = cast(Vector2i)transform.position.xy + pic.offset;
+			sprites.drawSprite(begin, pic.dimensions, pic.texture);
 		}
 	}
 }
