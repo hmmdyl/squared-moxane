@@ -3,6 +3,7 @@ module moxane.graphics.texture;
 import moxane.core.asset;
 
 import std.string : toStringz;
+import std.conv : to;
 
 import derelict.freeimage.freeimage;
 import derelict.opengl3.gl3;
@@ -26,14 +27,15 @@ import derelict.opengl3.gl3;
 enum Filter
 {
 	nearest = GL_NEAREST,
-	linear = GL_LINEAR
+	linear = GL_LINEAR,
+	nearestMipMapLinear = GL_NEAREST_MIPMAP_LINEAR,
 }
 
 class Bitmap
 {
 	private FIBITMAP* fibitmap;
 
-	this(string name)
+	this(string dir)
 	{
 		auto filez = dir.toStringz;
 		FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(filez, 0);
@@ -153,5 +155,52 @@ class Texture2D
 
 class Texture2DArray
 {
-	uint handle, width, height;
+	uint handle, width, height, depth;
+
+	this(string[] files, bool shouldThrow = false, Filter minification = Filter.linear, Filter magnification = Filter.linear, bool genMipMaps = false)
+	{
+		Bitmap[] bitmaps = new Bitmap[](files.length);
+		foreach(size_t i, string file; files)
+			bitmaps[i] = new Bitmap(file);
+
+		depth = cast(uint)files.length;
+
+		foreach(Bitmap bitmap; bitmaps)
+		{
+			width = bitmap.width > width ? bitmap.width : width;
+			height = bitmap.height > height ? bitmap.height : height;
+		}
+
+		foreach(size_t i, Bitmap bitmap; bitmaps) {
+			if(!(bitmap.width == width && bitmap.height == height)) {
+				if(shouldThrow) { 
+					throw new Exception(files[i] ~ " is of [" ~ 
+										to!string(bitmap.width) ~ ", " ~ to!string(bitmap.height) ~ "] not [" ~
+										to!string(width) ~ ", " ~ to!string(height) ~ "] as required."); 
+				} else {
+					bitmap.resize(width, height, ImageFilter.bicubic);
+				}
+			}
+		}
+
+		glGenTextures(1, &handle);
+		bind;
+
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, minification);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, magnification);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, cast(int)GL_RGBA, cast(int)width, cast(int)height, cast(int)depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+
+		foreach(size_t i, Bitmap bitmap; bitmaps) {
+			bitmap.ensure32Bits();
+			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, cast(int)i, width, height, 1, GL_BGRA, GL_UNSIGNED_BYTE, bitmap.data);
+		}
+
+		if(genMipMaps)
+			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+		unbind();
+	}
+
+	void bind() { glBindTexture(GL_TEXTURE_2D_ARRAY, handle); }
+	void unbind() { glBindTexture(GL_TEXTURE_2D_ARRAY, 0); }
 }
