@@ -22,7 +22,7 @@ import dlib.math;
 // OpenGL calls slow down the parser. Use wrapped calls or abstracted objects ONLY.
 // This is a high activity module.
 
-class Camera
+@safe class Camera
 {
 	Vector3f position;
 	Vector3f rotation;
