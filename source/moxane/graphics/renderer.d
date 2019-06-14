@@ -48,10 +48,22 @@ import dlib.math;
 
 	void buildView()
 	{
-		viewMatrix = translationMatrix(-position);
-		viewMatrix *= rotationMatrix(Axis.x, degtorad(rotation.x));
+		//viewMatrix = translationMatrix(-position);
+		/*viewMatrix = rotationMatrix(Axis.z, degtorad(rotation.z));
 		viewMatrix *= rotationMatrix(Axis.y, degtorad(rotation.y));
-		viewMatrix *= rotationMatrix(Axis.z, degtorad(rotation.z));
+		viewMatrix *= rotationMatrix(Axis.x, degtorad(rotation.x));
+		viewMatrix *= translationMatrix(-position);*/
+
+		//viewMatrix = rotationMatrix(Axis.y, degtorad(rotation.y));
+		//viewMatrix = translationMatrix(-position) * rotationMatrix(Axis.y, degtorad(rotation.y));
+		//viewMatrix = rotationMatrix(Axis.y, degtorad(rotation.y)) * translationMatrix(-position);
+
+		viewMatrix = translationMatrix(-position);
+		viewMatrix = rotationMatrix(Axis.z, degtorad(-rotation.z)) * viewMatrix;
+		viewMatrix = rotationMatrix(Axis.y, degtorad(-rotation.y)) * viewMatrix;
+		viewMatrix = rotationMatrix(Axis.x, degtorad(-rotation.x)) * viewMatrix;
+
+		//viewMatrix = Matrix4f.identity;
 	}
 
 	void deduceOrtho()
@@ -67,7 +79,7 @@ import dlib.math;
 		if(isOrtho)
 			projection = orthoMatrix(ortho.left, ortho.right, ortho.bottom, ortho.top, ortho.near, ortho.far);
 		else
-			projection = perspectiveMatrix(perspective.fieldOfView, cast(float)height / cast(float)width, perspective.near, perspective.far);
+			projection = perspectiveMatrix(perspective.fieldOfView, cast(float)width / cast(float)height, perspective.near, perspective.far);
 	}
 }
 
@@ -189,6 +201,8 @@ class Renderer
 		lastFrameDebug = currentFrameDebug;
 		currentFrameDebug = DebugData();
 
+		import derelict.opengl3.gl3 : glViewport;
+		glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
 		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 

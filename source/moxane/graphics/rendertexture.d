@@ -163,9 +163,9 @@ class RenderTexture
 		debug
 		{
 			glReadBuffer(GL_COLOR_ATTACHMENT2);
-			glBlitFramebuffer(0, 0, width, height, x, y, screenWidth/8, screenHeight/8, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer(0, 0, width, height, x, y, screenWidth/4, screenHeight/4, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			glReadBuffer(GL_COLOR_ATTACHMENT1);
-			glBlitFramebuffer(0, 0, width, height, screenWidth/8, y, screenWidth/8*2, screenHeight/8, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer(0, 0, width, height, screenWidth/4, y, screenWidth/4*2, screenHeight/4, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		}
 	}
 }
