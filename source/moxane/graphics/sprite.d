@@ -219,6 +219,8 @@ final class SpriteRenderer : IRenderable
 		textEffect["MVP"].set(&lc.projection);
 		scope(exit) glBindTexture(GL_TEXTURE_2D, 0);
 
+		scope(exit) textSpriteOrders.length = 0;
+
 		foreach(ref TextSpriteOrder order; textSpriteOrders)
 		{
 			int cx = order.position.x;
