@@ -5,6 +5,7 @@ import std.datetime.stopwatch;
 import core.sync.condition;
 import core.sync.mutex;
 import optional;
+import std.range.interfaces : InputRange;
 
 import containers;
 
@@ -96,7 +97,7 @@ class AsyncSystem
 		}
 	}
 
-	T await()
+	Optional!T await()
 	{
 		bool empty;
 		synchronized(queueSyncObj)
@@ -107,10 +108,20 @@ class AsyncSystem
 				condition.wait;
 		synchronized(queueSyncObj)
 		{
+			if(queue.length == 0) return no!T;
+
 			T item = queue.front;
 			queue.removeFront;
-			return item;
+			return Optional!T(item);
 		}
+	}
+
+	void clearUnsafe() { synchronized(queueSyncObj) queue.clear; }
+
+	void notifyUnsafe()
+	{
+		synchronized(mutex)
+			condition.notify;
 	}
 
 	void send(T item)
