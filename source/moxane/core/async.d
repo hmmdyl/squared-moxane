@@ -2,6 +2,9 @@ module moxane.core.async;
 
 import core.thread;
 import std.datetime.stopwatch;
+import core.sync.condition;
+import core.sync.mutex;
+import optional;
 
 import containers;
 
@@ -63,6 +66,60 @@ class AsyncSystem
 				fwt.fiber.call;
 				fiberWaitTimes.remove(fwt);
 			}
+		}
+	}
+}
+
+@trusted class Channel(T)
+{
+	private CyclicBuffer!T queue;
+	private Condition condition;
+	private Mutex mutex;
+	private Object queueSyncObj;
+
+	this()
+	{
+		queueSyncObj = new Object;
+		mutex = new Mutex;
+		condition = new Condition(mutex);
+	}
+
+	Optional!T tryGet()
+	{
+		synchronized(queueSyncObj)
+		{
+			if(queue.empty) return no!T;
+
+			T item = queue.front;
+			queue.removeFront;
+			return Optional!T(item);
+		}
+	}
+
+	T await()
+	{
+		bool empty;
+		synchronized(queueSyncObj)
+			empty = queue.empty;
+
+		if(empty)
+			synchronized(mutex)
+				condition.wait;
+		synchronized(queueSyncObj)
+		{
+			T item = queue.front;
+			queue.removeFront;
+			return item;
+		}
+	}
+
+	void send(T item)
+	{
+		synchronized(queueSyncObj)
+		{
+			queue.put(item);
+			synchronized(mutex)
+				condition.notify;
 		}
 	}
 }
