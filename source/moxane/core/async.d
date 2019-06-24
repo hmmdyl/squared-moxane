@@ -85,6 +85,8 @@ class AsyncSystem
 		condition = new Condition(mutex);
 	}
 
+	bool empty() { synchronized(queueSyncObj) return queue.empty; }
+
 	Optional!T tryGet()
 	{
 		synchronized(queueSyncObj)

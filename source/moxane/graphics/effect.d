@@ -150,8 +150,8 @@ class Effect
 	}
 
 	void attach(Shader shader)
-	{
-		assert(shader.compiled);
+	in(shader.compiled)
+	do {
 		glAttachShader(id, shader.id);
 	}
 
