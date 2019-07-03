@@ -205,3 +205,58 @@ class DepthTexture
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
+
+class PostProcessTexture
+{
+	uint width, height;
+	invariant {
+		assert(width > 0);
+		assert(height > 0);
+	}
+
+	uint fbo;
+	uint diffuse;
+
+	this(uint width, uint height)
+	{
+		this.width = width;
+		this.height = height;
+		
+		glGenTextures(1, &diffuse);
+		createTextures;
+
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, diffuse, 0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if(status != GL_FRAMEBUFFER_COMPLETE)
+			throw new Exception("FBO " ~ to!string(fbo) ~ " could not be created. Status: " ~ to!string(status));
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void createTextures()
+	{
+		glBindTexture(GL_TEXTURE_2D, diffuse);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_INT, null);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void bindDraw()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glViewport(0, 0, width, height);
+	}
+
+	void unbindDraw() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
+	void clear()
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+}

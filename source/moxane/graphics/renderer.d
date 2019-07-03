@@ -48,22 +48,10 @@ import dlib.math;
 
 	void buildView()
 	{
-		//viewMatrix = translationMatrix(-position);
-		/*viewMatrix = rotationMatrix(Axis.z, degtorad(rotation.z));
-		viewMatrix *= rotationMatrix(Axis.y, degtorad(rotation.y));
-		viewMatrix *= rotationMatrix(Axis.x, degtorad(rotation.x));
-		viewMatrix *= translationMatrix(-position);*/
-
-		//viewMatrix = rotationMatrix(Axis.y, degtorad(rotation.y));
-		//viewMatrix = translationMatrix(-position) * rotationMatrix(Axis.y, degtorad(rotation.y));
-		//viewMatrix = rotationMatrix(Axis.y, degtorad(rotation.y)) * translationMatrix(-position);
-
 		viewMatrix = translationMatrix(-position);
 		viewMatrix = rotationMatrix(Axis.z, degtorad(-rotation.z)) * viewMatrix;
 		viewMatrix = rotationMatrix(Axis.y, degtorad(-rotation.y)) * viewMatrix;
 		viewMatrix = rotationMatrix(Axis.x, degtorad(-rotation.x)) * viewMatrix;
-
-		//viewMatrix = Matrix4f.identity;
 	}
 
 	void deduceOrtho()
