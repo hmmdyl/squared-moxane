@@ -164,15 +164,17 @@ final class PostProcessDistributor
 	UnrolledList!PostProcess processes;
 
 	PostProcessCommon common;
+	PostProcessTexture lightTexture;
 	private PostProcessTexture[2] ppTextures;
 
 	PassPostProcess passThrough;
 
-	this(uint width, uint height, Moxane moxane)
+	this(uint width, uint height, Moxane moxane, bool lightingInput = true)
 	{
 		common = new PostProcessCommon;
 		ppTextures[0] = new PostProcessTexture(width, height);
 		ppTextures[1] = new PostProcessTexture(width, height);
+		if(lightingInput) lightTexture = new PostProcessTexture(width, height);
 		passThrough = new PassPostProcess(moxane, common);
 	}
 
@@ -184,14 +186,17 @@ final class PostProcessDistributor
 			pp.height = height;
 			pp.createTextures;
 		}
+		lightTexture.width = width;
+		lightTexture.height = height;
+		lightTexture.createTextures;
 	}
 
 	void render(Renderer renderer, ref LocalContext lc)
 	{
 		if(processes.length == 0)
-			passThrough.render(renderer, lc, renderer.scene, null, null);
+			passThrough.render(renderer, lc, renderer.scene, lightTexture is null ? null : lightTexture, null);
 		else if(processes.length == 1)
-			processes.front.render(renderer, lc, renderer.scene, null, null);
+			processes.front.render(renderer, lc, renderer.scene, lightTexture is null ? null : lightTexture, null);
 		else
 		{
 			size_t idPrev = 0;
@@ -202,7 +207,7 @@ final class PostProcessDistributor
 				scope(exit) id++;
 
 				if(id == 0)
-					pp.render(renderer, lc, renderer.scene, null, ppTextures[0]);
+					pp.render(renderer, lc, renderer.scene, lightTexture is null ? null : lightTexture, ppTextures[0]);
 				else if(id == processes.length - 1)
 					pp.render(renderer, lc, renderer.scene, ppTextures[idPrev], null);
 				else
