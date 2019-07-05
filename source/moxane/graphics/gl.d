@@ -82,6 +82,17 @@ class GLState
 		blendFunc.push(Tuple!(GLenum, GLenum)(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	}
 
+	private bool wireframe_;
+	@property bool wireframe() const { return wireframe_; }
+	@property void wireframe(bool w)
+	{
+		if(w)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		wireframe_ = w;
+	}
+
 	@nogc nothrow
 	{
 		mixin(Setting!(bool, "blend", enable!GL_BLEND));

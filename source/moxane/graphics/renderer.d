@@ -10,6 +10,7 @@ import moxane.graphics.log;
 import moxane.graphics.rendertexture;
 import moxane.graphics.effect;
 import moxane.graphics.triangletest;
+import moxane.graphics.postprocess;
 
 import moxane.graphics.imgui;
 import cimgui.funcs;
@@ -100,8 +101,11 @@ class Renderer
 	Camera primaryCamera;
 	Camera uiCamera;
 
+	bool wireframe;
 	RenderTexture scene;
 	DepthTexture sceneDepth;
+
+	PostProcessDistributor postProcesses;
 
 	TriangleTest tt;
 
@@ -151,6 +155,8 @@ class Renderer
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
 
+		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
+
 		//tt = new TriangleTest(moxane);
 		//sceneRenderables ~= tt;
 	}
@@ -164,6 +170,11 @@ class Renderer
 
 		gl.depthTest.push(true);
 		scope(exit) gl.depthTest.pop();
+
+		if(wireframe)
+			gl.wireframe = true;
+		scope(exit)
+			gl.wireframe = false;
 
 		LocalContext lc = 
 		{
@@ -192,20 +203,22 @@ class Renderer
 		import derelict.opengl3.gl3 : glViewport;
 		glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
+
+		LocalContext uilc = 
+		{
+			projection : uiCamera.projection, 
+			view : Matrix4f.identity, 
+			model : Matrix4f.identity, 
+			camera : uiCamera,
+			type : PassType.scene
+		};
+		postProcesses.render(this, uilc);
+
 		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
 		{
 			import derelict.opengl3.gl3 : glViewport;
 			glViewport(0, 0, uiCamera.width, uiCamera.height);
-
-			LocalContext uilc = 
-			{
-				projection : uiCamera.projection, 
-				view : Matrix4f.identity, 
-				model : Matrix4f.identity, 
-				camera : uiCamera,
-				type : PassType.scene
-			};
 			
 			foreach(IRenderable r; uiRenderables) 
 			{

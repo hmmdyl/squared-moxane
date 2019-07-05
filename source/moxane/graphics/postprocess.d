@@ -62,13 +62,18 @@ abstract class PostProcess
 		effect = new Effect(moxane, postProcessName);
 		effect.attachAndLink(vs, fs);
 		effect.bind;
+		getUniforms;
+		effect.unbind;
+	}
+
+	protected void getUniforms()
+	{
 		effect.findUniform("FramebufferSize");
 		effect.findUniform("Projection");
 		effect.findUniform("DepthTexture");
 		effect.findUniform("DiffuseTexture");
 		effect.findUniform("WorldPosTexture");
 		effect.findUniform("NormalTexture");
-		effect.unbind;
 	}
 
 	~this()
@@ -76,9 +81,8 @@ abstract class PostProcess
 		destroy(effect);
 	}
 
-	void render(Renderer renderer, ref LocalContext lc, RenderTexture source, PostProcessTexture previousStageSource, PostProcessTexture output)
-	in(renderer !is null) in(source !is null)
-	do {
+	protected void bind(Renderer renderer, ref LocalContext lc, RenderTexture source, PostProcessTexture previousStageSource, PostProcessTexture output)
+	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, previousStageSource is null ? source.diffuse : previousStageSource.diffuse);
 		glActiveTexture(GL_TEXTURE1);
@@ -87,18 +91,8 @@ abstract class PostProcess
 		glBindTexture(GL_TEXTURE_2D, source.normal);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, source.depthTexture.depth);
-		scope(exit)
-		{
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
 
+		effect.bind;
 		effect["FramebufferSize"].set(Vector2f(lc.camera.width, lc.camera.height));
 		effect["Projection"].set(&lc.projection);
 		effect["DepthTexture"].set(3);
@@ -118,13 +112,40 @@ abstract class PostProcess
 		}
 
 		glBindVertexArray(common.quadVao);
-		scope(exit) glBindVertexArray(0);
-		scope(exit) glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glEnableVertexAttribArray(0);
+	}
 
+	protected void unbind()
+	{
+		glDisableVertexAttribArray(0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		effect.unbind;
+	}
+
+	protected void draw()
+	{
 		glBindBuffer(GL_ARRAY_BUFFER, common.quadVbo);
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
 
 		glDrawArrays(GL_TRIANGLES, 0, common.vertices);
+	}
+
+	void render(Renderer renderer, ref LocalContext lc, RenderTexture source, PostProcessTexture previousStageSource, PostProcessTexture output)
+	in(renderer !is null) in(source !is null)
+	do {
+		bind(renderer, lc, source, previousStageSource, output);
+		draw;
+		unbind;
 	}
 }
 
