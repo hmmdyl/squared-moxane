@@ -11,6 +11,7 @@ import moxane.graphics.rendertexture;
 import moxane.graphics.effect;
 import moxane.graphics.triangletest;
 import moxane.graphics.postprocess;
+import moxane.graphics.light;
 
 import moxane.graphics.imgui;
 import cimgui.funcs;
@@ -105,6 +106,7 @@ class Renderer
 	RenderTexture scene;
 	DepthTexture sceneDepth;
 
+	LightDistributor lights;
 	PostProcessDistributor postProcesses;
 
 	TriangleTest tt;
@@ -156,6 +158,7 @@ class Renderer
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
 
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
+		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
 
 		//tt = new TriangleTest(moxane);
 		//sceneRenderables ~= tt;
@@ -212,6 +215,7 @@ class Renderer
 			camera : uiCamera,
 			type : PassType.scene
 		};
+		//lights.render(this, uilc, scene, postProcesses.lightTexture);
 		postProcesses.render(this, uilc);
 
 		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
