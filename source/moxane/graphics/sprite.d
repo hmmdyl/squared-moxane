@@ -292,7 +292,8 @@ final class SpriteRenderer : IRenderable
 
 		renderer.gl.blend.push(true);
 		scope(exit) renderer.gl.blend.pop;
-
+		renderer.gl.blendEquation.push(GL_FUNC_ADD);
+		scope(exit) renderer.gl.blendEquation.pop;
 		renderer.gl.blendFunc.push(Tuple!(GLenum, GLenum)(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		scope(exit) renderer.gl.blendFunc.pop;
 

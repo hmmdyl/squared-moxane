@@ -203,7 +203,8 @@ class Renderer
 		lastFrameDebug = currentFrameDebug;
 		currentFrameDebug = DebugData();
 
-		import derelict.opengl3.gl3 : glViewport;
+		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
 
@@ -215,7 +216,7 @@ class Renderer
 			camera : uiCamera,
 			type : PassType.scene
 		};
-		//lights.render(this, uilc, scene, postProcesses.lightTexture);
+		lights.render(this, uilc, scene, postProcesses.lightTexture, primaryCamera.position);
 		postProcesses.render(this, uilc);
 
 		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);

@@ -41,7 +41,7 @@ private final class PointLightPostProcess : PostProcess
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, common.quadVbo);
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
-		effect["CameraPosition"].set(cameraPosition);
+		effect["CameraPosition"].set(Vector3f(0f, 0f, 0f));
 
 		foreach(PointLight pl; pointLights)
 		{
@@ -69,6 +69,16 @@ final class LightDistributor
 	{
 		pointLightEffect = new PointLightPostProcess(moxane, common);
 		intermediate = new PostProcessTexture(width, height);
+
+		PointLight pl;
+		pl.position = Vector3f(0f, 20f, 0f);
+		pl.colour = Vector3f(1, 1, 1);
+		pl.ambientIntensity = 0f;
+		pl.diffuseIntensity = 200f;
+		pl.constAtt = 1f;
+		pl.linAtt = 0.4f;
+		pl.expAtt = 0.7f;
+		pointLights ~= pl;
 	}
 
 	~this()
@@ -86,7 +96,7 @@ final class LightDistributor
 		intermediate.createTextures;
 	}
 
-	void render(Renderer renderer, ref LocalContext lc, RenderTexture scene, PostProcessTexture output)
+	void render(Renderer renderer, ref LocalContext lc, RenderTexture scene, PostProcessTexture output, Vector3f cam)
 	{
 		renderer.gl.blend.push(true);
 		scope(exit) renderer.gl.blend.pop;
@@ -96,6 +106,7 @@ final class LightDistributor
 		scope(exit) renderer.gl.blendFunc.pop;
 
 		pointLightEffect.pointLights = inputRangeObject(pointLights[]);
+		pointLightEffect.cameraPosition = cam;
 		pointLightEffect.render(renderer, lc, scene, null, output); // TODO: change output to intermediate when next light stage is added.
 	}
 }
