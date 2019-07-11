@@ -69,16 +69,6 @@ final class LightDistributor
 	{
 		pointLightEffect = new PointLightPostProcess(moxane, common);
 		intermediate = new PostProcessTexture(width, height);
-
-		PointLight pl;
-		pl.position = Vector3f(0f, 20f, 0f);
-		pl.colour = Vector3f(1, 1, 1);
-		pl.ambientIntensity = 0f;
-		pl.diffuseIntensity = 200f;
-		pl.constAtt = 1f;
-		pl.linAtt = 0.4f;
-		pl.expAtt = 0.7f;
-		pointLights ~= pl;
 	}
 
 	~this()

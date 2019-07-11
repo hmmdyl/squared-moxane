@@ -9,6 +9,7 @@ import moxane.graphics.log;
 import moxane.core.asset;
 
 import std.string : toStringz, strip;
+import std.conv;
 
 struct EffectUniform
 {
@@ -137,6 +138,7 @@ class Effect
 		this.moxane = moxane;
 		this.effectName = effectName;
 		id = glCreateProgram();
+		moxane.services.getAOrB!(GraphicsLog, Log)().write(Log.Severity.info, effectName ~ " is GLSL program number " ~ to!string(id));
 	}
 
 	~this()

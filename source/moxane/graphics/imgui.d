@@ -50,8 +50,8 @@ class ImguiRenderer : IRenderable
 		win = moxane.services.get!Window;
 
 		AssetManager am = moxane.services.get!AssetManager;
-		Shader vert = am.uniqueLoad!Shader("content/shaders/imgui.vs.glsl");
-		Shader frag = am.uniqueLoad!Shader("content/shaders/imgui.fs.glsl");
+		Shader vert = am.uniqueLoad!Shader("content/moxane/shaders/imgui.vs.glsl");
+		Shader frag = am.uniqueLoad!Shader("content/moxane/shaders/imgui.fs.glsl");
 		effect = new Effect(moxane, ImguiRenderer.stringof ~ "Effect");
 		effect.attachAndLink(vert, frag);
 		effect.bind;

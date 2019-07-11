@@ -10,6 +10,8 @@ uniform vec3 Colour;
 uniform float Gradient;
 uniform float Density;
 
+uniform mat4 View;
+
 out vec3 Fragment;
 
 void main()
@@ -17,9 +19,11 @@ void main()
 	vec2 tc = gl_FragCoord.xy / FramebufferSize;
 	vec3 worldPos = texture(WorldPosTexture, tc).rgb;
 	vec3 diffuse = texture(DiffuseTexture, tc).rgb;
+	vec3 normal = texture(NormalTexture, tc).rgb;
 
-	float dist = length(worldPos);
+	vec3 mvPos = (View * vec4(worldPos, 1)).xyz;
+	float dist = length(mvPos);
 	float fogFactor = clamp(exp(-pow(dist * Density, Gradient)), 0, 1);
 
-	Fragment = mix(Colour, diffuse, fogFactor);
+	Fragment = (normal.x == 0 && normal.y == 0 && normal.z == 0) ? Colour : mix(Colour, diffuse, fogFactor);
 }

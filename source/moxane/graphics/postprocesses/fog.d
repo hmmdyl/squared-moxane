@@ -24,19 +24,22 @@ final class Fog : PostProcess
 		effect.findUniform("Colour");
 		effect.findUniform("Gradient");
 		effect.findUniform("Density");
+		effect.findUniform("View");
 	}
 
 	Vector3f colour;
 	float density;
 	float gradient;
+	Matrix4f sceneView;
 
-	void update(Vector3f colour, float density, float gradient)
+	void update(Vector3f colour, float density, float gradient, Matrix4f sceneView)
 	in(colour.x != float.nan && colour.y != float.nan && colour.z != float.nan)
 	in(density != float.nan && gradient != float.nan)
 	{
 		this.colour = colour;
 		this.density = density;
 		this.gradient = gradient;
+		this.sceneView = sceneView;
 	}
 
 	override protected void bind(Renderer renderer,ref LocalContext lc,RenderTexture source,PostProcessTexture previousStageSource,PostProcessTexture output) 
@@ -45,5 +48,6 @@ final class Fog : PostProcess
 		effect["Colour"].set(colour);
 		effect["Gradient"].set(gradient);
 		effect["Density"].set(density);
+		effect["View"].set(&sceneView);
 	}
 }

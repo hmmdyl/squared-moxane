@@ -128,7 +128,7 @@ final class Window
 		windowedX = position.x;
 		windowedY = position.y;
 
-		//glfwSwapInterval(16);
+		glfwSwapInterval(0);
 
 		log.write(Log.Severity.info, "Created window");
 	}

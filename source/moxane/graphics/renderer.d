@@ -203,7 +203,8 @@ class Renderer
 		lastFrameDebug = currentFrameDebug;
 		currentFrameDebug = DebugData();
 
-		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT;
+		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glClearColor;
+		glClearColor(1f, 1f, 1f, 0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
