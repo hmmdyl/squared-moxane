@@ -235,14 +235,8 @@ final class Window
 
 	@property Vector2d centrePos() {
 		Vector2d c;
-		c.x = position.x + (size.x / 2.0);
-		c.y = position.y + (size.y / 2.0);
-
-		import std.stdio;
-		writeln("Position: ", position);
-		writeln("Size: ", size);
-		writeln("Centre: ", c);
-
+		c.x = /+position.x + +/(size.x / 2.0);
+		c.y = /+position.y + +/(size.y / 2.0);
 		return c;
 	}
 
@@ -257,7 +251,7 @@ final class Window
 	@property void hideCursor(bool v) { 
 		hideCursor_ = v;
 		if(v)
-			glfwSetInputMode(ptr, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			glfwSetInputMode(ptr, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		else
 			glfwSetInputMode(ptr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}

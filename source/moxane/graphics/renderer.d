@@ -109,8 +109,6 @@ class Renderer
 	LightDistributor lights;
 	PostProcessDistributor postProcesses;
 
-	TriangleTest tt;
-
 	private IRenderable[] sceneRenderables;
 	IRenderable[] uiRenderables;
 
@@ -159,9 +157,6 @@ class Renderer
 
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
 		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
-
-		//tt = new TriangleTest(moxane);
-		//sceneRenderables ~= tt;
 	}
 
 	void scenePass()
@@ -204,9 +199,9 @@ class Renderer
 		currentFrameDebug = DebugData();
 
 		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glClearColor;
-		glClearColor(1f, 1f, 1f, 0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, primaryCamera.width, primaryCamera.height);
+		//glClearColor(1f, 1f, 1f, 0f);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
 
 		LocalContext uilc = 
@@ -220,7 +215,7 @@ class Renderer
 		lights.render(this, uilc, scene, postProcesses.lightTexture, primaryCamera.position);
 		postProcesses.render(this, uilc);
 
-		scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
+		debug scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
 		{
 			import derelict.opengl3.gl3 : glViewport;
@@ -247,6 +242,9 @@ class Renderer
 			sceneDepth.width = primaryCamera.width;
 			sceneDepth.height = primaryCamera.height;
 			sceneDepth.createTextures;
+
+			postProcesses.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
+			lights.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
 		}
 	}
 

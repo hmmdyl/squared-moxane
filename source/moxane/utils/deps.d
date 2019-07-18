@@ -4,6 +4,7 @@ import derelict.util.exception;
 import derelict.freetype.ft : DerelictFT;
 import derelict.freeimage.freeimage : DerelictFI;
 import derelict.glfw3 : DerelictGLFW3;
+import derelict.assimp3.assimp : DerelictASSIMP3;
 
 private void loadFT()
 {
@@ -40,9 +41,22 @@ private void loadGLFW3()
 	DerelictGLFW3.load();
 }
 
+private void loadASSIMP3()
+{
+	ShouldThrow missingASSIMP3Symbol(string symbol)
+	{
+		import std.stdio;
+		writeln(symbol);
+		return ShouldThrow.No;
+	}
+	DerelictASSIMP3.missingSymbolCallback = &missingASSIMP3Symbol;
+	DerelictASSIMP3.load;
+}
+
 void loadDependencies()
 {
 	loadGLFW3;
 	loadFT;
 	loadFI;
+	loadASSIMP3;
 }

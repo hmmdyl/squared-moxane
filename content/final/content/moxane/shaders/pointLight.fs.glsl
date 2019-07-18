@@ -64,7 +64,9 @@ void main()
 	vec3 normal = texture(NormalTexture, tc).rgb;
 	vec3 diffuse = texture(DiffuseTexture, tc).rgb;
 
-	vec4 l = normal == vec3(0) ? vec3(1) : calculatePointLight(worldPos, normal);
+	vec4 l = vec4(1);
+	if(normal.x != 0 || normal.y != 0 || normal.z != 0)
+		l = calculatePointLight(worldPos, normal);
 
 	Fragment = diffuse * l.xyz;
 }

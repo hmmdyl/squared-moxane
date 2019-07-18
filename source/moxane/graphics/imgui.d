@@ -131,7 +131,7 @@ class ImguiRenderer : IRenderable
 		{
 			//writeln("begin io");
 			//scope(exit) writeln("end IO update");
-			io.DeltaTime = 1f / 60f;
+			io.DeltaTime = moxane.deltaTime;
 
 			Vector2i size = win.size;
 			Vector2i framebufferSize = win.framebufferSize;
@@ -205,7 +205,7 @@ class ImguiRenderer : IRenderable
 
 		Vector2i framebufferSize = Vector2i(cast(int)(io.DisplaySize.x * io.DisplayFramebufferScale.x), cast(int)(io.DisplaySize.y * io.DisplayFramebufferScale.y));
 		//drawData.ScaleClipRects(io.DisplayFramebufferScale);
-		//ImDrawData_ScaleClipRects(drawData, io.DisplayFramebufferScale);
+		ImDrawData_ScaleClipRects(drawData, io.DisplayFramebufferScale);
 
 		glActiveTexture(GL_TEXTURE0);
 		effect["Texture"].set(0);

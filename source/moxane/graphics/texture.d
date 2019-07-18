@@ -112,22 +112,8 @@ class Texture2D
 	uint handle;
 	uint width, height;
 
-	this(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps)
-	{
-		glGenTextures(1, &handle);
-		bind;
-		scope(exit) unbind;
-
-		this.width = width;
-		this.height = height;
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minification);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnification);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
-
-		if(genMipMaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-	}
+	this(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps, bool clamp = true)
+	{ upload(data, width, height, minification, magnification, genMipMaps, clamp); }
 
 	this(string dir, Filter minification = Filter.linear, Filter magnification = Filter.linear, bool genMipMaps = false)
 	{
@@ -146,7 +132,26 @@ class Texture2D
 		FreeImage_Unload(bitmap);
 		scope(exit) FreeImage_Unload(bitmap32);
 
-		this(FreeImage_GetBits(bitmap32), FreeImage_GetWidth(bitmap32), FreeImage_GetHeight(bitmap32), minification, magnification, genMipMaps);
+		upload(FreeImage_GetBits(bitmap32), FreeImage_GetWidth(bitmap32), FreeImage_GetHeight(bitmap32), minification, magnification, genMipMaps, false);
+	}
+
+	void upload(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps, bool clamp = false)
+	{
+		glGenTextures(1, &handle);
+		bind;
+		scope(exit) unbind;
+
+		this.width = width;
+		this.height = height;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minification);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnification);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+
+		if(genMipMaps)
+			glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	void bind() { glBindTexture(GL_TEXTURE_2D, handle); }

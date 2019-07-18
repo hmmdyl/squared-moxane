@@ -277,7 +277,7 @@ class Moxane
 	protected Window registerWindow()
 	{
 		ApiBoot api = ApiBoot.createOpenGL43Core;
-		WindowBoot winBoot = WindowBoot(1280, 720, "Moxane", false);
+		WindowBoot winBoot = WindowBoot(1920, 1080, "Moxane", false);
 		Window win = new Window(this, winBoot, api);
 		services.register!Window(win);
 		return win;
@@ -286,7 +286,7 @@ class Moxane
 	protected Renderer registerRenderer()
 	{
 		import dlib.math;
-		Renderer renderer = new Renderer(this, Vector2u(1280, 720), true);
+		Renderer renderer = new Renderer(this, Vector2u(1920, 1080), false);
 		services.register!Renderer(renderer);
 		return renderer;
 	}
