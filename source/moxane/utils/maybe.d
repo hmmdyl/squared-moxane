@@ -4,6 +4,8 @@ import std.exception : enforce;
 import std.traits;
 import core.memory;
 
+@safe:
+
 struct Maybe(T)
 	if(is(T == struct) || isBasicType!T)
 {
@@ -48,7 +50,7 @@ struct Maybe(T)
 		else return def;
 	}
 
-	bool opEquals(auto ref const Maybe!T other) const
+	bool opEquals(ref const Maybe!T other) const
 	{ return notNull == other.notNull && payload == other.payload; }
 }
 

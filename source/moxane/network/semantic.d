@@ -1,9 +1,13 @@
 module moxane.network.semantic;
 
+import cerealed;
+alias NoSerialise = NoCereal;
+
 enum SyncLifetime
 {
 	omnipresent,
-	local
+	local,
+	none
 }
 
 struct NetworkSemantic
@@ -11,4 +15,4 @@ struct NetworkSemantic
 	SyncLifetime syncLifetime;
 }
 
-immutable NetworkSemantic defaultSemantic = NetworkSemantic(SyncLifetime.local);
+immutable NetworkSemantic defaultSemantic = NetworkSemantic(SyncLifetime.none);

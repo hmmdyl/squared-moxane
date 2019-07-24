@@ -135,6 +135,7 @@ class Entity
 	{
 		enforce(canFind(scripts, script), "Script not present");
 		scripts = remove!(a => a == script)(scripts);
+		script.onDetach;
 		script.entity = null;
 	}
 
@@ -415,7 +416,7 @@ abstract class System
 		this.moxane = moxane;
 		this.entityManager = manager;
 	}
-
+	
 	abstract void update();
 }
 
@@ -474,6 +475,8 @@ abstract class Script
 	{
 		this.moxane = moxane;
 	}
+
+	void onDetach() {}
 
 	abstract void execute()
 	{}
