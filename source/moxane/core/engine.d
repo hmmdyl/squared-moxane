@@ -13,6 +13,7 @@ import moxane.core.eventwaiter;
 import moxane.core.asset;
 import moxane.core.entity;
 import moxane.core.scene;
+import moxane.io.input;
 
 /// Provides a singleton like system for systems, accessible by type.
 class ServiceHandler
@@ -158,6 +159,7 @@ class Moxane
 		if(settings.asyncSystem) registerAsync;
 		if(settings.entitySystem) registerEntityManager;
 		if(settings.sceneSystem) registerSceneManager;
+		if(settings.inputSystem) registerInputManager;
 
 		deltaTime = 0f;
 		deltaSw = StopWatch(AutoStart.yes);
@@ -194,6 +196,10 @@ class Moxane
 
 	void update()
 	{
+		InputManager inputManager = services.get!InputManager;
+		if(inputManager !is null)
+			inputManager.update();
+
 		SceneManager sceneManager = services.get!SceneManager;
 		if(sceneManager !is null)
 			sceneManager.onUpdateBegin;
@@ -239,6 +245,13 @@ class Moxane
 		}
 	}
 	
+	protected InputManager registerInputManager()
+	{
+		InputManager im = new InputManager(services.get!Window);
+		services.register!InputManager(im);
+		return im;
+	}
+
 	protected SceneManager registerSceneManager()
 	{
 		SceneManager sm = new SceneManager(this);
@@ -311,6 +324,7 @@ struct MoxaneBootSettings
 	bool asyncSystem;
 	bool entitySystem;
 	bool sceneSystem;
+	bool inputSystem;
 
 	static MoxaneBootSettings defaultBoot() 
 	{
@@ -326,7 +340,7 @@ struct MoxaneBootSettings
 		MoxaneBootSettings mbs;
 		foreach(fieldName; FieldNameTuple!MoxaneBootSettings) 
 		{
-			if(fieldName == "windowSystem" || fieldName == "graphicsSystem")
+			if(fieldName == "windowSystem" || fieldName == "graphicsSystem" || fieldName == "inputSystem")
 				__traits(getMember, mbs, fieldName) = false;
 			else 
 				__traits(getMember, mbs, fieldName) = true;

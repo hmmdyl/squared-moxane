@@ -1,6 +1,6 @@
 module moxane.network.semantic;
 
-import cerealed;
+public import cerealed : NoCereal;
 alias NoSerialise = NoCereal;
 
 enum SyncLifetime

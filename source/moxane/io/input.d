@@ -30,7 +30,7 @@ class InputManager
 	ButtonAction[string] boundKeyState;
 
 	/// key name -> name[s] of binding
-	private HashSet!(string)[int] bindings;
+	HashSet!(string)[int] bindings;
 
 	private Vector2d mouseMove_;
 	@property Vector2d mouseMove() const { return mouseMove_; }
@@ -54,6 +54,10 @@ class InputManager
 		window.onKey.add(&onKeyWin);
 		window.onChar.add(&onTextWin);
 		window.onMouseMove.add(&onMouseMoveWin);
+
+		mouseMove_ = Vector2d(0, 0);
+		mouseMoveRaw_ = Vector2d(0, 0);
+		mouseMoveRawPrevious = window.cursorPos;
 	}
 
 	~this()
@@ -64,16 +68,42 @@ class InputManager
 		window.onMouseMove.remove(&onMouseMoveWin);
 	}
 
-	void getState(string bindingName)
+	void update()
 	{
+		if(window.hideCursor)
+		{
+			Vector2d cursor = window.cursorPos;
+			Vector2d c = cursor - mouseMoveRawPrevious;
+			mouseMoveRawPrevious = cursor;
 
+			mouseMoveRaw_ = c;
+			mouseMove_.x = c.x;
+			mouseMove_.y = invertY ? -c.y : c.y;
+		}
+		else
+		{
+			mouseMove_ = Vector2d(0, 0);
+			mouseMoveRaw_ = Vector2d(0, 0);
+		}
+	}
+
+	ButtonAction getBindingState(string bindingName)
+	{
+		ButtonAction* action = bindingName in boundKeyState;
+		if(action is null) return ButtonAction.release;
+		else return *action;
 	}
 
 	void setBinding(string name, int n) @trusted
 	{
 		foreach(int boundInputs, ref HashSet!string bindingNames; bindings)
+		{
 			if(bindingNames[].canFind!"a==b"(name))
+			{
 				bindingNames.remove(name);
+				boundKeyState[name] = ButtonAction.release;
+			}
+		}
 		
 		HashSet!(string)* b = n in bindings;
 		if(b !is null)
@@ -83,6 +113,7 @@ class InputManager
 			bindings[n] = HashSet!string();
 			bindings[n] ~= name;
 			boundKeys[name] = EventWaiter!InputEvent();
+			boundKeyState[name] = ButtonAction.release;
 		}
 	}
 
@@ -102,7 +133,7 @@ class InputManager
 
 	private void handleCallback(int key, ButtonAction a) @trusted
 	{
-		HashSet!(string)* bindingNames = cast(int)a in bindings;
+		HashSet!(string)* bindingNames = key in bindings;
 		if(bindingNames !is null)
 		{
 			foreach(b; *bindingNames)
@@ -125,16 +156,7 @@ class InputManager
 
 	private void onMouseMoveWin(Window win, Vector2d movement)
 	{
-		if(win.hideCursor)
-		{
-			Vector2d cursor = win.cursorPos;
-			Vector2d c = cursor - mouseMoveRawPrevious;
-			mouseMoveRawPrevious = cursor;
-
-			mouseMoveRaw_ = c;
-			mouseMove_.x = c.x;
-			mouseMove_.y = invertY ? -c.y : c.y;
-		}
+		
 	}
 
 	private void onMouseButtonWin(Window win, MouseButton mb, ButtonAction a)
