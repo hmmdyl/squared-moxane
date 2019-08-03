@@ -94,6 +94,18 @@ interface IRenderable
 	void render(Renderer, ref LocalContext, out uint drawCalls, out uint numVerts);
 }
 
+enum RendererHookPass
+{
+	beginningGlobal,
+	endGlobal
+}
+
+struct RendererHook
+{
+	Renderer renderer;
+	RendererHookPass pass;
+}
+
 class Renderer 
 {
 	Moxane moxane;
@@ -122,6 +134,8 @@ class Renderer
 
 	DebugData lastFrameDebug;
 	DebugData currentFrameDebug;
+
+	EventWaiter!RendererHook passHook;
 
 	this(Moxane moxane, Vector2u winSize, bool debugMode = false)
 	{
@@ -198,10 +212,18 @@ class Renderer
 		lastFrameDebug = currentFrameDebug;
 		currentFrameDebug = DebugData();
 
+		RendererHook hook;
+		hook.renderer = this;
+		hook.pass = RendererHookPass.beginningGlobal;
+		passHook.emit(hook);
+
+		scope(success)
+		{
+			hook.pass = RendererHookPass.endGlobal;
+			passHook.emit(hook);
+		}
+
 		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glClearColor;
-		//glClearColor(1f, 1f, 1f, 0f);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glViewport(0, 0, primaryCamera.width, primaryCamera.height);
 		scenePass;
 
 		LocalContext uilc = 
