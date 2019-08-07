@@ -76,6 +76,7 @@ import dlib.math;
 enum PassType
 {
 	shadow,
+	waterRefraction,
 	scene,
 	ui
 }
@@ -118,6 +119,10 @@ class Renderer
 	RenderTexture scene;
 	DepthTexture sceneDepth;
 
+	RenderTexture refraction;
+	DepthTexture refractionDepth;
+	PostProcessTexture refractionWithLighting;
+
 	LightDistributor lights;
 	PostProcessDistributor postProcesses;
 
@@ -128,6 +133,7 @@ class Renderer
 
 	private struct DebugData
 	{
+		uint wrDrawCalls, wrNumVerts;
 		uint sceneDrawCalls, sceneNumVerts;
 		uint uiDrawCalls, uiNumVerts;
 	}
@@ -168,9 +174,53 @@ class Renderer
 
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
+		refractionDepth = new DepthTexture(winSize.x, winSize.y, gl);
+		refraction = new RenderTexture(winSize.x, winSize.y, refractionDepth, gl);
+		refractionWithLighting = new PostProcessTexture(winSize.x, winSize.y);
 
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
 		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
+	}
+ 
+	void waterRefractionPass()
+	{
+		void sceneWrPass()
+		{
+			refraction.bindDraw;
+			refraction.clear;
+			scope(exit) refraction.unbindDraw;
+
+			gl.depthTest.push(true);
+			scope(exit) gl.depthTest.pop();
+
+			LocalContext lc =
+			{
+				projection : primaryCamera.projection, 
+				view : primaryCamera.viewMatrix, 
+				model : Matrix4f.identity, 
+				camera : primaryCamera,
+				type : PassType.waterRefraction
+			};
+
+			foreach(IRenderable r; sceneRenderables)
+			{
+				uint dc, nv;
+				r.render(this, lc, dc, nv);
+				currentFrameDebug.sceneDrawCalls += dc;
+				currentFrameDebug.sceneNumVerts += nv;
+			}
+		}
+
+		sceneWrPass;
+		LocalContext uilc = 
+		{
+			projection : uiCamera.projection, 
+			view : Matrix4f.identity, 
+			model : Matrix4f.identity, 
+			camera : uiCamera,
+			type : PassType.scene
+		};
+		lights.render(this, uilc, refraction, refractionWithLighting, primaryCamera.position);
 	}
 
 	void scenePass()
@@ -223,6 +273,8 @@ class Renderer
 			passHook.emit(hook);
 		}
 
+		waterRefractionPass;
+
 		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glClearColor;
 		scenePass;
 
@@ -264,6 +316,18 @@ class Renderer
 			sceneDepth.width = primaryCamera.width;
 			sceneDepth.height = primaryCamera.height;
 			sceneDepth.createTextures;
+
+			refraction.width = primaryCamera.width;
+			refraction.height = primaryCamera.height;
+			refraction.createTextures;
+
+			refractionDepth.width = primaryCamera.width;
+			refractionDepth.height = primaryCamera.height;
+			refractionDepth.createTextures;
+
+			refractionWithLighting.width = primaryCamera.width;
+			refractionWithLighting.height = primaryCamera.height;
+			refractionWithLighting.createTextures;
 
 			postProcesses.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
 			lights.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
