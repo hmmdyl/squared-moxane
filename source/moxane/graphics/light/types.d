@@ -9,7 +9,7 @@ enum ShadowAllocation
 	available
 }
 
-struct PointLight
+class PointLight
 {
 	Vector3f position;
 	Vector3f colour;
@@ -20,7 +20,7 @@ struct PointLight
 	float constAtt, linAtt, expAtt;
 }
 
-struct DirectionalLight
+class DirectionalLight
 {
 	Vector3f direction;
 	Vector3f colour;

@@ -4,7 +4,7 @@ import std.exception : enforce;
 import std.traits;
 import core.memory;
 
-@safe:
+//@safe:
 
 struct Maybe(T)
 	if(is(T == struct) || isBasicType!T)
