@@ -36,6 +36,7 @@ private final class PointLightPostProcess : PostProcess
 
 	InputRange!PointLight pointLights;
 	Vector3f cameraPosition;
+	float strengthOverride = 1f;
 
 	override protected void draw() 
 	{
@@ -48,7 +49,7 @@ private final class PointLightPostProcess : PostProcess
 			effect["LightPosition"].set(pl.position);
 			effect["LightColour"].set(pl.colour);
 			effect["AmbientIntensity"].set(pl.ambientIntensity);
-			effect["DiffuseIntensity"].set(pl.diffuseIntensity);
+			effect["DiffuseIntensity"].set(pl.diffuseIntensity * strengthOverride);
 			effect["ConstantAttenuation"].set(pl.constAtt);
 			effect["LinearAttenuation"].set(pl.linAtt);
 			effect["ExponentialAttenuation"].set(pl.expAtt);
@@ -86,7 +87,7 @@ final class LightDistributor
 		intermediate.createTextures;
 	}
 
-	void render(Renderer renderer, ref LocalContext lc, RenderTexture scene, PostProcessTexture output, Vector3f cam)
+	void render(Renderer renderer, ref LocalContext lc, RenderTexture scene, PostProcessTexture output, Vector3f cam, float strengthOverride = 1f)
 	{
 		renderer.gl.blend.push(true);
 		scope(exit) renderer.gl.blend.pop;
@@ -97,6 +98,7 @@ final class LightDistributor
 
 		pointLightEffect.pointLights = inputRangeObject(pointLights[]);
 		pointLightEffect.cameraPosition = cam;
+		pointLightEffect.strengthOverride = strengthOverride;
 		pointLightEffect.render(renderer, lc, scene, null, output); // TODO: change output to intermediate when next light stage is added.
 	}
 }
