@@ -220,7 +220,7 @@ class Renderer
 			camera : uiCamera,
 			type : PassType.scene
 		};
-		lights.render(this, uilc, refraction, refractionWithLighting, primaryCamera.position, 0.01f);
+		lights.render(this, uilc, refraction, refractionWithLighting, primaryCamera.position);
 	}
 
 	void scenePass()

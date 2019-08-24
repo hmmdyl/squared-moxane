@@ -4,11 +4,11 @@ import core.thread;
 import std.datetime.stopwatch;
 import core.sync.condition;
 import core.sync.mutex;
-import optional;
 import std.range.interfaces : InputRange;
 
 import containers;
 
+import moxane.utils.maybe;
 import moxane.core.entity;
 
 class AsyncSystem
@@ -87,19 +87,19 @@ class AsyncSystem
 
 	bool empty() { synchronized(queueSyncObj) return queue.empty; }
 
-	Optional!T tryGet()
+	Maybe!T tryGet()
 	{
 		synchronized(queueSyncObj)
 		{
-			if(queue.empty) return no!T;
+			if(queue.empty) return Maybe!T();
 
 			T item = queue.front;
 			queue.removeFront;
-			return Optional!T(item);
+			return Maybe!T(item);
 		}
 	}
 
-	Optional!T await()
+	Maybe!T await()
 	{
 		bool empty;
 		synchronized(queueSyncObj)
@@ -110,11 +110,11 @@ class AsyncSystem
 				condition.wait;
 		synchronized(queueSyncObj)
 		{
-			if(queue.length == 0) return no!T;
+			if(queue.length == 0) return Maybe!T();
 
 			T item = queue.front;
 			queue.removeFront;
-			return Optional!T(item);
+			return Maybe!T(item);
 		}
 	}
 

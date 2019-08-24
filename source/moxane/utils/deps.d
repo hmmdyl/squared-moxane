@@ -50,7 +50,7 @@ private void loadASSIMP3()
 		return ShouldThrow.No;
 	}
 	DerelictASSIMP3.missingSymbolCallback = &missingASSIMP3Symbol;
-	DerelictASSIMP3.load;
+	DerelictASSIMP3.load();
 }
 
 void loadDependencies()
