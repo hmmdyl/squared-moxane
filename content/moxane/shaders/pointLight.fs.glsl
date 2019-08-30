@@ -15,10 +15,11 @@ uniform sampler2D WorldPosTexture;
 uniform sampler2D DiffuseTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D DepthTexture;
+uniform sampler2D MetaTexture;
 
 out vec3 Fragment;
 
-vec4 calculateLight(vec3 colour, float ambientIntensity, float diffuseIntensity, vec3 lightDirection, vec3 worldPosition, vec3 normal, float shadow) {
+vec4 calculateLight(vec3 colour, float ambientIntensity, float diffuseIntensity, vec3 lightDirection, vec3 worldPosition, vec3 normal, float shadow, vec4 meta) {
 	vec4 ambientColour = vec4(colour * ambientIntensity, 1.0);
 	float diffuseFactor = dot(normal, -lightDirection);
 	
@@ -31,17 +32,17 @@ vec4 calculateLight(vec3 colour, float ambientIntensity, float diffuseIntensity,
 		vec3 vertToEye = normalize(CameraPosition - worldPosition);
 		vec3 lightReflect = normalize(reflect(lightDirection, normal));
 		float specularFactor = dot(vertToEye, lightReflect);
-		
+
 		if(specularFactor > 0.0) {
-			specularFactor = pow(specularFactor, 0.1); // todo: implement specular mapping
-			specularColour = vec4(colour * 0.01 * specularFactor, 1.0);
+			specularFactor = pow(specularFactor, meta.x); // todo: implement specular mapping
+			specularColour = vec4(colour * meta.y * specularFactor, 1.0);
 		}
 	}
 	
 	return (ambientColour + shadow * (diffuseColour + specularColour));
 }
 
-vec4 calculatePointLight(vec3 worldPosition, vec3 normal) {
+vec4 calculatePointLight(vec3 worldPosition, vec3 normal, vec4 meta) {
 	vec3 lightDir = worldPosition - LightPosition;
 	//vec3 lightDir = LightPosition - worldPosition;
 	float distance = length(lightDir);
@@ -49,7 +50,7 @@ vec4 calculatePointLight(vec3 worldPosition, vec3 normal) {
 	
 	float shadow = 1.0;
 	
-	vec4 colour = calculateLight(LightColour, AmbientIntensity, DiffuseIntensity, lightDir, worldPosition, normal, shadow);
+	vec4 colour = calculateLight(LightColour, AmbientIntensity, DiffuseIntensity, lightDir, worldPosition, normal, shadow, meta);
 	
 	float attenuation = ConstantAttenuation + LinearAttenuation * distance + ExponentialAttenuation * distance * distance;
 	attenuation = max(1.0, attenuation);
@@ -63,8 +64,9 @@ void main()
 	vec3 worldPos = texture(WorldPosTexture, tc).rgb;
 	vec3 normal = texture(NormalTexture, tc).rgb;
 	vec3 diffuse = texture(DiffuseTexture, tc).rgb;
+	vec4 meta  = texture(MetaTexture, tc).rgba;
 
-	vec4 l = normal == vec3(0) ? vec3(1) : calculatePointLight(worldPos, normal);
+	vec4 l = normal == vec3(0) ? vec4(1) : calculatePointLight(worldPos, normal, meta);
 
 	Fragment = diffuse * l.xyz;
 }

@@ -11,7 +11,7 @@ class RenderTexture
 	uint width, height;
 
 	GLuint fbo;
-	GLuint diffuse, worldPos, normal, meta;
+	GLuint diffuse, worldPos, normal, spec;
 	GLuint depth;
 	DepthTexture depthTexture;
 
@@ -30,7 +30,7 @@ class RenderTexture
 		glGenTextures(1, &diffuse);
 		glGenTextures(1, &worldPos);
 		glGenTextures(1, &normal);
-		//glGenTextures(1, &meta);
+		glGenTextures(1, &spec);
 		createTextures;
 
 		glGenFramebuffers(1, &fbo);
@@ -38,10 +38,11 @@ class RenderTexture
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, diffuse, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, worldPos, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normal, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, spec, 0);
 		if(depthTexture !is null)
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture.depth, 0);
 
-		GLenum[] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
+		GLenum[] drawBuffers = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3];
 		glDrawBuffers(cast(int)drawBuffers.length, drawBuffers.ptr);
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -78,7 +79,10 @@ class RenderTexture
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT, null);
 
-		//glBindTexture(GL_TEXTURE_2D, meta);
+		glBindTexture(GL_TEXTURE_2D, spec);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, width, height, 0, GL_RG, GL_UNSIGNED_SHORT, null);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -88,6 +92,7 @@ class RenderTexture
 		glDeleteTextures(1, &diffuse);
 		glDeleteTextures(1, &worldPos);
 		glDeleteTextures(1, &normal);
+		glDeleteTextures(1, &spec);
 		glDeleteFramebuffers(1, &fbo);
 	}
 
@@ -166,6 +171,8 @@ class RenderTexture
 			glBlitFramebuffer(0, 0, width, height, x, y, screenWidth/4, screenHeight/4, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			glReadBuffer(GL_COLOR_ATTACHMENT1);
 			glBlitFramebuffer(0, 0, width, height, screenWidth/4, y, screenWidth/4*2, screenHeight/4, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glReadBuffer(GL_COLOR_ATTACHMENT3);
+			glBlitFramebuffer(0, 0, width, height, screenWidth/4*2, y, screenWidth/4*3, screenHeight/4, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		}
 	}
 }

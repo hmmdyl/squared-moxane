@@ -42,7 +42,7 @@ private final class PointLightPostProcess : PostProcess
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, common.quadVbo);
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
-		effect["CameraPosition"].set(Vector3f(0f, 0f, 0f));
+		effect["CameraPosition"].set(cameraPosition);
 
 		foreach(PointLight pl; pointLights)
 		{
