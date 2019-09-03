@@ -21,11 +21,11 @@ struct Transform
 
 	@property Matrix4f matrix() @trusted
 	{
-		Matrix4f m = translationMatrix(-position);
-		m *= rotationMatrix(Axis.x, degtorad(rotation.x));
+		Matrix4f m = translationMatrix(position);
+		/+m *= rotationMatrix(Axis.x, degtorad(rotation.x));
 		m *= rotationMatrix(Axis.y, degtorad(rotation.y));
 		m *= rotationMatrix(Axis.z, degtorad(rotation.z));
-		m *= scaleMatrix(scale);
+		m *= scaleMatrix(scale);+/
 		return m;
 	}
 }

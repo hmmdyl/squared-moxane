@@ -59,6 +59,21 @@ private final class PointLightPostProcess : PostProcess
 	}
 }
 
+private final class DirectionalLightPostProcess : PostProcess
+{
+	override protected string fragmentShader() {
+		return readText(AssetManager.translateToAbsoluteDir("content/moxane/shaders/directionalLight.fs.glsl"));
+	}
+
+	this(Moxane moxane, PostProcessCommon comm) { super(DirectionalLightPostProcess.stringof, moxane, comm); }
+
+	override protected void getUniforms()
+	{
+		super.getUniforms;
+	}
+
+}
+
 final class LightDistributor
 {
 	UnrolledList!PointLight pointLights;
