@@ -74,7 +74,7 @@ abstract class PostProcess
 		effect.findUniform("DiffuseTexture");
 		effect.findUniform("WorldPosTexture");
 		effect.findUniform("NormalTexture");
-		effect.findUniform("MetaTexture");
+		effect.findUniform("SpecTexture");
 	}
 
 	~this()
@@ -98,7 +98,7 @@ abstract class PostProcess
 		effect.bind;
 		effect["FramebufferSize"].set(Vector2f(lc.camera.width, lc.camera.height));
 		effect["Projection"].set(&lc.projection);
-		effect["MetaTexture"].set(4);
+		effect["SpecTexture"].set(4);
 		effect["DepthTexture"].set(3);
 		effect["DiffuseTexture"].set(0);
 		effect["WorldPosTexture"].set(1);
@@ -107,12 +107,12 @@ abstract class PostProcess
 		if(output is null)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT);
+			//glClear(GL_COLOR_BUFFER_BIT);
 		}
 		else
 		{
 			output.bindDraw;
-			output.clear;
+			//output.clear;
 		}
 
 		glBindVertexArray(common.quadVao);

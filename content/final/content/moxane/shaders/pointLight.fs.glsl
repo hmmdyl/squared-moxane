@@ -15,7 +15,7 @@ uniform sampler2D WorldPosTexture;
 uniform sampler2D DiffuseTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D DepthTexture;
-uniform sampler2D MetaTexture;
+uniform sampler2D SpecTexture;
 
 out vec3 Fragment;
 
@@ -33,7 +33,7 @@ vec4 calculateLight(vec3 colour, float ambientIntensity, float diffuseIntensity,
 		vec3 lightReflect = normalize(reflect(lightDirection, normal));
 		float specularFactor = dot(vertToEye, lightReflect);
 
-		if(specularFactor > 0.0) {
+		if(specularFactor > 0.0 && meta.x > 0) {
 			specularFactor = pow(specularFactor, meta.x); // todo: implement specular mapping
 			specularColour = vec4(colour * meta.y * specularFactor, 1.0);
 		}
@@ -64,7 +64,7 @@ void main()
 	vec3 worldPos = texture(WorldPosTexture, tc).rgb;
 	vec3 normal = texture(NormalTexture, tc).rgb;
 	vec3 diffuse = texture(DiffuseTexture, tc).rgb;
-	vec4 meta  = texture(MetaTexture, tc).rgba;
+	vec4 meta  = texture(SpecTexture, tc).rgba;
 
 	vec4 l = normal == vec3(0) ? vec4(1) : calculatePointLight(worldPos, normal, meta);
 

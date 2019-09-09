@@ -275,7 +275,9 @@ class Renderer
 
 		waterRefractionPass;
 
-		import derelict.opengl3.gl3 : glViewport, glClear, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, glClearColor;
+		import derelict.opengl3.gl3;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scenePass;
 
 		LocalContext uilc = 

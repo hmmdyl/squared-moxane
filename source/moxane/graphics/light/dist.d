@@ -70,29 +70,55 @@ private final class DirectionalLightPostProcess : PostProcess
 	override protected void getUniforms()
 	{
 		super.getUniforms;
+		effect.findUniform("LightDirection");
+		effect.findUniform("LightColour");
+		effect.findUniform("AmbientIntensity");
+		effect.findUniform("DiffuseIntensity");
+		effect.findUniform("CameraPosition");
 	}
 
+	InputRange!DirectionalLight lights;
+	Vector3f cameraPosition;
+
+	override protected void draw()
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, common.quadVbo);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
+		effect["CameraPosition"].set(cameraPosition);
+
+		foreach(DirectionalLight dl; lights)
+		{
+			effect["LightDirection"].set(dl.direction);
+			effect["LightColour"].set(dl.colour);
+			effect["AmbientIntensity"].set(dl.ambientIntensity);
+			effect["DiffuseIntensity"].set(dl.diffuseIntensity);
+
+			glDrawArrays(GL_TRIANGLES, 0, common.vertices);
+		}
+	}
 }
 
 final class LightDistributor
 {
 	UnrolledList!PointLight pointLights;
+	UnrolledList!DirectionalLight directionalLights;
 
 	private PointLightPostProcess pointLightEffect;
 	private PostProcessTexture intermediate;
+	private DirectionalLightPostProcess directionalLightEffect;
 
 	this(Moxane moxane, PostProcessCommon common, uint width, uint height)
 	{
 		pointLightEffect = new PointLightPostProcess(moxane, common);
+		directionalLightEffect = new DirectionalLightPostProcess(moxane, common);
 		intermediate = new PostProcessTexture(width, height);
 	}
 
 	~this()
 	{
-		destroy(intermediate);
-		intermediate = null;
-		destroy(pointLightEffect);
-		pointLightEffect = null;
+		destroy(intermediate); intermediate = null;
+		destroy(pointLightEffect); pointLightEffect = null;
+		destroy(directionalLightEffect); directionalLightEffect = null;
 	}
 
 	void updateFramebufferSize(uint width, uint height)
@@ -110,10 +136,20 @@ final class LightDistributor
 		scope(exit) renderer.gl.blendEquation.pop;
 		renderer.gl.blendFunc.push(tuple(GL_ONE, GL_ONE));
 		scope(exit) renderer.gl.blendFunc.pop;
+		renderer.gl.depthTest.push(false);
+		scope(exit) renderer.gl.depthTest.pop;
+
+		output.bindDraw;
+		output.clear;
+
+		directionalLightEffect.lights = inputRangeObject(directionalLights[]);
+		directionalLightEffect.cameraPosition = cam;
+		directionalLightEffect.render(renderer, lc, scene, null, output);
 
 		pointLightEffect.pointLights = inputRangeObject(pointLights[]);
 		pointLightEffect.cameraPosition = cam;
 		pointLightEffect.strengthOverride = strengthOverride;
 		pointLightEffect.render(renderer, lc, scene, null, output); // TODO: change output to intermediate when next light stage is added.
+		
 	}
 }
