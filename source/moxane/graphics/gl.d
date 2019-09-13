@@ -8,6 +8,7 @@ import moxane.graphics.log;
 import std.typecons : Tuple;
 import std.conv : to;
 import derelict.opengl3.gl3;
+import std.string : fromStringz;
 
 enum stackDepth = 8;
 
@@ -81,6 +82,11 @@ class GLState
 		blendEquation.push(GL_FUNC_ADD);
 		blendFunc.push(Tuple!(GLenum, GLenum)(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 	}
+
+	@property string rendererName() { return cast(string)fromStringz(glGetString(GL_RENDERER)); }
+	@property string vendorName() { return cast(string)glGetString(GL_VENDOR).fromStringz; }
+	@property string versionStr() { return cast(string)glGetString(GL_VERSION).fromStringz; }
+	@property string glslVersion() { return cast(string)glGetString(GL_SHADING_LANGUAGE_VERSION).fromStringz; }
 
 	private bool wireframe_;
 	@property bool wireframe() const { return wireframe_; }

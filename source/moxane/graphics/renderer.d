@@ -130,6 +130,8 @@ class Renderer
 
 	Log log;
 
+	string rendererName, vendor, glVersion, glslVersion;
+
 	private struct DebugData
 	{
 		uint wrDrawCalls, wrNumVerts;
@@ -157,6 +159,10 @@ class Renderer
 		am.registerLoader!Shader(new ShaderLoader);
 
 		gl = new GLState(moxane, debugMode);
+		rendererName = gl.rendererName;
+		vendor = gl.vendorName;
+		glVersion = gl.versionStr;
+		glslVersion = gl.glslVersion;
 
 		primaryCamera = new Camera;
 		primaryCamera.width = winSize.x;
@@ -358,10 +364,15 @@ class RendererDebugAttachment : IImguiRenderable
 		import std.conv : to;
 		import std.string : toStringz;
 		igBegin("Renderer Statistics");
-		if(igCollapsingHeader("Basic", 0))
+		if(igCollapsingHeader("Basic", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			igText("Delta: %0.6f s", renderer.moxane.deltaTime);
 			igText("Frames: %u", renderer.moxane.frames);
+
+			igText("Renderer: %s", renderer.rendererName.toStringz);
+			igText("Vendor: %s", renderer.vendor.toStringz);
+			igText("Version: %s", renderer.glVersion.toStringz);
+			igText("GLSL version: %s", renderer.glslVersion.toStringz);
 
 			igText("Scene");
 			igIndent();
