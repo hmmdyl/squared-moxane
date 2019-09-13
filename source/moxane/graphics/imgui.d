@@ -260,16 +260,20 @@ class ImguiRenderer : IRenderable
 
 	private void onKey(Window win, Keys key, ButtonAction a) @trusted
 	{
-		ImGuiIO* io = igGetIO();
-		if(a == ButtonAction.press)
-			io.KeysDown[key] = true;
-		if(a == ButtonAction.release)
-			io.KeysDown[key] = false;
+		try 
+		{
+			ImGuiIO* io = igGetIO();
+			if(a == ButtonAction.press)
+				io.KeysDown[key] = true;
+			if(a == ButtonAction.release)
+				io.KeysDown[key] = false;
 
-		io.KeyCtrl = io.KeysDown[Keys.leftControl] || io.KeysDown[Keys.rightControl];
-		io.KeyShift = io.KeysDown[Keys.leftShift] || io.KeysDown[Keys.rightShift];
-		io.KeyAlt = io.KeysDown[Keys.leftAlt] || io.KeysDown[Keys.rightAlt];
-		io.KeySuper = io.KeysDown[Keys.leftSuper] || io.KeysDown[Keys.rightSuper];
+			io.KeyCtrl = io.KeysDown[Keys.leftControl] || io.KeysDown[Keys.rightControl];
+			io.KeyShift = io.KeysDown[Keys.leftShift] || io.KeysDown[Keys.rightShift];
+			io.KeyAlt = io.KeysDown[Keys.leftAlt] || io.KeysDown[Keys.rightAlt];
+			io.KeySuper = io.KeysDown[Keys.leftSuper] || io.KeysDown[Keys.rightSuper];
+		}
+		catch(Error e){}
 	}
 
 	private void onChar(Window win, char c) @trusted
