@@ -291,7 +291,7 @@ class Renderer
 		lights.render(this, uilc, scene, postProcesses.lightTexture, primaryCamera.position);
 		postProcesses.render(this, uilc);
 
-		debug scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
+		//debug scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
 		{
 			import derelict.opengl3.gl3 : glViewport;
