@@ -75,7 +75,7 @@ class GLState
 		}
 
 		depthTest.push(false);
-		depthTestExpr.push(GL_LESS);
+		depthTestExpr.push(GL_LEQUAL);
 		depthMask.push(true);
 		blend.push(false);
 		blendEquation.push(GL_FUNC_ADD);
