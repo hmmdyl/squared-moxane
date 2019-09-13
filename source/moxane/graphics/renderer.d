@@ -119,9 +119,8 @@ class Renderer
 	RenderTexture scene;
 	DepthTexture sceneDepth;
 
-	RenderTexture refraction;
-	DepthTexture refractionDepth;
-	PostProcessTexture refractionWithLighting;
+	RenderTexture sceneDup;
+	DepthTexture sceneDepthDup;
 
 	LightDistributor lights;
 	PostProcessDistributor postProcesses;
@@ -174,53 +173,12 @@ class Renderer
 
 		sceneDepth = new DepthTexture(winSize.x, winSize.y, gl);
 		scene = new RenderTexture(winSize.x, winSize.y, sceneDepth, gl);
-		refractionDepth = new DepthTexture(winSize.x, winSize.y, gl);
-		refraction = new RenderTexture(winSize.x, winSize.y, refractionDepth, gl);
-		refractionWithLighting = new PostProcessTexture(winSize.x, winSize.y);
+
+		sceneDepthDup = new DepthTexture(winSize.x, winSize.y, gl);
+		sceneDup = new RenderTexture(winSize.x, winSize.y, sceneDepthDup, gl);
 
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
 		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
-	}
- 
-	void waterRefractionPass()
-	{
-		void sceneWrPass()
-		{
-			refraction.bindDraw;
-			refraction.clear;
-			scope(exit) refraction.unbindDraw;
-
-			gl.depthTest.push(true);
-			scope(exit) gl.depthTest.pop();
-
-			LocalContext lc =
-			{
-				projection : primaryCamera.projection, 
-				view : primaryCamera.viewMatrix, 
-				model : Matrix4f.identity, 
-				camera : primaryCamera,
-				type : PassType.waterRefraction
-			};
-
-			foreach(IRenderable r; sceneRenderables)
-			{
-				uint dc, nv;
-				r.render(this, lc, dc, nv);
-				currentFrameDebug.sceneDrawCalls += dc;
-				currentFrameDebug.sceneNumVerts += nv;
-			}
-		}
-
-		sceneWrPass;
-		LocalContext uilc = 
-		{
-			projection : uiCamera.projection, 
-			view : Matrix4f.identity, 
-			model : Matrix4f.identity, 
-			camera : uiCamera,
-			type : PassType.scene
-		};
-		//lights.render(this, uilc, refraction, refractionWithLighting, primaryCamera.position);
 	}
 
 	void scenePass()
@@ -244,7 +202,40 @@ class Renderer
 			view : primaryCamera.viewMatrix, 
 			model : Matrix4f.identity, 
 			camera : primaryCamera,
-			type : PassType.ui
+			type : PassType.scene
+		};
+		scope(exit) lc.destroy;
+
+		foreach(IRenderable r; sceneRenderables)
+		{
+			uint drawCalls, numVerts;
+			r.render(this, lc, drawCalls, numVerts);
+			currentFrameDebug.sceneDrawCalls += drawCalls;
+			currentFrameDebug.sceneNumVerts += numVerts;
+		}
+	}
+
+	void waterPass()
+	{
+		scene.bindDraw;
+		scope(exit) 
+			scene.unbindDraw;
+
+		gl.depthTest.push(true);
+		scope(exit) gl.depthTest.pop();
+
+		if(wireframe)
+			gl.wireframe = true;
+		scope(exit)
+			gl.wireframe = false;
+
+		LocalContext lc = 
+		{
+			projection : primaryCamera.projection, 
+			view : primaryCamera.viewMatrix, 
+			model : Matrix4f.identity, 
+			camera : primaryCamera,
+			type : PassType.waterRefraction
 		};
 		scope(exit) lc.destroy;
 
@@ -273,12 +264,12 @@ class Renderer
 			passHook.emit(hook);
 		}
 
-		waterRefractionPass;
-
 		import derelict.opengl3.gl3;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scenePass;
+		scene.blitTo(sceneDup);
+		waterPass;
 
 		LocalContext uilc = 
 		{
@@ -319,18 +310,14 @@ class Renderer
 			sceneDepth.height = primaryCamera.height;
 			sceneDepth.createTextures;
 
-			refraction.width = primaryCamera.width;
-			refraction.height = primaryCamera.height;
-			refraction.createTextures;
+			sceneDup.width = primaryCamera.width;
+			sceneDup.height = primaryCamera.height;
+			sceneDup.createTextures;
 
-			refractionDepth.width = primaryCamera.width;
-			refractionDepth.height = primaryCamera.height;
-			refractionDepth.createTextures;
-
-			refractionWithLighting.width = primaryCamera.width;
-			refractionWithLighting.height = primaryCamera.height;
-			refractionWithLighting.createTextures;
-
+			sceneDepthDup.width = primaryCamera.width;
+			sceneDepthDup.height = primaryCamera.height;
+			sceneDepthDup.createTextures;
+			
 			postProcesses.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
 			lights.updateFramebufferSize(primaryCamera.width, primaryCamera.height);
 		}
