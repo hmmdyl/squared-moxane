@@ -76,9 +76,10 @@ import dlib.math;
 enum PassType
 {
 	shadow,
-	waterRefraction,
+	water,
 	scene,
-	ui
+	ui,
+	glass,
 }
 
 struct LocalContext
@@ -241,7 +242,40 @@ class Renderer
 			view : primaryCamera.viewMatrix, 
 			model : Matrix4f.identity, 
 			camera : primaryCamera,
-			type : PassType.waterRefraction
+			type : PassType.water
+		};
+		scope(exit) lc.destroy;
+
+		foreach(IRenderable r; sceneRenderables)
+		{
+			uint drawCalls, numVerts;
+			r.render(this, lc, drawCalls, numVerts);
+			currentFrameDebug.sceneDrawCalls += drawCalls;
+			currentFrameDebug.sceneNumVerts += numVerts;
+		}
+	}
+
+	void glassPass()
+	{
+		scene.bindDraw;
+		scope(exit) 
+			scene.unbindDraw;
+
+		gl.depthTest.push(true);
+		scope(exit) gl.depthTest.pop();
+
+		if(wireframe)
+			gl.wireframe = true;
+		scope(exit)
+			gl.wireframe = false;
+
+		LocalContext lc = 
+		{
+			projection : primaryCamera.projection, 
+			view : primaryCamera.viewMatrix, 
+			model : Matrix4f.identity, 
+			camera : primaryCamera,
+			type : PassType.glass
 		};
 		scope(exit) lc.destroy;
 
@@ -274,6 +308,9 @@ class Renderer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scenePass;
+		sceneDup.bindDraw;
+		sceneDup.clear;
+		sceneDup.unbindDraw;
 		scene.blitTo(sceneDup);
 		waterPass;
 
@@ -286,9 +323,17 @@ class Renderer
 			type : PassType.scene
 		};
 		lights.render(this, uilc, scene, postProcesses.lightTexture, primaryCamera.position);
+
+		//postProcesses.lightTexture.blitTo(scene);
+		//sceneDup.bindDraw;
+		//sceneDup.clear;
+		//sceneDup.unbindDraw;
+		//scene.blitTo(sceneDup);
+		//glassPass;
+
 		postProcesses.render(this, uilc);
 
-		//debug scene.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
+		//debug sceneDup.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
 		{
 			import derelict.opengl3.gl3 : glViewport;

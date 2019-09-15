@@ -257,6 +257,7 @@ class PostProcessTexture
 	void bindDraw()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glViewport(0, 0, width, height);
 	}
 
@@ -265,5 +266,20 @@ class PostProcessTexture
 	void clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void blitTo(RenderTexture dest)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest.fbo);
+		scope(exit)
+		{
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		}
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, dest.width, dest.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 }
