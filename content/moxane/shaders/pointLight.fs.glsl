@@ -33,7 +33,7 @@ vec4 calculateLight(vec3 colour, float ambientIntensity, float diffuseIntensity,
 		vec3 lightReflect = normalize(reflect(lightDirection, normal));
 		float specularFactor = dot(vertToEye, lightReflect);
 
-		if(specularFactor > 0.0) {
+		if(specularFactor > 0.0 && meta.x > 0) {
 			specularFactor = pow(specularFactor, meta.x); // todo: implement specular mapping
 			specularColour = vec4(colour * meta.y * specularFactor, 1.0);
 		}

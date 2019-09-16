@@ -1,7 +1,7 @@
 module moxane.io.input;
 
 import moxane.core;
-import moxane.io.kbm;
+public import moxane.io.kbm;
 import moxane.io.window;
 import moxane.utils.maybe;
 
@@ -23,6 +23,7 @@ struct InputEventText
 	char c;
 }
 
+/// Distributes IO from mouse and keyboard according to defined bindings.
 class InputManager
 {
 	/// name of binding -> EventWaiter
@@ -68,6 +69,7 @@ class InputManager
 		window.onMouseMove.remove(&onMouseMoveWin);
 	}
 
+	/// Update internal state
 	void update()
 	{
 		if(window.hideCursor)
@@ -92,6 +94,11 @@ class InputManager
 		ButtonAction* action = bindingName in boundKeyState;
 		if(action is null) return ButtonAction.release;
 		else return *action;
+	}
+
+	bool hasBinding(string bindingName)
+	{
+		return (bindingName in boundKeyState) !is null;
 	}
 
 	void setBinding(string name, int n) @trusted
