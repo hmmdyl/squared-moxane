@@ -123,6 +123,9 @@ class Renderer
 	RenderTexture sceneDup;
 	DepthTexture sceneDepthDup;
 
+	RenderTexture sunDirMap;
+	DepthTexture sunDirMapDepth;
+
 	LightDistributor lights;
 	PostProcessDistributor postProcesses;
 
@@ -186,6 +189,9 @@ class Renderer
 
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
 		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
+	
+		sunDirMapDepth = new DepthTexture(1024, 1024, gl);
+		sunDirMap = new RenderTexture(1024, 1024, sunDirMapDepth, gl);
 	}
 
 	void scenePass()
@@ -288,6 +294,41 @@ class Renderer
 		}
 	}
 
+	void shadowPass()
+	{
+		sunDirMap.bindDraw;
+		sunDirMap.clear;
+		scope(exit) 
+			scene.unbindDraw;
+
+		gl.depthTest.push(true);
+		scope(exit) gl.depthTest.pop();
+
+		gl.wireframe = false;
+
+		Matrix4f proj = orthoMatrix!float(-10, 10, -10, 10, -10, 20);
+		Matrix4f view = lookAtMatrix!float(Vector3f(0, 0.5f, 0.5f), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+		lights.lpv = proj * view;
+
+		LocalContext lc = 
+		{
+			projection : proj, 
+			view : view, 
+			model : Matrix4f.identity, 
+			camera : primaryCamera,
+			type : PassType.shadow
+		};
+		scope(exit) lc.destroy;
+
+		foreach(IRenderable r; sceneRenderables)
+		{
+			uint drawCalls, numVerts;
+			r.render(this, lc, drawCalls, numVerts);
+			currentFrameDebug.sceneDrawCalls += drawCalls;
+			currentFrameDebug.sceneNumVerts += numVerts;
+		}
+	}
+
 	void render()
 	{
 		lastFrameDebug = currentFrameDebug;
@@ -307,6 +348,9 @@ class Renderer
 		import derelict.opengl3.gl3;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shadowPass;
+
 		scenePass;
 		sceneDup.bindDraw;
 		sceneDup.clear;
@@ -322,6 +366,7 @@ class Renderer
 			camera : uiCamera,
 			type : PassType.scene
 		};
+		lights.shadow = sunDirMap;
 		lights.render(this, uilc, scene, postProcesses.lightTexture, primaryCamera.position);
 
 		//postProcesses.lightTexture.blitTo(scene);
@@ -333,7 +378,7 @@ class Renderer
 
 		postProcesses.render(this, uilc);
 
-		//debug sceneDup.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
+		debug sunDirMap.blitToScreen(0, 0, uiCamera.width, uiCamera.height);
 
 		{
 			import derelict.opengl3.gl3 : glViewport;
