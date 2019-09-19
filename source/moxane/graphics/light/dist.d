@@ -171,7 +171,7 @@ immutable string directionalLightShadowFrag = q{
 		if(uvcoords.x < 0 || uvcoords.x > 1 || uvcoords.y < 0 || uvcoords.y > 1)
 			discard;
 
-		float bias = max(0.005 * (1.0 - dot(normal, LightDirection)), 0.0005);
+		float bias = 0;// max(0.005 * (1.0 - dot(normal, LightDirection)), 0.0005);
 		float vis = z - bias > texture(ShadowDepthTexture, uvcoords).x ? 1.0 : 0;
 		//float vis = texture(ShadowDepthTexture, uvcoords).x;
 
