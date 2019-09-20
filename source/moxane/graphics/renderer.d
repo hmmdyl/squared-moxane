@@ -19,6 +19,7 @@ import cimgui.types;
 
 import std.algorithm.mutation;
 import dlib.math;
+import std.math : floor;
 
 // NOTICE: NO OPENGL CALLS WITHIN THIS MODULE
 // OpenGL calls slow down the parser. Use wrapped calls or abstracted objects ONLY.
@@ -190,8 +191,9 @@ class Renderer
 		postProcesses = new PostProcessDistributor(winSize.x, winSize.y, moxane);
 		lights = new LightDistributor(moxane, postProcesses.common, winSize.x, winSize.y);
 	
-		sunDirMapDepth = new DepthTexture(1024, 1024, gl);
-		sunDirMap = new RenderTexture(1024, 1024, sunDirMapDepth, gl);
+		enum dirMapSize = 1024;
+		sunDirMapDepth = new DepthTexture(dirMapSize, dirMapSize, gl);
+		sunDirMap = new RenderTexture(dirMapSize, dirMapSize, sunDirMapDepth, gl);
 	}
 
 	void scenePass()
@@ -306,8 +308,13 @@ class Renderer
 
 		gl.wireframe = false;
 
-		Matrix4f proj = orthoMatrix!float(-10, 10, -10, 10, -10, 20);
-		Matrix4f view = lookAtMatrix!float(Vector3f(0, 0.5f, 0.5f), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+		Matrix4f proj = orthoMatrix!float(-10, 10, -10, 10, -10, 10);
+		immutable lightDir = Vector3f(0, 0.5f, 0.5f);
+		//Matrix4f view = lookAtMatrix!float(Vector3f(20, 0, 0), Vector3f(20, 0, 0) - lightDir, Vector3f(0, 1, 0));
+		// ^^^ works
+
+		Vector3f eye = Vector3f(floor(primaryCamera.position.x), floor(primaryCamera.position.y), floor(primaryCamera.position.z));
+		Matrix4f view = lookAtMatrix!float(eye, eye - lightDir*0.1f, Vector3f(0, 1, 0));
 		lights.lpv = proj * view;
 
 		LocalContext lc = 

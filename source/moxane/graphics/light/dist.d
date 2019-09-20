@@ -10,6 +10,8 @@ import derelict.opengl3.gl3;
 import dlib.math;
 import containers;
 import std.file : readText;
+
+
 import std.range;
 import std.typecons;
 
@@ -119,9 +121,9 @@ immutable string directionalLightShadowFrag = q{
 
 	uniform sampler2D ShadowDepthTexture;
 
-	uniform mat4 BiasMatrix;
 	uniform mat4 LPV;
-	uniform mat4 LPVInv;
+	uniform vec2 Bias;
+	uniform float SampleMaxCutoff;
 
 	vec2 calculateTexCoord() {
 		return gl_FragCoord.xy / FramebufferSize;
@@ -154,6 +156,27 @@ immutable string directionalLightShadowFrag = q{
 		return calculateLight(LightColour, AmbientIntensity, DiffuseIntensity, LightDirection, worldPos, normal, shadow, specPower, specStrength);
 	}
 
+	float calcShadow(vec4 lightSpacePos, vec3 normal)
+	{
+		vec3 projC = lightSpacePos.xyz / lightSpacePos.w;
+		vec2 uvcoords;
+		uvcoords.x = 0.5 * projC.x + 0.5;
+		uvcoords.y = 0.5 * projC.y + 0.5;
+		float z = 0.5 * projC.z + 0.5;
+
+		if(uvcoords.x < 0.01 || uvcoords.x > 0.99 || uvcoords.y < 0.01 || uvcoords.y > 0.99)
+			return 0;
+
+		float bias = max(Bias.x * (1.0 - dot(normal, LightDirection)), Bias.y);
+
+		float depthSample = texture(ShadowDepthTexture, uvcoords).x;
+		if(depthSample > SampleMaxCutoff)
+			return 0;
+
+		float shadow = z - bias > depthSample ? 1 : 0;
+		return shadow;
+	}
+
 	void main() {
 		vec2 texCoord = calculateTexCoord();
 		vec3 worldPos = texture(WorldPosTexture, texCoord).rgb;
@@ -162,21 +185,7 @@ immutable string directionalLightShadowFrag = q{
 		vec2 spec = texture(SpecTexture, texCoord).rg;
 
 		vec4 lps = LPV * vec4(worldPos, 1);
-		vec3 projC = lps.xyz / lps.w;
-		vec2 uvcoords;
-		uvcoords.x = 0.5 * projC.x + 0.5;
-		uvcoords.y = 0.5 * projC.y + 0.5;
-		float z = 0.5 * projC.z + 0.5;
-
-		if(uvcoords.x < 0 || uvcoords.x > 1 || uvcoords.y < 0 || uvcoords.y > 1)
-			discard;
-
-		float bias = 0;// max(0.005 * (1.0 - dot(normal, LightDirection)), 0.0005);
-		float vis = z - bias > texture(ShadowDepthTexture, uvcoords).x ? 1.0 : 0;
-		//float vis = texture(ShadowDepthTexture, uvcoords).x;
-
-		//DiffuseOut = vec3(vis);
-		//DiffuseOut =  vec3(texture(ShadowDepthTexture, texCoord));
+		float vis = calcShadow(lps, normal);
 		DiffuseOut = (vec4(diffuse, 1.0) * calculateDirectionalLight(worldPos, normal, vis, spec.x, spec.y)).xyz;
 	}
 };
@@ -195,25 +204,20 @@ private final class DirLightShadowPP : PostProcess
 		effect.findUniform("AmbientIntensity");
 		effect.findUniform("DiffuseIntensity");
 		effect.findUniform("CameraPosition");
-		effect.findUniform("BiasMatrix");
+		effect.findUniform("Bias");
 		effect.findUniform("ShadowDepthTexture");
 		effect.findUniform("LPV");
-		effect.findUniform("LPVInv");
+		effect.findUniform("SampleMaxCutoff");
 	}
 
 	DirectionalLight light;
 	Vector3f cameraPosition;
 	RenderTexture rt;
 	Matrix4f lpv;
+	float biasL, biasS;
 
 	override protected void draw()
 	{
-		Matrix4f biasMatrix = Matrix4f(
-									   [0.5f, 0f, 0f, 0f,
-									   0f, 0.5f, 0f, 0f,
-									   0f, 0f, 0.5f, 0f,
-									   0.5f, 0.5f, 0.5f, 1.0f]);
-
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D, rt.depthTexture.depth);
 
@@ -221,18 +225,16 @@ private final class DirLightShadowPP : PostProcess
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
 		effect["CameraPosition"].set(cameraPosition);
 
-		Matrix4f lpvInv = lpv.inverse;
+		effect["LightDirection"].set(light.direction);
+		effect["LightColour"].set(light.colour);
+		effect["AmbientIntensity"].set(light.ambientIntensity);
+		effect["DiffuseIntensity"].set(light.diffuseIntensity);
+		effect["LPV"].set(&lpv);
+		effect["ShadowDepthTexture"].set(10);
+		effect["Bias"].set(Vector2f(biasL, biasS));
+		effect["SampleMaxCutoff"].set(0.95f);
 
-			effect["LightDirection"].set(light.direction);
-			effect["LightColour"].set(light.colour);
-			effect["AmbientIntensity"].set(light.ambientIntensity);
-			effect["DiffuseIntensity"].set(light.diffuseIntensity);
-			effect["BiasMatrix"].set(&biasMatrix);
-			effect["LPV"].set(&lpv);
-			effect["LPVInv"].set(&lpvInv);
-			effect["ShadowDepthTexture"].set(10);
-
-			glDrawArrays(GL_TRIANGLES, 0, common.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, common.vertices);
 	}
 }
 
@@ -248,6 +250,7 @@ final class LightDistributor
 
 	RenderTexture shadow;
 	Matrix4f lpv;
+	float biasSmall = 0f, biasLarge = 0.002196532f;
 
 	this(Moxane moxane, PostProcessCommon common, uint width, uint height)
 	{
@@ -293,6 +296,8 @@ final class LightDistributor
 		shadowLightEffect.cameraPosition = cam;
 		shadowLightEffect.rt = shadow;
 		shadowLightEffect.lpv = lpv;
+		shadowLightEffect.biasL = biasLarge;
+		shadowLightEffect.biasS = biasSmall;
 		shadowLightEffect.render(renderer, lc, scene, null, output);
 
 		pointLightEffect.pointLights = inputRangeObject(pointLights[]);
