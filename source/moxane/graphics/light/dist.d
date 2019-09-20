@@ -140,12 +140,13 @@ immutable string directionalLightShadowFrag = q{
 			diffuseColour = vec4(colour * diffuseIntensity * diffuseFactor, 1.0);
 
 			vec3 vertToEye = normalize(CameraPosition - worldPosition);
-			vec3 lightReflect = normalize(reflect(lightDirection, normal));
+			vec3 lightReflect = normalize(reflect(-lightDirection, normal));
 			float specularFactor = dot(vertToEye, lightReflect);
 
 			if(specularFactor > 0.0) {
 				specularFactor = pow(specularFactor, specPower); // todo: implement specular mapping
 				specularColour = vec4(colour * specStrength * specularFactor, 1.0);
+				//specularColour = vec4(1);
 			}
 		}
 
