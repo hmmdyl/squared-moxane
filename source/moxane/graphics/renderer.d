@@ -141,6 +141,7 @@ class Renderer
 	{
 		uint wrDrawCalls, wrNumVerts;
 		uint sceneDrawCalls, sceneNumVerts;
+		uint shadowDrawCalls, shadowNumVerts;
 		uint uiDrawCalls, uiNumVerts;
 	}
 
@@ -331,8 +332,8 @@ class Renderer
 		{
 			uint drawCalls, numVerts;
 			r.render(this, lc, drawCalls, numVerts);
-			currentFrameDebug.sceneDrawCalls += drawCalls;
-			currentFrameDebug.sceneNumVerts += numVerts;
+			currentFrameDebug.shadowDrawCalls += drawCalls;
+			currentFrameDebug.shadowNumVerts += numVerts;
 		}
 	}
 
@@ -481,8 +482,10 @@ class RendererDebugAttachment : IImguiRenderable
 			igText("Draw calls: %u Vertices: %u", renderer.lastFrameDebug.uiDrawCalls, renderer.lastFrameDebug.uiNumVerts);
 			igUnindent();
 
-			//char[1024] buf;
-			//igInputTextMultiline("???????".toStringz, buf.ptr, 1024);
+			igText("Shadow");
+			igIndent();
+			igText("Draw calls: %u Vertices: %u", renderer.lastFrameDebug.shadowDrawCalls, renderer.lastFrameDebug.shadowNumVerts);
+			igUnindent();
 		}
 		igEnd();
 	}
