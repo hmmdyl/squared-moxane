@@ -28,8 +28,6 @@ private void loadFI()
 {
 	ShouldThrow missingFISymbol(string symbol)
 	{
-		import std.stdio;
-		writeln(symbol);
 		return ShouldThrow.No;
 	}
 	DerelictFI.missingSymbolCallback = &missingFISymbol;
@@ -45,8 +43,6 @@ private void loadASSIMP3()
 {
 	ShouldThrow missingASSIMP3Symbol(string symbol)
 	{
-		import std.stdio;
-		writeln(symbol);
 		return ShouldThrow.No;
 	}
 	DerelictASSIMP3.missingSymbolCallback = &missingASSIMP3Symbol;

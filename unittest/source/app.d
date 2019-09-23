@@ -3,6 +3,7 @@ import std.stdio;
 import moxane.core.engine;
 import moxane.core.log;
 import moxane.graphics.renderer;
+import moxane.graphics.light;
 import moxane.io.window;
 import moxane.core.asset;
 import moxane.graphics.transformation;
@@ -16,13 +17,55 @@ import dlib.math;
 
 import std.datetime.stopwatch;
 
+import bindbc.newton;
+
 //extern(C) __gshared string[] rt_options = ["gcopt=gc:precise profile:1"];
+
+extern(C) void cb_applyForce(const NewtonBody* body_, dFloat timestep, int threadIndex)
+{
+	// Fetch user data and body position.
+	dFloat[4] pos;
+	NewtonBodyGetPosition(body_, pos.ptr);
+
+	// Apply force.
+	dFloat[3] force = [1, -10.0, 0];
+	NewtonBodySetForce(body_, force.ptr);
+
+	// Print info to terminal.
+	printf("Sleep=%d, %.2f, %.2f, %.2f\n", NewtonBodyGetSleepState(body_), pos[0], pos[1], pos[2]);
+}
 
 class TriangleRotateScript : AsyncScript
 {
+	NewtonWorld* world;
+	NewtonBody* ground, sphere;
+
 	this(Moxane moxane) @trusted
 	{
 		super(moxane, true, false);
+
+		loadNewton;
+		world = NewtonCreate();
+
+		float[16] tm = [
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, -5.0f, 1.0f
+		];
+
+		NewtonCollision* csSphere = NewtonCreateSphere(world, 0.5f, 0, null);
+		NewtonCollision* csGround = NewtonCreateBox(world, 100, 0.1f, 100, 0, null);
+
+		ground = NewtonCreateDynamicBody(world, csGround, tm.ptr);
+		tm[13] = 3.0f;
+		sphere = NewtonCreateDynamicBody(world, csSphere, tm.ptr);
+		//float[3] force = [0, -1, 0];
+		//NewtonBodySetForce(sphere, force.ptr);
+
+		NewtonBodySetMassMatrix(sphere, 1f, 1, 1, 1);
+
+		NewtonBodySetForceAndTorqueCallback(sphere, &cb_applyForce);
 	}
 
 	override protected void deinit() @trusted
@@ -32,9 +75,13 @@ class TriangleRotateScript : AsyncScript
 	{
 		while(!moxane.exit)
 		{
-			moxane.services.get!Log().write(Log.Severity.info, "yeet");
+			NewtonUpdate(world, 1f / 600f);
+
 			Transform* t = entity.get!Transform;
-			t.rotation.y += 10f;
+			float[4] arr;
+			NewtonBodyGetPosition(sphere, arr.ptr);
+			//writeln(arr);
+			t.position.arrayof = arr[0..3];
 
 			moxane.services.get!AsyncSystem().awaitNextFrame(this);
 			mixin(checkCancel);
@@ -117,63 +164,25 @@ void main()
 		Vector3f(0f, 0f, 1f)
 	];
 	StaticModel sm = new StaticModel(sr, material, verts, normals);
-	//sr.addStaticModel(sm);
 	sm.localTransform = Transform.init;
 	sm.localTransform.rotation.y = 125f;
 
-	/*Material material1 = new Material(sr.standardMaterialGroup);
-	material1.diffuse = Vector3f(0f, 0.5f, 0.9f);
-	material1.specular = Vector3f(0f, 0f, 0f);
-	material1.normal = null;
-	material1.depthWrite = true;
-	material1.hasLighting = true;
-	material1.castsShadow = true;
-	StaticModel sm1 = new StaticModel(sr, material1, verts1, normals);
-	sr.addStaticModel(sm1);
-	sm1.finalTransform = Transform.init;
-	sm1.finalTransform.position.x = 0.01f;
-	sm1.finalTransform.position.z = 5f;
-	sm1.finalTransform.scale.y = 2.5f;
-	sm1.finalTransform.scale.x = 0.5f;
-	sm1.finalTransform.rotation.y = 90f;*/
-
-	Entity entity = new Entity;
+	Entity entity = new Entity(entityManager);
 	entityManager.add(entity);
 	Transform* transform = entity.createComponent!Transform;
 	*transform = Transform.init;
 	RenderComponent* rc = entity.createComponent!RenderComponent;
-	transform.position = Vector3f(0f, 0f, 5f);
+	transform.position = Vector3f(0f, 0f, -5f);
 	ers.addModel(sm, *rc);
 	entity.attachScript(new TriangleRotateScript(moxane));
 
+	DirectionalLight dl = new DirectionalLight;
+	dl.ambientIntensity = 1f;
+	dl.direction = Vector3f(1, 0, 0);
+	dl.colour = Vector3f(1, 1, 1);
+	dl.diffuseIntensity = 0f;
+
+	r.lights.directionalLights ~= dl;
+
 	moxane.run;
-
-	/*StopWatch sw = StopWatch(AutoStart.yes);
-	StopWatch oneSecond = StopWatch(AutoStart.yes);
-	int frameCount = 0;
-
-	while(!win.shouldClose)
-	{
-		sw.stop;
-		moxane.deltaTime = sw.peek.total!"nsecs" / 1_000_000_000f;
-	
-		if(oneSecond.peek.total!"msecs" >= 1000)
-		{
-			oneSecond.reset;
-			moxane.frames = frameCount;
-			frameCount = 0;
-		}
-
-		frameCount++;
-
-		sw.reset;
-		sw.start;
-		
-		sm.transformation.rotation.y += moxane.deltaTime * 180;
-		sm1.transformation.rotation.y -= moxane.deltaTime * 180;
-		r.render;
-
-		win.swapBuffers;
-		win.pollEvents;
-	}*/
 }

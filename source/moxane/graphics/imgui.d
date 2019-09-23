@@ -325,7 +325,4 @@ shared static this()
 	}
 	//DerelictCImgui.missingSymbolCallback = &missing;
 	DerelictCImgui.load;
-	import std.stdio;
-	import std.string;
-	writeln(fromStringz(igGetVersion()));
 }

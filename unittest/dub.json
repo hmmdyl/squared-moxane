@@ -1,24 +1,26 @@
 {
-	"name": "unittest",
 	"authors": [
 		"dylan"
 	],
+	"copyright": "Copyright © 2019, dylan",
 	"dependencies": {
-		"derelict-gl3": "==1.0.19",
-		"derelict-glfw3": "~>3.1.3",
+		"bindbc-newton": "~>0.1.0",
+		"colorize": "~>1.0.5",
+		"derelict-enet": "~>3.0.0",
 		"derelict-fi": "~>2.0.3",
 		"derelict-ft": "~>1.1.3",
-		"resusage": "~>0.2.8",
-		"colorize": "~>1.0.5",
+		"derelict-gl3": "1.0.19",
+		"derelict-glfw3": "~>3.1.3",
 		"derelict-util": "~>2.0.6",
 		"dlib": "~>0.15.0",
-		"emsi_containers": "~>0.8.0-alpha.12",
-		"derelict-enet": "~>3.0.0",
+		"emsi_containers": ">=0.8.0-alpha.12 <0.9.0-0",
 		"moxane": {
-			"path": "../"
-		}
+			"path": "../",
+			"version": ">=0.0.0"
+		},
+		"resusage": "~>0.2.8"
 	},
 	"description": "A minimal D application.",
-	"copyright": "Copyright © 2019, dylan",
-	"license": "proprietary"
+	"license": "proprietary",
+	"name": "unittest"
 }

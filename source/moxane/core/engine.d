@@ -290,7 +290,7 @@ class Moxane
 	protected Window registerWindow()
 	{
 		ApiBoot api = ApiBoot.createOpenGL43Core;
-		WindowBoot winBoot = WindowBoot(1920, 1080, "Moxane", false);
+		WindowBoot winBoot = WindowBoot(1920, 1080, appName, false);
 		Window win = new Window(this, winBoot, api);
 		services.register!Window(win);
 		return win;
