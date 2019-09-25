@@ -33,6 +33,7 @@ class ServiceHandler
 		}
 	}
 	EventWaiterSimple!OnRegister onRegister;
+	EventWaiterSimple!OnRegister onDeregister;
 
 	private void enforceIsInherited(T, TBase)(T inst)
 	{

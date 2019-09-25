@@ -121,32 +121,43 @@ class Body
 
 extern(C) nothrow void newtonTransformResult(const NewtonBody* bodyPtr, const dFloat* matrix, int threadIndex)
 {
-	Body body_ = cast(Body)NewtonBodyGetUserData(bodyPtr);
-	assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics"); 
+	try 
+	{
+		Body body_ = cast(Body)NewtonBodyGetUserData(bodyPtr);
+		assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics"); 
 
-	Matrix4f m;
-	m.arrayof = matrix[0..16]; // death
+		Matrix4f m;
+		m.arrayof = matrix[0..16]; // death
 
-	Vector3f bodyPosition = translation(m);
-	Vector3f bodyRotation = toEuler(m);
-	bodyRotation.x = radtodeg(bodyRotation.x);
-	bodyRotation.y = radtodeg(bodyRotation.y);
-	bodyRotation.z = radtodeg(bodyRotation.z);
+		Vector3f bodyPosition = translation(m);
+		Vector3f bodyRotation = toEuler(m);
+		bodyRotation.x = radtodeg(bodyRotation.x);
+		bodyRotation.y = radtodeg(bodyRotation.y);
+		bodyRotation.z = radtodeg(bodyRotation.z);
 	
-	body_.transform.position = bodyPosition;
-	body_.transform.rotation = bodyRotation;
+		body_.transform.position = bodyPosition;
+		body_.transform.rotation = bodyRotation;
+	}
+	catch(Exception) {}
 }
 
 extern(C) nothrow void newtonApplyForce(const NewtonBody* bodyPtr, float timeStep, int threadIndex)
 {
-	Body body_ = cast(Body)NewtonBodyGetUserData(bodyPtr);
-	assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics");
+	try 
+	{
+		Body body_ = cast(Body)NewtonBodyGetUserData(bodyPtr);
+		assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics");
 
-	float[3] temp = body_.sumForce_.arrayof; 
-	NewtonBodySetForce(bodyPtr, temp.ptr);
-	body_.sumForce_ = Vector3f(0, 0, 0);
+		if(body_.gravity)
+			body_.sumForce_ += Vector3f(body_.mass[0] * body_.system.gravity.x, body_.mass[0] * body_.system.gravity.y, body_.mass[0] * body_.system.gravity.z);
 
-	temp = body_.sumTorque_.arrayof;
-	NewtonBodySetTorque(bodyPtr, temp.ptr);
-	body_.sumTorque_ = Vector3f(0, 0, 0);
+		float[3] temp = body_.sumForce_.arrayof; 
+		NewtonBodySetForce(bodyPtr, temp.ptr);
+		body_.sumForce_ = Vector3f(0, 0, 0);
+
+		temp = body_.sumTorque_.arrayof;
+		NewtonBodySetTorque(bodyPtr, temp.ptr);
+		body_.sumTorque_ = Vector3f(0, 0, 0);
+	}
+	catch(Exception) {}
 }
