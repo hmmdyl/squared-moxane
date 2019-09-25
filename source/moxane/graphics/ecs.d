@@ -1,8 +1,6 @@
 module moxane.graphics.ecs;
 
-import moxane.core.engine;
-import moxane.core.entity;
-import moxane.graphics.transformation;
+import moxane.core;
 import moxane.graphics.standard;
 
 import std.algorithm.searching : canFind, find;

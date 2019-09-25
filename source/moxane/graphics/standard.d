@@ -1,13 +1,10 @@
 module moxane.graphics.standard;
 
-import moxane.core.engine;
+import moxane.core;
 import moxane.graphics.effect;
 import moxane.graphics.texture;
 import moxane.graphics.renderer;
-import moxane.core.asset;
-import moxane.core.log;
 import moxane.graphics.log;
-import moxane.graphics.transformation;
 
 import dlib.math;
 import std.variant;

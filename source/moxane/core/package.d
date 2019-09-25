@@ -8,3 +8,4 @@ public import moxane.core.eventwaiter;
 public import moxane.core.scene;
 public import moxane.core.log;
 public import moxane.core.asset;
+public import moxane.core.transformation;

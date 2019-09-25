@@ -2,7 +2,6 @@ module moxane.ui.ecs;
 
 import moxane.graphics.renderer;
 import moxane.graphics.texture;
-import moxane.graphics.transformation;
 import moxane.graphics.sprite;
 import moxane.io;
 import moxane.core;

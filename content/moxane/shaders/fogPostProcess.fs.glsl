@@ -26,4 +26,6 @@ void main()
 	float fogFactor = clamp(exp(-pow(dist * Density, Gradient)), 0, 1);
 
 	Fragment = (normal.x == 0 && normal.y == 0 && normal.z == 0) ? diffuse : mix(Colour, diffuse, fogFactor);
+
+	Fragment = pow(Fragment, vec3(1 / 2.2));
 }

@@ -1,19 +1,16 @@
-[ INFO] Default @ 2019-Sep-23 21:01:22.9510246: Loading windowing lib
-[ INFO] Default @ 2019-Sep-23 21:01:23.0581235: Loaded windowing lib. Creating window
-[ INFO] Default @ 2019-Sep-23 21:01:24.1741363: Created window
-[ INFO] Default @ 2019-Sep-23 21:01:24.207167: PassPostProcess is GLSL program number 3
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2111686: Could not get uniform DepthTexture for effect PassPostProcess
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2161742: Could not get uniform WorldPosTexture for effect PassPostProcess
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2201768: Could not get uniform NormalTexture for effect PassPostProcess
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2251814: Could not get uniform SpecTexture for effect PassPostProcess
-[ INFO] Default @ 2019-Sep-23 21:01:24.2291845: PointLightPostProcess is GLSL program number 6
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2331909: Could not get uniform DepthTexture for effect PointLightPostProcess
-[ INFO] Default @ 2019-Sep-23 21:01:24.2381955: DirectionalLightPostProcess is GLSL program number 9
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2421991: Could not get uniform DepthTexture for effect DirectionalLightPostProcess
-[ INFO] Default @ 2019-Sep-23 21:01:24.2462007: DirLightShadowPP is GLSL program number 12
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2502042: Could not get uniform DepthTexture for effect DirLightShadowPP
-[ DEBUG] Default @ 2019-Sep-23 21:01:24.2592147: Hello
-[ INFO] Default @ 2019-Sep-23 21:01:24.2622171: StandardMaterialEffect is GLSL program number 15
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2672218: Could not get uniform SpecularTexture for effect StandardMaterialEffect
-[ WARNING] Default @ 2019-Sep-23 21:01:24.271223: Could not get uniform Specular for effect StandardMaterialEffect
-[ WARNING] Default @ 2019-Sep-23 21:01:24.2752279: Could not get uniform UseSpecularTexture for effect StandardMaterialEffect
+[ INFO] Default @ 2019-Sep-24 14:49:13.3217721: Loading windowing lib
+[ INFO] Default @ 2019-Sep-24 14:49:13.7363974: Loaded windowing lib. Creating window
+[ INFO] Default @ 2019-Sep-24 14:49:14.0783612: Created window
+[ INFO] Default @ 2019-Sep-24 14:49:14.1969018: PassPostProcess is GLSL program number 3
+[ WARNING] Default @ 2019-Sep-24 14:49:14.2301468: Could not get uniform DepthTexture for effect PassPostProcess
+[ WARNING] Default @ 2019-Sep-24 14:49:14.2412287: Could not get uniform WorldPosTexture for effect PassPostProcess
+[ WARNING] Default @ 2019-Sep-24 14:49:14.2503356: Could not get uniform NormalTexture for effect PassPostProcess
+[ WARNING] Default @ 2019-Sep-24 14:49:14.2616952: Could not get uniform SpecTexture for effect PassPostProcess
+[ INFO] Default @ 2019-Sep-24 14:49:14.2970105: PointLightPostProcess is GLSL program number 6
+[ WARNING] Default @ 2019-Sep-24 14:49:14.3441505: Could not get uniform DepthTexture for effect PointLightPostProcess
+[ INFO] Default @ 2019-Sep-24 14:49:14.3572795: DirectionalLightPostProcess is GLSL program number 9
+[ WARNING] Default @ 2019-Sep-24 14:49:14.3960983: Could not get uniform DepthTexture for effect DirectionalLightPostProcess
+[ INFO] Default @ 2019-Sep-24 14:49:14.4082086: DirLightShadowPP is GLSL program number 12
+[ WARNING] Default @ 2019-Sep-24 14:49:14.4633792: Could not get uniform DepthTexture for effect DirLightShadowPP
+[ DEBUG] Default @ 2019-Sep-24 14:49:14.5028585: Hello
+[ INFO] Default @ 2019-Sep-24 14:49:14.5128755: StandardMaterialEffect is GLSL program number 15
