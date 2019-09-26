@@ -30,7 +30,21 @@ class BoxCollider : Collider
 		super(system);
 		this.dimensions = dimensions;
 		this.offset = offset;
-		handle = NewtonCreateBox(system.handle, dimensions.x, dimensions.y, dimensions.z, 1, offset.matrix.arrayof.ptr);
+		handle = NewtonCreateBox(system.handle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
+	}
+}
+
+class SphereCollider : Collider
+{
+	float radius;
+	Transform offset;
+
+	this(PhysicsSystem system, float radius, Transform offset = Transform.init)
+	{
+		super(system);
+		this.radius = radius;
+		this.offset = offset;
+		handle = NewtonCreateSphere(system.handle, radius, 0, offset.matrix.arrayof.ptr);
 	}
 }
 

@@ -55,12 +55,12 @@ class Body
 	@property const bool freeze() { return cast(bool)NewtonBodyGetFreezeState(handle); }
 	@property void freeze(bool n) { NewtonBodySetFreezeState(handle, cast(int)n); }
 
-	private Vector3f sumForce_;
+	private Vector3f sumForce_ = Vector3f(0, 0, 0);
 	@property Vector3f sumForce() const { return sumForce_; }
 	@property void sumForce(Vector3f sum) { sumForce_ = sum; }
 	void addForce(Vector3f force) { sumForce_ += force; }
 
-	private Vector3f sumTorque_;
+	private Vector3f sumTorque_ = Vector3f(0, 0, 0);
 	@property Vector3f sumTorque() const { return sumTorque_; }
 	@property void sumTorque(Vector3f sum) { sumTorque_ = sum; }
 	void addTorque(Vector3f torque) { sumTorque_ += torque; }

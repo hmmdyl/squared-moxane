@@ -36,3 +36,34 @@ void loadMesh(Vertex, Allocator = GCAllocator)(string file, out Vertex[] vertice
 		}
 	}
 }
+
+void loadMesh(Vertex, Normal, Allocator = GCAllocator)(string file, out Vertex[] vertices, out Normal[] normals)
+{
+	const(aiScene*) scene = aiImportFile(file.toStringz, aiProcess_Triangulate);
+	enforce(scene !is null, "Could not load model from file: \"" ~ file ~ "\"");
+
+	size_t numVerts;
+	foreach(i; 0 .. scene.mNumMeshes)
+		numVerts += scene.mMeshes[i].mNumFaces * 3;
+
+	vertices = cast(Vertex[])Allocator.instance.allocate(numVerts * Vertex.sizeof);
+	normals = cast(Normal[])Allocator.instance.allocate(numVerts * Normal.sizeof);
+
+	size_t v;
+	foreach(meshC; 0 .. scene.mNumMeshes)
+	{
+		const aiMesh* mesh = scene.mMeshes[meshC];
+		foreach(faceC; 0 .. mesh.mNumFaces)
+		{
+			const aiFace face = mesh.mFaces[faceC];
+			foreach(vertexC; 0 .. 3)
+			{
+				aiVector3D aiv = mesh.mVertices[face.mIndices[vertexC]];
+				aiVector3D ain = mesh.mNormals[face.mIndices[vertexC]];
+				vertices[v] = Vertex(aiv.x, aiv.z, aiv.y);
+				normals[v] = Normal(ain.x, ain.y, ain.z);
+				v++;
+			}
+		}
+	}
+}

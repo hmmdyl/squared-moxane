@@ -293,8 +293,8 @@ class StandardRenderer : IRenderable
 	{
 		Log log = moxane.services.getAOrB!(GraphicsLog, Log);
 		Shader vs = new Shader, fs = new Shader;
-		enforce(vs.compile(readText(AssetManager.translateToAbsoluteDir("content/shaders/standardMaterial.vs.glsl")), GL_VERTEX_SHADER, log));
-		enforce(fs.compile(readText(AssetManager.translateToAbsoluteDir("content/shaders/standardMaterial.fs.glsl")), GL_FRAGMENT_SHADER, log));
+		enforce(vs.compile(readText(AssetManager.translateToAbsoluteDir("content/moxane/shaders/standardMaterial.vs.glsl")), GL_VERTEX_SHADER, log));
+		enforce(fs.compile(readText(AssetManager.translateToAbsoluteDir("content/moxane/shaders/standardMaterial.fs.glsl")), GL_FRAGMENT_SHADER, log));
 		standardMaterial_ = new MaterialGroup;
 		standardMaterial_.effect = new Effect(moxane, "StandardMaterialEffect");
 		standardMaterial_.effect.attachAndLink(vs, fs);

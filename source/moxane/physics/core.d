@@ -9,6 +9,8 @@ import dlib.math.matrix;
 import dlib.math.transformation;
 import bindbc.newton;
 
+@safe:
+
 struct PhysicsComponent
 {
 	Collider collider;
@@ -17,25 +19,23 @@ struct PhysicsComponent
 
 class PhysicsSystem : System
 {
-	Moxane moxane;
-
 	package NewtonWorld* handle;
 
 	Vector3f gravity;
 
-	this(Moxane moxane, EntityManager manager)
+	this(Moxane moxane, EntityManager manager) @trusted
 	{
 		super(moxane, manager);
 		handle = NewtonCreate();
 	}
 
-	~this()
+	~this() @trusted
 	{
 		NewtonDestroy(handle);
 		handle = null;
 	}
 
-	override void update()
+	override void update() @trusted
 	{
 		NewtonUpdate(handle, moxane.deltaTime);
 
@@ -45,7 +45,7 @@ class PhysicsSystem : System
 			Transform* transform = entity.get!Transform;
 			PhysicsComponent* phys = entity.get!PhysicsComponent;
 
-			*transform = *phys.rigidBody.transform;
+			*transform = phys.rigidBody.transform;
 		}
 	}
 }
