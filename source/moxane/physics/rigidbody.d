@@ -12,12 +12,14 @@ import bindbc.newton;
 
 import std.typecons;
 
+@trusted:
+
 class Body
 {
 	enum Mode
 	{
-		dynamic,
-		kinematic
+		dynamic = 0,
+		kinematic = 1
 	}
 
 	package NewtonBody* handle;
@@ -29,6 +31,9 @@ class Body
 	Transform transform;
 
 	bool gravity;
+	bool dampenPlayer;
+
+	this() { mode = Mode.dynamic; }
 
 	this(Collider collider, Mode mode, PhysicsSystem system, Transform transform = Transform.init) 
 	in(collider !is null) in(system !is null)
@@ -52,6 +57,11 @@ class Body
 	~this()
 	{ NewtonDestroyBody(handle); handle = null; }
 
+	void upConstraint() {
+		Vector3f up = Vector3f(0, 1, 0);
+		NewtonConstraintCreateUpVector(system.handle, up.arrayof.ptr, handle);
+	}
+
 	@property const bool freeze() { return cast(bool)NewtonBodyGetFreezeState(handle); }
 	@property void freeze(bool n) { NewtonBodySetFreezeState(handle, cast(int)n); }
 
@@ -60,13 +70,15 @@ class Body
 	@property void sumForce(Vector3f sum) { sumForce_ = sum; }
 	void addForce(Vector3f force) { sumForce_ += force; }
 
+	void setForce() { NewtonBodySetForce(handle, sumForce_.arrayof.ptr); }
+
 	private Vector3f sumTorque_ = Vector3f(0, 0, 0);
 	@property Vector3f sumTorque() const { return sumTorque_; }
 	@property void sumTorque(Vector3f sum) { sumTorque_ = sum; }
 	void addTorque(Vector3f torque) { sumTorque_ += torque; }
 
 	@property bool collidable() const { return cast(bool)NewtonBodyGetCollidable(handle); }
-	@property void collidable(bool n) const { NewtonBodySetCollidable(handle, cast(int)n); }
+	@property void collidable(bool n) { NewtonBodySetCollidable(handle, cast(int)n); }
 
 	@property Vector3f acceleration() const {
 		Vector3f acc; NewtonBodyGetAcceleration(handle, acc.arrayof.ptr); return acc; }
@@ -95,20 +107,22 @@ class Body
 	}
 
 	@property float linearDamping() const { return NewtonBodyGetLinearDamping(handle); }
-	@property void linearDamping(float damp) const { NewtonBodySetLinearDamping(handle, damp); }
+	@property void linearDamping(float damp) { NewtonBodySetLinearDamping(handle, damp); }
 
 	@property Tuple!(float, Vector3f) mass() const {
 		float m; Vector3f inertia;
 		NewtonBodyGetMass(handle, &m, &inertia.arrayof[0], &inertia.arrayof[1], &inertia.arrayof[2]);
 		return tuple(m, inertia);
 	}
-	@property void mass(float m, Vector3f inertia) const { NewtonBodySetMassMatrix(handle, m, inertia.x, inertia.y, inertia.z); }
+	@property void mass(float m, Vector3f inertia) { NewtonBodySetMassMatrix(handle, m, inertia.x, inertia.y, inertia.z); }
 
-	@property void massFull(float mass, Matrix4f inertiaMatrix) const { NewtonBodySetFullMassMatrix(handle, mass, inertiaMatrix.arrayof.ptr); }
+	@property void massFull(float mass, Matrix4f inertiaMatrix) { NewtonBodySetFullMassMatrix(handle, mass, inertiaMatrix.arrayof.ptr); }
+
+	@property massProperties(float mass) { NewtonBodySetMassProperties(handle, mass, collider.handle); }
 
 	@property Vector3f angularVelocity() const {
 		Vector3f acc; NewtonBodyGetOmega(handle, acc.arrayof.ptr); return acc; }
-	@property void angularVelocity(Vector3f vel) const { NewtonBodySetOmega(handle, vel.arrayof.ptr); }
+	@property void angularVelocity(Vector3f vel) { NewtonBodySetOmega(handle, vel.arrayof.ptr); }
 
 	@property int simulationState() const { return NewtonBodyGetSimulationState(handle); }
 
@@ -116,7 +130,28 @@ class Body
 
 	@property Vector3f velocity() const {
 		Vector3f vel; NewtonBodyGetVelocity(handle, vel.arrayof.ptr); return vel; }
-	@property void velocity(Vector3f v) const { NewtonBodySetVelocity(handle, v.arrayof.ptr); }
+	@property void velocity(Vector3f v) { NewtonBodySetVelocity(handle, v.arrayof.ptr); }
+	Vector3f velo =	Vector3f(0, 0, 0);
+}
+
+class PlayerBody : Body
+{
+	this(Collider collider, PhysicsSystem system, Transform transform = Transform.init) 
+	in(collider !is null) in(system !is null)
+	{ 
+		super.collider = collider; 
+		super.system = system;
+		super.transform = transform;
+
+		import std.stdio;
+		writeln(mode);
+
+		float[16] matrix = transform.matrix.arrayof;
+		handle = NewtonCreateKinematicBody(system.handle, collider.handle, matrix.ptr);
+
+		NewtonBodySetUserData(handle, cast(void*)this);
+		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
+	}
 }
 
 extern(C) nothrow void newtonTransformResult(const NewtonBody* bodyPtr, const dFloat* matrix, int threadIndex)
@@ -135,7 +170,7 @@ extern(C) nothrow void newtonTransformResult(const NewtonBody* bodyPtr, const dF
 		bodyRotation.y = radtodeg(bodyRotation.y);
 		bodyRotation.z = radtodeg(bodyRotation.z);
 	
-		body_.transform.position = bodyPosition;
+		body_.transform.position = bodyPosition + Vector3f(0, 1.9, 0);
 		body_.transform.rotation = bodyRotation;
 	}
 	catch(Exception) {}
@@ -151,6 +186,11 @@ extern(C) nothrow void newtonApplyForce(const NewtonBody* bodyPtr, float timeSte
 		if(body_.gravity)
 			body_.sumForce_ += Vector3f(body_.mass[0] * body_.system.gravity.x, body_.mass[0] * body_.system.gravity.y, body_.mass[0] * body_.system.gravity.z);
 
+		if(body_.dampenPlayer)
+		{
+			Vector3f velo = body_.velocity;
+			body_.velocity = body_.velo;
+		}
 		float[3] temp = body_.sumForce_.arrayof; 
 		NewtonBodySetForce(bodyPtr, temp.ptr);
 		body_.sumForce_ = Vector3f(0, 0, 0);

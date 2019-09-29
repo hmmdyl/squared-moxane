@@ -5,6 +5,8 @@ import moxane.physics.core;
 import bindbc.newton;
 import dlib.math;
 
+@trusted:
+
 abstract class Collider
 {
 	enum Shape
@@ -18,6 +20,9 @@ abstract class Collider
 	this(PhysicsSystem system) in(system !is null) { this.system = system; }
 
 	~this() { NewtonDestroyCollision(handle); handle = null; }
+
+	@property Vector3f scale() const { Vector3f s; NewtonCollisionGetScale(handle, &s.x, &s.y, &s.z); return s; }
+	@property void scale(Vector3f s) { NewtonCollisionSetScale(handle, s.x, s.y, s.z); }
 } 
 
 class BoxCollider : Collider
@@ -61,5 +66,23 @@ class StaticMeshCollider : Collider
 			NewtonTreeCollisionAddFace(handle, 3, &vertices[triangleIndex].x, Vector3f.sizeof, cast(int)(triangleIndex + 1));
 		
 		NewtonTreeCollisionEndBuild(handle, cast(int)optimiseMesh);
+	}
+}
+
+class CapsuleCollider : Collider
+{
+	const float radius;
+	const float radius1;
+	const float height;
+	const Transform offset;
+
+	this(PhysicsSystem system, float radius, float radius1, float height, Transform offset = Transform.init)
+	{
+		super(system);
+		this.radius = radius;
+		this.radius1 = radius1;
+		this.height = height;
+		this.offset = offset;
+		handle = NewtonCreateCapsule(system.handle, radius, radius1, height, 0, offset.matrix.arrayof.ptr);
 	}
 }
