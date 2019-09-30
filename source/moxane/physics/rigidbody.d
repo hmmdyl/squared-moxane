@@ -33,7 +33,7 @@ class Body
 	bool gravity;
 	bool dampenPlayer;
 
-	this() { mode = Mode.dynamic; }
+	this() { mode = Mode.kinematic; }
 
 	this(Collider collider, Mode mode, PhysicsSystem system, Transform transform = Transform.init) 
 	in(collider !is null) in(system !is null)
@@ -120,6 +120,11 @@ class Body
 
 	@property massProperties(float mass) { NewtonBodySetMassProperties(handle, mass, collider.handle); }
 
+	void updateMatrix()
+	{
+		NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+	}
+
 	@property Vector3f angularVelocity() const {
 		Vector3f acc; NewtonBodyGetOmega(handle, acc.arrayof.ptr); return acc; }
 	@property void angularVelocity(Vector3f vel) { NewtonBodySetOmega(handle, vel.arrayof.ptr); }
@@ -142,9 +147,6 @@ class PlayerBody : Body
 		super.collider = collider; 
 		super.system = system;
 		super.transform = transform;
-
-		import std.stdio;
-		writeln(mode);
 
 		float[16] matrix = transform.matrix.arrayof;
 		handle = NewtonCreateKinematicBody(system.handle, collider.handle, matrix.ptr);
@@ -188,16 +190,19 @@ extern(C) nothrow void newtonApplyForce(const NewtonBody* bodyPtr, float timeSte
 
 		if(body_.dampenPlayer)
 		{
-			Vector3f velo = body_.velocity;
+			//Vector3f velo = body_.velocity;
 			body_.velocity = body_.velo;
+			body_.velo = Vector3f(0, 0, 0);
 		}
-		float[3] temp = body_.sumForce_.arrayof; 
-		NewtonBodySetForce(bodyPtr, temp.ptr);
-		body_.sumForce_ = Vector3f(0, 0, 0);
+		//else {
+			float[3] temp = body_.sumForce_.arrayof; 
+			NewtonBodySetForce(bodyPtr, temp.ptr);
+			body_.sumForce_ = Vector3f(0, 0, 0);
 
-		temp = body_.sumTorque_.arrayof;
-		NewtonBodySetTorque(bodyPtr, temp.ptr);
-		body_.sumTorque_ = Vector3f(0, 0, 0);
+			temp = body_.sumTorque_.arrayof;
+			NewtonBodySetTorque(bodyPtr, temp.ptr);
+			body_.sumTorque_ = Vector3f(0, 0, 0);
+		//}
 	}
 	catch(Exception) {}
 }
