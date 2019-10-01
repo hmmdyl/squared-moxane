@@ -3,6 +3,7 @@ module moxane.physics.rigidbody;
 import moxane.core;
 import moxane.physics.core;
 import moxane.physics.collider;
+import moxane.utils.newtonmath;
 
 import dlib.math.vector;
 import dlib.math.matrix;
@@ -10,7 +11,9 @@ import dlib.math.transformation;
 import dlib.math.utils;
 import bindbc.newton;
 
+import std.math;
 import std.typecons;
+import std.algorithm;
 
 @trusted:
 
@@ -28,14 +31,14 @@ class Body
 	Collider collider;
 	const Mode mode;
 
-	Transform transform;
+	AtomicTransform transform;
 
 	bool gravity;
 	bool dampenPlayer;
 
 	this() { mode = Mode.kinematic; }
 
-	this(Collider collider, Mode mode, PhysicsSystem system, Transform transform = Transform.init) 
+	this(Collider collider, Mode mode, PhysicsSystem system, AtomicTransform transform = AtomicTransform.init) 
 	in(collider !is null) in(system !is null)
 	{ 
 		this.collider = collider; 
@@ -137,11 +140,13 @@ class Body
 		Vector3f vel; NewtonBodyGetVelocity(handle, vel.arrayof.ptr); return vel; }
 	@property void velocity(Vector3f v) { NewtonBodySetVelocity(handle, v.arrayof.ptr); }
 	Vector3f velo =	Vector3f(0, 0, 0);
+
+	void integrateVelocity(float ts) { NewtonBodyIntegrateVelocity(handle, ts); }
 }
 
 class PlayerBody : Body
 {
-	this(Collider collider, PhysicsSystem system, Transform transform = Transform.init) 
+	this(Collider collider, PhysicsSystem system, AtomicTransform transform = AtomicTransform.init) 
 	in(collider !is null) in(system !is null)
 	{ 
 		super.collider = collider; 
@@ -153,6 +158,240 @@ class PlayerBody : Body
 
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
+
+		impulseSolver = new ImpulseSolver(this);
+	} 
+
+	// NOTICE
+	// This code is nearly a 1:1 translation from Newton's tutorials
+
+	private class ImpulseSolver
+	{
+		struct Jacobian
+		{
+			Vector3f linear, angular;
+		}
+
+		Matrix4f invInertia;
+		Vector3f veloc;
+		Jacobian[maxRows] jacobian;
+		bool[maxRows] contactPointPresent;
+		NewtonWorldConvexCastReturnInfo[maxRows] contactPoint;
+		float[maxRows] rhs, low, high, impulseMag;
+		int[maxRows] normalIndex;
+		float mass, invMass;
+		int rowCount;
+
+		PlayerBody outer;
+
+		this(PlayerBody pb)
+		{
+			outer = pb;
+			mass = outer.mass()[0];
+			invMass = outer.inverseMass()[0];
+			invInertia = outer.inverseInertiaMatrix;
+			reset;
+		}
+
+		void reset()
+		{
+			rowCount = 0;
+			veloc = outer.velocity;
+		}
+
+		void addAngularRows()
+		{
+			foreach(i; 0 .. 3)
+			{
+				contactPointPresent[rowCount] = false;
+				jacobian[rowCount].linear = Vector3f(0, 0, 0);
+				jacobian[rowCount].angular = Vector3f(0, 0, 0);
+				jacobian[rowCount].angular[rowCount] = 1f;
+				rhs[rowCount] = 0f;
+				impulseMag[rowCount] = 0f;
+				low[rowCount] = -1.0e12f;
+				high[rowCount] = 1.0e12f;
+				normalIndex[rowCount] = 0;
+				rowCount++;
+				assert(rowCount < maxRows);
+			}
+		}
+
+		int addLinearRow(Vector3f dir, Vector3f r, float accel, float low, float high, int normalIndex = -1)
+		{
+			contactPointPresent[rowCount] = false;
+			jacobian[rowCount].linear = dir;
+			jacobian[rowCount].angular = cross(r, dir);
+			this.low[rowCount] = low;
+			this.high[rowCount] = high;
+			this.normalIndex[rowCount] = (normalIndex == -1) ? 0 : normalIndex - rowCount;
+			rhs[rowCount] = accel - dot(veloc, jacobian[rowCount].linear);
+			
+			scope(exit) rowCount++;
+			assert(rowCount + 1 < maxRows);
+
+			return rowCount;
+		}
+
+		Vector3f calculateImpulse()
+		{
+			dFloat[maxRows][maxRows] massMatrix;
+			foreach(i; 0 .. rowCount)
+			{
+				Jacobian jInvMass = jacobian[i];
+
+				jInvMass.linear = jInvMass.linear * invMass;
+				jInvMass.angular = rotateVector(invInertia, jInvMass.angular);
+
+				auto tmp = Vector3f(jInvMass.linear * jacobian[i].linear + jInvMass.angular * jacobian[i].angular);
+
+				dFloat a00 = (tmp.x + tmp.y + tmp.z) * 1.0001f;
+				massMatrix[i][i] = a00;
+
+				impulseMag[i] = 0.0f;
+				for (int j = i + 1; j < rowCount; j++) {
+					auto tmp1 = Vector3f(jInvMass.linear * jacobian[j].linear + jInvMass.angular * jacobian[j].angular);
+					dFloat a01 = tmp1.x + tmp1.y + tmp1.z;
+					massMatrix[i][j] = a01;
+					massMatrix[j][i] = a01;
+				}
+			}
+
+			//dGaussSeidelLcpSor(m_rowCount, D_MAX_ROWS, &massMatrix[0][0], m_impulseMag, m_rhs, m_normalIndex, m_low, m_high, dFloat(1.0e-6f), 32, dFloat(1.1f));
+			dGaussSeidelLcpSor!float(rowCount, maxRows, &massMatrix[0][0], impulseMag.ptr, rhs.ptr, normalIndex.ptr, low.ptr, high.ptr, 1.0e-6f, 32, 1.1f);
+
+			auto netImpulse = Vector3f(0, 0, 0);
+			for (int i = 0; i < rowCount; i++) {
+				netImpulse += jacobian[i].linear * impulseMag[i];
+			}
+			return netImpulse;
+		}
+
+		void applyReaction(float timestep)
+		{
+			Matrix4f m;
+			auto com = Vector4f(0, 0, 0, 0);
+			float mass, ixx, iyy, izz;
+			foreach(i; 0 .. rowCount)
+			{
+				if(contactPointPresent[i])
+				{
+					NewtonBodyGetMatrix(contactPoint[i].m_hitBody, m.arrayof.ptr);
+					NewtonBodyGetCentreOfMass(contactPoint[i].m_hitBody, com.arrayof.ptr);
+					auto point = Vector4f(contactPoint[i].m_point);
+					point.w = 0;
+					auto r = (point - com * m).xyz;
+					NewtonBodyGetMass(contactPoint[i].m_hitBody, &mass, &ixx, &iyy, &izz);
+
+					mass *= 0.1f;
+
+					auto linearImpulse = jacobian[i].linear * (-impulseMag[i] * mass / (mass + this.mass));
+					auto angularImpulse = cross(r, jacobian[i].linear);
+					NewtonBodyApplyImpulsePair(contactPoint[i].m_hitBody, linearImpulse.arrayof.ptr, angularImpulse.arrayof.ptr, timestep);
+				}
+			}
+		}
+	}
+
+	private ImpulseSolver impulseSolver;
+
+	private enum maxContacts = 6;
+	private enum maxRows = maxContacts * 3;
+
+	private enum maxCollisionPenetration = 5.0e-3f;
+
+	private int contactCount;
+	private NewtonWorldConvexCastReturnInfo[maxRows] contactBuffer;
+
+	void calculateContacts()
+	{
+		Matrix4f m = matrix();
+		contactCount = NewtonWorldCollide(super.system.handle, m.arrayof.ptr, super.collider.handle, cast(void*)this, &prefilterCallback, contactBuffer.ptr, 6, 0);
+	}
+
+	extern(C) private static uint prefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collision, void* userPtr)
+	{
+		Body body_ = cast(Body)userPtr;
+		assert(body_ !is null);
+
+		if(body_.handle == bodyPtr) return 0;
+		else return 1;
+	}
+
+	private void resolveInterpenetrations()
+	{
+		auto zero = Vector4f(0, 0, 0, 0);
+		auto savedVelocity = Vector4f(0, 0, 0, 0);
+		NewtonBodyGetVelocity(super.handle, savedVelocity.arrayof.ptr);
+
+		float timestep = 0.1f;
+		float invTimestep = 1.0f / timestep;
+
+		float penetration = maxCollisionPenetration * 10f;
+		for(int j = 0; (j < 8) && (penetration > maxCollisionPenetration); j++)
+		{
+			Matrix4f m;
+			Vector4f com = Vector4f(0, 0, 0, 0);
+
+			NewtonBodySetVelocity(super.handle, zero.arrayof.ptr);
+			NewtonBodyGetMatrix(super.handle, m.arrayof.ptr);
+			NewtonBodyGetCentreOfMass(super.handle, com.arrayof.ptr);
+			com = com * m;
+			com.w = 0.0f;
+
+			impulseSolver.reset;
+			impulseSolver.addAngularRows();
+			for (int i = 0; i < contactCount; i++) {
+				NewtonWorldConvexCastReturnInfo* contact = &contactBuffer[i];
+
+				auto point = Vector4f(contact.m_point[0], contact.m_point[1], contact.m_point[2], 0.0f);
+				auto normal = Vector4f(contact.m_normal[0], contact.m_normal[1], contact.m_normal[2], 0.0f);
+
+				penetration = clamp(contact.m_penetration - maxCollisionPenetration * 0.5f, 0.0f, 0.5f);
+				int index = impulseSolver.addLinearRow(normal.xyz, (point - com).xyz, 0.0f, 0.0f, 1.0e12f);
+				impulseSolver.rhs[index] = penetration * invTimestep;
+			}
+
+			auto veloc = Vector3f(impulseSolver.calculateImpulse() * super.inverseMass()[0]);
+			NewtonBodySetVelocity(super.handle, veloc.arrayof.ptr);
+			NewtonBodyIntegrateVelocity(super.handle, timestep);
+
+			penetration = 0.0f;
+			calculateContacts;
+			for (int i = 0; i < contactCount; i++)
+				penetration = max(contactBuffer[i].m_penetration, penetration);
+		}
+	}
+
+	void resolveCollision(float timestep)
+	{
+		Matrix4f m = matrix();
+
+		calculateContacts;
+		if(contactCount == 0) return;
+
+		float maxPenetration = 0f;
+		foreach(i; 0 .. contactCount) maxPenetration = max(contactBuffer[i].m_penetration, maxPenetration);
+	
+		if(maxPenetration > maxCollisionPenetration)
+		{
+			resolveInterpenetrations;
+			m = matrix();
+		}
+
+		Vector3f zero = Vector3f(0, 0, 0), com = super.centreOfMass, veloc = super.velocity;
+		com = (Vector4f(com.x, com.y, com.z, 0f) * m).xyz;
+		
+		impulseSolver.reset;
+		Vector4f surfaceVeloc;
+
+	}
+
+	private Matrix4f matrix() 
+	{
+		Matrix4f m;
+		NewtonBodyGetMatrix(handle, m.arrayof.ptr);
+		return m;
 	}
 }
 
@@ -172,7 +411,7 @@ extern(C) nothrow void newtonTransformResult(const NewtonBody* bodyPtr, const dF
 		bodyRotation.y = radtodeg(bodyRotation.y);
 		bodyRotation.z = radtodeg(bodyRotation.z);
 	
-		body_.transform.position = bodyPosition + Vector3f(0, 1.9, 0);
+		body_.transform.position = bodyPosition;
 		body_.transform.rotation = bodyRotation;
 	}
 	catch(Exception) {}
@@ -188,21 +427,13 @@ extern(C) nothrow void newtonApplyForce(const NewtonBody* bodyPtr, float timeSte
 		if(body_.gravity)
 			body_.sumForce_ += Vector3f(body_.mass[0] * body_.system.gravity.x, body_.mass[0] * body_.system.gravity.y, body_.mass[0] * body_.system.gravity.z);
 
-		if(body_.dampenPlayer)
-		{
-			//Vector3f velo = body_.velocity;
-			body_.velocity = body_.velo;
-			body_.velo = Vector3f(0, 0, 0);
-		}
-		//else {
-			float[3] temp = body_.sumForce_.arrayof; 
-			NewtonBodySetForce(bodyPtr, temp.ptr);
-			body_.sumForce_ = Vector3f(0, 0, 0);
+		float[3] temp = body_.sumForce_.arrayof; 
+		NewtonBodySetForce(bodyPtr, temp.ptr);
+		body_.sumForce_ = Vector3f(0, 0, 0);
 
-			temp = body_.sumTorque_.arrayof;
-			NewtonBodySetTorque(bodyPtr, temp.ptr);
-			body_.sumTorque_ = Vector3f(0, 0, 0);
-		//}
+		temp = body_.sumTorque_.arrayof;
+		NewtonBodySetTorque(bodyPtr, temp.ptr);
+		body_.sumTorque_ = Vector3f(0, 0, 0);
 	}
 	catch(Exception) {}
 }

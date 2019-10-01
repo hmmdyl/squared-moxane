@@ -45,7 +45,7 @@ class PhysicsSystem : System
 			Transform* transform = entity.get!Transform;
 			PhysicsComponent* phys = entity.get!PhysicsComponent;
 
-			*transform = phys.rigidBody.transform;
+			*transform = Transform(phys.rigidBody.transform);
 		}
 	}
 }
