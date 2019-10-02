@@ -128,6 +128,21 @@ class Body
 		NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
 	}
 
+	protected void getTransform()
+	{
+		Matrix4f m;
+		NewtonBodyGetMatrix(handle, m.arrayof.ptr);
+
+		Vector3f bodyPosition = translation(m);
+		Vector3f bodyRotation = toEuler(m);
+		bodyRotation.x = radtodeg(bodyRotation.x);
+		bodyRotation.y = radtodeg(bodyRotation.y);
+		bodyRotation.z = radtodeg(bodyRotation.z);
+
+		transform.position = bodyPosition;
+		transform.rotation = bodyRotation;
+	}
+
 	@property Vector3f angularVelocity() const {
 		Vector3f acc; NewtonBodyGetOmega(handle, acc.arrayof.ptr); return acc; }
 	@property void angularVelocity(Vector3f vel) { NewtonBodySetOmega(handle, vel.arrayof.ptr); }
@@ -146,18 +161,39 @@ class Body
 
 class PlayerBody : Body
 {
-	this(Collider collider, PhysicsSystem system, AtomicTransform transform = AtomicTransform.init) 
-	in(collider !is null) in(system !is null)
+	private float height, radius, stepHeight;
+	private float contactPatch;
+
+	private bool isAirborne, onFloor;
+
+	float lateralSpeed = 0f, forwardSpeed = 0f, headingAngle = 0f;
+	Vector3f impulse = Vector3f(0, 0, 0);
+
+	this(PhysicsSystem system, float radius, float height, float mass, AtomicTransform transform = AtomicTransform.init) 
+	in(system !is null)
 	{ 
-		super.collider = collider; 
 		super.system = system;
 		super.transform = transform;
+		
+		stepHeight = height / 3f;
+		enum scale = 3f;
+		height = max(height - 2f * radius / scale, 0.1f);
+
+		this.height = height;
+		this.radius = radius;
+		this.contactPatch = radius / scale;
+
+		collider = new CapsuleCollider(system, radius / scale, radius / scale, height);
+		collider.scale = Vector3f(1, scale, scale);
 
 		float[16] matrix = transform.matrix.arrayof;
 		handle = NewtonCreateKinematicBody(system.handle, collider.handle, matrix.ptr);
 
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
+
+		super.mass(mass, Vector3f(1, 1, 1));
+		super.collidable = true;
 
 		impulseSolver = new ImpulseSolver(this);
 	} 
@@ -197,6 +233,7 @@ class PlayerBody : Body
 		{
 			rowCount = 0;
 			veloc = outer.velocity;
+			contactPointPresent[] = false;
 		}
 
 		void addAngularRows()
@@ -236,6 +273,8 @@ class PlayerBody : Body
 		Vector3f calculateImpulse()
 		{
 			dFloat[maxRows][maxRows] massMatrix;
+			foreach(ref r; massMatrix)
+				r[] = 0f;
 			foreach(i; 0 .. rowCount)
 			{
 				Jacobian jInvMass = jacobian[i];
@@ -318,6 +357,34 @@ class PlayerBody : Body
 		else return 1;
 	}
 
+	private enum CollisionState { deepPenetration, collision, free }
+
+	private CollisionState predictCollision(Vector3f v)
+	{
+		foreach(i; 0 .. contactCount)
+			if(contactBuffer[i].m_penetration >= maxCollisionPenetration) 
+				return CollisionState.deepPenetration;
+
+		foreach(i; 0 .. contactCount)
+		{
+			float projectionSpeed = dot(v, Vector3f(contactBuffer[i].m_normal[0..3]));
+			if(projectionSpeed < 0)
+				return CollisionState.collision;
+		}
+
+		return CollisionState.free;
+	}
+
+	private float predictTimestep(float timestep)
+	{
+		getTransform;
+		Vector3f v = velocity();
+
+		NewtonBodyIntegrateVelocity(handle, timestep);
+
+		return timestep;
+	}
+
 	private void resolveInterpenetrations()
 	{
 		auto zero = Vector4f(0, 0, 0, 0);
@@ -352,7 +419,8 @@ class PlayerBody : Body
 				impulseSolver.rhs[index] = penetration * invTimestep;
 			}
 
-			auto veloc = Vector3f(impulseSolver.calculateImpulse() * super.inverseMass()[0]);
+			float invMass = inverseMass()[0];
+			auto veloc = Vector3f(impulseSolver.calculateImpulse() * invMass);
 			NewtonBodySetVelocity(super.handle, veloc.arrayof.ptr);
 			NewtonBodyIntegrateVelocity(super.handle, timestep);
 
@@ -384,7 +452,75 @@ class PlayerBody : Body
 		
 		impulseSolver.reset;
 		Vector4f surfaceVeloc;
+		immutable float contactPatchHigh = contactPatch * 0.995f;
+		foreach(i; 0 .. contactCount)
+		{
+			NewtonWorldConvexCastReturnInfo* contact = &contactBuffer[i];
 
+			auto point = Vector4f(contact.m_point[0], contact.m_point[1], contact.m_point[2], 0);
+			auto normal = Vector4f(contact.m_normal[0], contact.m_normal[1], contact.m_normal[2], 0);
+			immutable int normalIndex = impulseSolver.addLinearRow(normal.xyz, point.xyz - com, 0f, 0f, 1.0e12f);
+
+			float invMass, invIxx, invIyy, invIzz;
+			NewtonBodyGetPointVelocity(contact.m_hitBody, point.arrayof.ptr, surfaceVeloc.arrayof.ptr);
+			impulseSolver.rhs[impulseSolver.rowCount - 1] = dot(surfaceVeloc, normal);
+
+			NewtonBodyGetInvMass(contact.m_hitBody, &invMass, &invIxx, &invIyy, &invIzz);
+			NewtonWorldConvexCastReturnInfo* otherBodyContact = (invMass > 0f) ? contact : null;
+			impulseSolver.contactPoint[impulseSolver.rowCount - 1] = *otherBodyContact;
+			impulseSolver.contactPointPresent[impulseSolver.rowCount - 1] = true;
+
+			isAirborne = false;
+			Vector4f localPoint = unrotateVector(transform.matrix, point);
+			if(localPoint.x < contactPatchHigh)
+			{
+				onFloor = true;
+				float friction = 2.0f; // needs resolver
+				if(friction > 0f)
+				{
+					Vector4f sideDir = cross(transform.matrix.up, normal.xyz).normalized;
+					impulseSolver.addLinearRow(sideDir.xyz, (point.xyz - com), -lateralSpeed, -friction, friction, normalIndex);
+					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, sideDir.xyz);
+					impulseSolver.contactPoint[impulseSolver.rowCount-1] = *otherBodyContact;
+
+					Vector4f frontDir = cross(normal.xyz, sideDir.xyz);
+					impulseSolver.addLinearRow(frontDir.xyz, (point.xyz - com), -forwardSpeed, -friction, friction, normalIndex);
+					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, sideDir.xyz);
+					impulseSolver.contactPoint[impulseSolver.rowCount-1] = *otherBodyContact;
+				}
+			}
+		}
+
+		impulseSolver.addAngularRows;
+		veloc += impulseSolver.calculateImpulse * inverseMass()[0];
+		impulseSolver.applyReaction(timestep);
+
+		velocity = veloc;
+	}
+
+	void update(float timestep)
+	{
+		contactCount = 0;
+		float timeLeft = timestep;
+		immutable float timeEpsilon = timestep * (1 / 16f);
+
+		transform.rotation.y = headingAngle;
+		updateMatrix;
+
+		Vector3f v = velocity() + impulse * inverseMass()[0];
+		velocity = v;
+
+		isAirborne = true;
+		onFloor = false;
+
+		for(int i = 0; (i < 4) && (timeLeft > timeEpsilon); i++)
+		{
+			if(timeLeft > timeEpsilon)
+				resolveCollision(timestep);
+			float predictedTime = predictTimestep(timeLeft);
+			NewtonBodyIntegrateVelocity(handle, predictedTime);
+			timeLeft -= predictedTime;
+		}
 	}
 
 	private Matrix4f matrix() 
@@ -402,17 +538,7 @@ extern(C) nothrow void newtonTransformResult(const NewtonBody* bodyPtr, const dF
 		Body body_ = cast(Body)NewtonBodyGetUserData(bodyPtr);
 		assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics"); 
 
-		Matrix4f m;
-		m.arrayof = matrix[0..16]; // death
-
-		Vector3f bodyPosition = translation(m);
-		Vector3f bodyRotation = toEuler(m);
-		bodyRotation.x = radtodeg(bodyRotation.x);
-		bodyRotation.y = radtodeg(bodyRotation.y);
-		bodyRotation.z = radtodeg(bodyRotation.z);
-	
-		body_.transform.position = bodyPosition;
-		body_.transform.rotation = bodyRotation;
+		body_.getTransform;
 	}
 	catch(Exception) {}
 }

@@ -91,3 +91,21 @@ void dGaussSeidelLcpSor(T)(const int size, const int stride, const T* matrix, T*
 		x[j] = u[j];
 	}
 }
+
+Vector4f unrotateVector(Matrix4f m, Vector4f v)
+{
+	Vector4f r;
+	r.x = dot(v.xyz, m.forward);
+	r.y = dot(v.xyz, m.up);
+	r.z = dot(v.xyz, m.right);
+	r.w = 0f;
+	return r;
+}
+
+Vector4f untransformVector(Matrix4f m, Vector4f v)
+{
+	Vector3f mt = m.translation;
+	Vector4f rot = unrotateVector(m, v - Vector4f(mt.x, mt.y, mt.z, 0));
+	rot.w = 1f;
+	return rot;
+}
