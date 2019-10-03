@@ -160,6 +160,11 @@ class Body
 	void integrateVelocity(float ts) { NewtonBodyIntegrateVelocity(handle, ts); }
 }
 
+class DynamicPlayerBody : Body
+{
+
+}
+
 class KinematicPlayerBody : Body
 {
 	private float height, radius, stepHeight;
@@ -251,8 +256,8 @@ class KinematicPlayerBody : Body
 				jacobian[rowCount].angular[i] = 1f;
 				rhs[rowCount] = 0f;
 				impulseMag[rowCount] = 0f;
-				low[rowCount] = -1.0e12f;
-				high[rowCount] = 1.0e12f;
+				low[rowCount] = -10f;
+				high[rowCount] = 10f;
 				normalIndex[rowCount] = 0;
 				rowCount++;
 				assert(rowCount < maxRows*3);
@@ -277,7 +282,7 @@ class KinematicPlayerBody : Body
 
 		Vector3f calculateImpulse()
 		{
-			dFloat[maxRows][maxRows] massMatrix;
+			dFloat[maxRows*3][maxRows*3] massMatrix;
 			foreach(ref r; massMatrix)
 				r[] = 0f;
 			foreach(i; 0 .. rowCount)
@@ -302,9 +307,9 @@ class KinematicPlayerBody : Body
 			}
 
 			//dGaussSeidelLcpSor(m_rowCount, D_MAX_ROWS, &massMatrix[0][0], m_impulseMag, m_rhs, m_normalIndex, m_low, m_high, dFloat(1.0e-6f), 32, dFloat(1.1f));
-			dGaussSeidelLcpSor!float(rowCount, maxRows, &massMatrix[0][0], impulseMag.ptr, rhs.ptr, normalIndex.ptr, low.ptr, high.ptr, 1.0e-6f, 32, 1.1f);
+			//dGaussSeidelLcpSor!float(rowCount, maxRows, &massMatrix[0][0], impulseMag.ptr, rhs.ptr, normalIndex.ptr, low.ptr, high.ptr, 1.0e-6f, 32, 1.1f);
 			
-			/+{
+			{
 				double delta;
 
 				for (int k = 0; k < 32; ++k)
@@ -323,7 +328,7 @@ class KinematicPlayerBody : Body
 						impulseMag[i] = delta;
 					}
 				}
-			}+/
+			}
 
 			foreach(im; 0..impulseMag.length)
 				if(impulseMag[im].isNaN)
