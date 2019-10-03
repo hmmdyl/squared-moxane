@@ -9,6 +9,7 @@ import dlib.math.vector;
 import dlib.math.matrix;
 import dlib.math.transformation;
 import dlib.math.utils;
+import dlib.math.linsolve;
 import bindbc.newton;
 
 import std.math;
@@ -36,7 +37,7 @@ class Body
 	bool gravity;
 	bool dampenPlayer;
 
-	this() { mode = Mode.kinematic; }
+	this() { mode = Mode.dynamic; }
 
 	this(Collider collider, Mode mode, PhysicsSystem system, AtomicTransform transform = AtomicTransform.init) 
 	in(collider !is null) in(system !is null)
@@ -128,7 +129,7 @@ class Body
 		NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
 	}
 
-	protected void getTransform()
+	void getTransform()
 	{
 		Matrix4f m;
 		NewtonBodyGetMatrix(handle, m.arrayof.ptr);
@@ -159,7 +160,7 @@ class Body
 	void integrateVelocity(float ts) { NewtonBodyIntegrateVelocity(handle, ts); }
 }
 
-class PlayerBody : Body
+class KinematicPlayerBody : Body
 {
 	private float height, radius, stepHeight;
 	private float contactPatch;
@@ -192,7 +193,7 @@ class PlayerBody : Body
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
 
-		super.mass(mass, Vector3f(1, 1, 1));
+		super.massProperties(mass);
 		super.collidable = true;
 
 		impulseSolver = new ImpulseSolver(this);
@@ -210,22 +211,26 @@ class PlayerBody : Body
 
 		Matrix4f invInertia;
 		Vector3f veloc;
-		Jacobian[maxRows] jacobian;
-		bool[maxRows] contactPointPresent;
-		NewtonWorldConvexCastReturnInfo[maxRows] contactPoint;
-		float[maxRows] rhs, low, high, impulseMag;
-		int[maxRows] normalIndex;
+		Jacobian[maxRows*3] jacobian;
+		bool[maxRows*3] contactPointPresent;
+		NewtonWorldConvexCastReturnInfo[maxRows*3] contactPoint;
+		float[maxRows*3] rhs, low, high, impulseMag;
+		int[maxRows*3] normalIndex;
 		float mass, invMass;
 		int rowCount;
 
-		PlayerBody outer;
+		KinematicPlayerBody outer;
 
-		this(PlayerBody pb)
+		this(KinematicPlayerBody pb)
 		{
 			outer = pb;
 			mass = outer.mass()[0];
 			invMass = outer.inverseMass()[0];
 			invInertia = outer.inverseInertiaMatrix;
+			rhs[] = 0f;
+			low[] = 0f;
+			high[] = 0f;
+			impulseMag[] = 0f;
 			reset;
 		}
 
@@ -243,14 +248,14 @@ class PlayerBody : Body
 				contactPointPresent[rowCount] = false;
 				jacobian[rowCount].linear = Vector3f(0, 0, 0);
 				jacobian[rowCount].angular = Vector3f(0, 0, 0);
-				jacobian[rowCount].angular[rowCount] = 1f;
+				jacobian[rowCount].angular[i] = 1f;
 				rhs[rowCount] = 0f;
 				impulseMag[rowCount] = 0f;
 				low[rowCount] = -1.0e12f;
 				high[rowCount] = 1.0e12f;
 				normalIndex[rowCount] = 0;
 				rowCount++;
-				assert(rowCount < maxRows);
+				assert(rowCount < maxRows*3);
 			}
 		}
 
@@ -264,10 +269,10 @@ class PlayerBody : Body
 			this.normalIndex[rowCount] = (normalIndex == -1) ? 0 : normalIndex - rowCount;
 			rhs[rowCount] = accel - dot(veloc, jacobian[rowCount].linear);
 			
-			scope(exit) rowCount++;
-			assert(rowCount + 1 < maxRows);
+			rowCount++;
+			assert(rowCount < maxRows*3);
 
-			return rowCount;
+			return rowCount - 1;
 		}
 
 		Vector3f calculateImpulse()
@@ -298,6 +303,31 @@ class PlayerBody : Body
 
 			//dGaussSeidelLcpSor(m_rowCount, D_MAX_ROWS, &massMatrix[0][0], m_impulseMag, m_rhs, m_normalIndex, m_low, m_high, dFloat(1.0e-6f), 32, dFloat(1.1f));
 			dGaussSeidelLcpSor!float(rowCount, maxRows, &massMatrix[0][0], impulseMag.ptr, rhs.ptr, normalIndex.ptr, low.ptr, high.ptr, 1.0e-6f, 32, 1.1f);
+			
+			/+{
+				double delta;
+
+				for (int k = 0; k < 32; ++k)
+				{
+					for (int i = 0; i < rowCount; ++i)
+					{
+						delta = 0.0;
+
+						for (int j = 0; j < i; ++j)
+							delta += massMatrix[j][i] * impulseMag[j];
+
+						for (int j = i + 1; j < rowCount; ++j)
+							delta += massMatrix[j][i] * impulseMag[j];
+
+						delta = (rhs[i] - delta) / massMatrix[i][i];
+						impulseMag[i] = delta;
+					}
+				}
+			}+/
+
+			foreach(im; 0..impulseMag.length)
+				if(impulseMag[im].isNaN)
+					impulseMag[im] = 0f;
 
 			auto netImpulse = Vector3f(0, 0, 0);
 			for (int i = 0; i < rowCount; i++) {
@@ -336,16 +366,16 @@ class PlayerBody : Body
 
 	private enum maxContacts = 6;
 	private enum maxRows = maxContacts * 3;
-
+	private enum maxCollisionSteps = 8;
 	private enum maxCollisionPenetration = 5.0e-3f;
 
-	private int contactCount;
+	int contactCount;
 	private NewtonWorldConvexCastReturnInfo[maxRows] contactBuffer;
 
 	void calculateContacts()
 	{
 		Matrix4f m = matrix();
-		contactCount = NewtonWorldCollide(super.system.handle, m.arrayof.ptr, super.collider.handle, cast(void*)this, &prefilterCallback, contactBuffer.ptr, 6, 0);
+		contactCount = NewtonWorldCollide(super.system.handle, m.arrayof.ptr, super.collider.handle, cast(void*)this, &prefilterCallback, contactBuffer.ptr, maxContacts, 0);
 	}
 
 	extern(C) private static uint prefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collision, void* userPtr)
@@ -378,9 +408,55 @@ class PlayerBody : Body
 	private float predictTimestep(float timestep)
 	{
 		getTransform;
+		AtomicTransform orig = transform;
 		Vector3f v = velocity();
 
 		NewtonBodyIntegrateVelocity(handle, timestep);
+		CollisionState playerCollisionState = predictCollision(v);
+		transform = orig;
+		updateMatrix;
+
+		if(playerCollisionState == CollisionState.deepPenetration)
+		{
+			float savedTimeStep = timestep;
+			timestep *= 0.5f;
+			float dt = timestep;
+
+			foreach(i; 0 .. maxCollisionSteps)
+			{
+				integrateVelocity(timestep);
+				calculateContacts;
+				transform = orig;
+				updateMatrix;
+
+				dt *= 0.5f;
+				playerCollisionState = predictCollision(v);
+				if(playerCollisionState == CollisionState.collision)
+					return timestep;
+				else if(playerCollisionState == CollisionState.deepPenetration)
+					timestep -= dt;
+				else timestep += dt;
+			}
+
+			if(timestep > dt * 2f)
+				return timestep;
+
+			dt = savedTimeStep / maxCollisionSteps;
+			timestep = dt;
+			foreach(i; 1 .. maxCollisionSteps)
+			{
+				integrateVelocity(timestep);
+				calculateContacts;
+				transform = orig;
+				updateMatrix;
+
+				playerCollisionState = predictCollision(v);
+				if(playerCollisionState != CollisionState.free)
+					return timestep;
+
+				timestep += dt;
+			}
+		}
 
 		return timestep;
 	}
@@ -441,6 +517,7 @@ class PlayerBody : Body
 		float maxPenetration = 0f;
 		foreach(i; 0 .. contactCount) maxPenetration = max(contactBuffer[i].m_penetration, maxPenetration);
 	
+		impulseSolver.reset;
 		if(maxPenetration > maxCollisionPenetration)
 		{
 			resolveInterpenetrations;
@@ -451,11 +528,11 @@ class PlayerBody : Body
 		com = (Vector4f(com.x, com.y, com.z, 0f) * m).xyz;
 		
 		impulseSolver.reset;
-		Vector4f surfaceVeloc;
+		Vector4f surfaceVeloc = Vector4f(0, 0, 0, 0);
 		immutable float contactPatchHigh = contactPatch * 0.995f;
 		foreach(i; 0 .. contactCount)
 		{
-			NewtonWorldConvexCastReturnInfo* contact = &contactBuffer[i];
+			NewtonWorldConvexCastReturnInfo contact = contactBuffer[i];
 
 			auto point = Vector4f(contact.m_point[0], contact.m_point[1], contact.m_point[2], 0);
 			auto normal = Vector4f(contact.m_normal[0], contact.m_normal[1], contact.m_normal[2], 0);
@@ -466,9 +543,9 @@ class PlayerBody : Body
 			impulseSolver.rhs[impulseSolver.rowCount - 1] = dot(surfaceVeloc, normal);
 
 			NewtonBodyGetInvMass(contact.m_hitBody, &invMass, &invIxx, &invIyy, &invIzz);
-			NewtonWorldConvexCastReturnInfo* otherBodyContact = (invMass > 0f) ? contact : null;
-			impulseSolver.contactPoint[impulseSolver.rowCount - 1] = *otherBodyContact;
-			impulseSolver.contactPointPresent[impulseSolver.rowCount - 1] = true;
+			NewtonWorldConvexCastReturnInfo otherBodyContact = (invMass > 0f) ? contact : NewtonWorldConvexCastReturnInfo.init;
+			impulseSolver.contactPoint[impulseSolver.rowCount - 1] = otherBodyContact;
+			impulseSolver.contactPointPresent[impulseSolver.rowCount - 1] = invMass > 0f;
 
 			isAirborne = false;
 			Vector4f localPoint = unrotateVector(transform.matrix, point);
@@ -478,15 +555,15 @@ class PlayerBody : Body
 				float friction = 2.0f; // needs resolver
 				if(friction > 0f)
 				{
-					Vector4f sideDir = cross(transform.matrix.up, normal.xyz).normalized;
-					impulseSolver.addLinearRow(sideDir.xyz, (point.xyz - com), -lateralSpeed, -friction, friction, normalIndex);
-					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, sideDir.xyz);
-					impulseSolver.contactPoint[impulseSolver.rowCount-1] = *otherBodyContact;
+					Vector3f sideDir = cross(transform.matrix.up, normal.xyz).normalized;
+					impulseSolver.addLinearRow(sideDir, (point.xyz - com), -lateralSpeed, -friction, friction, normalIndex);
+					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, sideDir);
+					impulseSolver.contactPoint[impulseSolver.rowCount-1] = otherBodyContact;
 
-					Vector4f frontDir = cross(normal.xyz, sideDir.xyz);
-					impulseSolver.addLinearRow(frontDir.xyz, (point.xyz - com), -forwardSpeed, -friction, friction, normalIndex);
-					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, sideDir.xyz);
-					impulseSolver.contactPoint[impulseSolver.rowCount-1] = *otherBodyContact;
+					Vector3f frontDir = cross(normal.xyz, sideDir);
+					impulseSolver.addLinearRow(frontDir, (point.xyz - com), -forwardSpeed, -friction, friction, normalIndex);
+					impulseSolver.rhs[impulseSolver.rowCount-1] += dot(surfaceVeloc.xyz, frontDir);
+					impulseSolver.contactPoint[impulseSolver.rowCount-1] = otherBodyContact;
 				}
 			}
 		}
@@ -504,7 +581,10 @@ class PlayerBody : Body
 		float timeLeft = timestep;
 		immutable float timeEpsilon = timestep * (1 / 16f);
 
+		getTransform;
 		transform.rotation.y = headingAngle;
+		transform.rotation.x = 0;
+		transform.rotation.z = 0;
 		updateMatrix;
 
 		Vector3f v = velocity() + impulse * inverseMass()[0];
@@ -517,6 +597,7 @@ class PlayerBody : Body
 		{
 			if(timeLeft > timeEpsilon)
 				resolveCollision(timestep);
+
 			float predictedTime = predictTimestep(timeLeft);
 			NewtonBodyIntegrateVelocity(handle, predictedTime);
 			timeLeft -= predictedTime;
