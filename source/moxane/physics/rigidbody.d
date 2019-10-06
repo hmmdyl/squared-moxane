@@ -155,14 +155,96 @@ class Body
 	@property Vector3f velocity() const {
 		Vector3f vel; NewtonBodyGetVelocity(handle, vel.arrayof.ptr); return vel; }
 	@property void velocity(Vector3f v) { NewtonBodySetVelocity(handle, v.arrayof.ptr); }
-	Vector3f velo =	Vector3f(0, 0, 0);
 
 	void integrateVelocity(float ts) { NewtonBodyIntegrateVelocity(handle, ts); }
 }
 
 class DynamicPlayerBody : Body
 {
+	const float height, radius;
 
+	float yaw = 0f;
+	float strafe = 0f, forward = 0f, vertical = 0f;
+
+	float floatHeight = 0.6f;
+
+	this(PhysicsSystem system, float radius, float height, float mass, AtomicTransform transform = AtomicTransform.init) 
+	in(system !is null)
+	{ 
+		super.system = system;
+		super.transform = transform;
+
+		enum scale = 3f;
+		height = max(height - 2f * radius / scale, 0.1f);
+
+		this.height = height;
+		this.radius = radius;
+
+		collider = new BoxCollider(system, Vector3f(0.25f, 1.3f, 0.25f), Transform(Vector3f(0, 0.65f, 0)));
+			//new CapsuleCollider(system, 0.1f, 0.1f, 0.3f);
+		//collider.scale = Vector3f(1, scale, scale);
+
+		float[16] matrix = transform.matrix.arrayof;
+		handle = NewtonCreateDynamicBody(system.handle, collider.handle, matrix.ptr);
+		NewtonBodySetForceAndTorqueCallback(handle, &newtonApplyForce);
+		gravity = true;
+
+		upConstraint;
+
+		NewtonBodySetUserData(handle, cast(void*)this);
+		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
+
+		super.mass(mass, Vector3f(1, 1, 1));
+		super.collidable = true;
+	} 
+
+	void update(float dt)
+	{
+		getTransform;
+		Vector3f rot = Vector3f(0, 0, 0);
+		transform.rotation = rot;
+		updateMatrix;
+
+		auto calculatedVelocity = Vector3f(strafe, raycastHit ? vertical : vertical + velocity.y, forward);
+		velocity = calculatedVelocity;
+		
+		foreach(t; 0 .. 1)
+		{
+			raycastHit = false;
+			Vector3f start = transform.position;
+			Vector3f end = start - Vector3f(0, floatHeight, 0);
+			NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			
+			if(raycastHit || velocity.y == 0f)
+			{
+				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
+				updateMatrix;
+			}
+
+			integrateVelocity(dt / 1);
+		}
+	}
+
+	bool raycastHit;
+	Vector3f raycastHitCoord = Vector3f(0, 0, 0);
+
+	private static extern(C) float newtonRaycastCallback(const NewtonBody* bodyPtr, const NewtonCollision* shapeHit, const float* hitContact, const float* hitNormal, long collisionID, void* userData, float intersectParam)
+	{
+		try
+		{
+			DynamicPlayerBody dpb = cast(DynamicPlayerBody)userData;
+			dpb.raycastHitCoord = Vector3f(hitContact[0], hitContact[1], hitContact[2]);
+			dpb.raycastHit = true;
+			return intersectParam;
+		}
+		catch(Exception) {}
+	}
+
+	private static extern(C) uint newtonPrefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collPtr, void* userData) nothrow
+	{
+		if(bodyPtr == userData) return 0;
+		else return 1;
+	}
 }
 
 class KinematicPlayerBody : Body

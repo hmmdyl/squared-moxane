@@ -18,7 +18,7 @@ struct Transform
 		this.scale = at.scale;
 	}
 
-	this(Vector3f position, Vector3f rotation, Vector3f scale)
+	this(Vector3f position, Vector3f rotation = Vector3f(0, 0 ,0), Vector3f scale = Vector3f(1, 1, 1))
 	{
 		this.position = position;
 		this.rotation = rotation;
