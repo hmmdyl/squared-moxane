@@ -204,24 +204,24 @@ class DynamicPlayerBody : Body
 		Vector3f rot = Vector3f(0, 0, 0);
 		transform.rotation = rot;
 		updateMatrix;
-
-		auto calculatedVelocity = Vector3f(strafe, raycastHit ? vertical : vertical + velocity.y, forward);
-		velocity = calculatedVelocity;
 		
-		foreach(t; 0 .. 1)
+		foreach(t; 0 .. 10)
 		{
+			auto calculatedVelocity = Vector3f(strafe, raycastHit ? vertical : vertical + velocity.y, forward);
+			velocity = calculatedVelocity;
+
+			integrateVelocity(dt / 10);
+
 			raycastHit = false;
 			Vector3f start = transform.position;
 			Vector3f end = start - Vector3f(0, floatHeight, 0);
 			NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
-			
+
 			if(raycastHit || velocity.y == 0f)
 			{
 				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
 				updateMatrix;
 			}
-
-			integrateVelocity(dt / 1);
 		}
 	}
 
