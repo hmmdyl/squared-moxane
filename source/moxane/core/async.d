@@ -5,6 +5,7 @@ import std.datetime.stopwatch;
 import core.sync.condition;
 import core.sync.mutex;
 import std.range.interfaces : InputRange;
+import std.functional : unaryFun;
 
 import containers;
 
@@ -71,7 +72,17 @@ class AsyncSystem
 	}
 }
 
-@trusted class Channel(T)
+@safe interface IChannel(T)
+{
+	Maybe!T tryGet();
+	Maybe!T await();
+	void awaitOnly();
+
+	void send(T);
+	void terminate();
+}
+
+@trusted class Channel(T) : IChannel!T
 {
 	private CyclicBuffer!T queue;
 	private Condition condition;
@@ -118,12 +129,23 @@ class AsyncSystem
 		}
 	}
 
+	void awaitOnly()
+	{
+		bool empty;
+		synchronized(queueSyncObj)
+			empty = queue.empty;
+
+		if(empty)
+			synchronized(mutex)
+				condition.wait;
+	}
+
 	void clearUnsafe() { synchronized(queueSyncObj) queue.clear; }
 
 	void notifyUnsafe()
 	{
 		synchronized(mutex)
-			condition.notify;
+			condition.notifyAll;
 	}
 
 	void send(T item)
@@ -135,4 +157,84 @@ class AsyncSystem
 				condition.notify;
 		}
 	}
+
+	void terminate() { clearUnsafe; notifyUnsafe; }
+}
+
+@trusted class ExposedChannel(T) : IChannel!T
+{
+	private DynamicArray!T payload;	
+	private Condition condition;
+	private Mutex waitMutex;
+	private Mutex consumptionMutex;
+
+	this()
+	{
+		waitMutex = new Mutex;
+		condition = new Condition(waitMutex);
+		consumptionMutex = new Mutex;
+	}
+
+	auto items() { return payload[]; }
+
+	void syncEnter() { consumptionMutex.lock; }
+	void syncExit() { consumptionMutex.unlock; }
+
+	bool empty() 
+	{ synchronized(consumptionMutex) return payload.empty; }
+	Maybe!T front() { return await(); }
+	void popFront() {}
+
+	Maybe!T tryGet() 
+	{
+		synchronized(consumptionMutex)
+		{
+			if(payload.empty) return Maybe!T();
+
+			T item = payload.back;
+			payload.removeBack;
+			return Maybe!T(item);
+		}
+	}
+
+	Maybe!T await()
+	{
+		bool empty;
+		synchronized(consumptionMutex)
+			empty = payload.empty;
+
+		if(empty)
+			synchronized(waitMutex)
+				condition.wait;
+
+		synchronized(consumptionMutex)
+		{
+			if(payload.empty) return Maybe!T();
+
+			T item = payload.back;
+			payload.removeBack;
+			return Maybe!T(item);
+		}
+	}
+
+	void awaitOnly()
+	{
+		bool empty;
+		synchronized(consumptionMutex)
+			empty = payload.empty;
+
+		if(empty)
+			synchronized(waitMutex)
+				condition.wait;
+	}
+
+	void clearUnsafe() { synchronized(consumptionMutex) payload.clear; }
+
+	void notifyUnsafe()
+	{
+		synchronized(waitMutex)
+			condition.notifyAll;
+	}
+
+	void terminate() { clearUnsafe; notifyUnsafe; }
 }
