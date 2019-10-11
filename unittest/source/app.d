@@ -18,7 +18,7 @@ import bindbc.newton;
 //extern(C) __gshared string[] rt_options = ["gcopt=gc:precise profile:1"];
 
 __gshared StopWatch projectileTime;
-enum initialVelocity = 300;
+enum initialVelocity = 3000;
 enum angle = degtorad(40f);
 
 __gshared bool first = true;
@@ -37,11 +37,11 @@ extern(C) void cb_applyForce(const NewtonBody* body_, dFloat timestep, int threa
 	if(first)
 	{
 		dFloat[3] force = [initialVelocity * mass, 
-						   initialVelocity * mass + 9.81 * mass, 
+						   /+initialVelocity * mass + +/-9.81 * mass, 
 						   0];
 		NewtonBodySetForce(body_, force.ptr);
 
-		first = false;
+		//first = false;
 	}
 	else
 	{
@@ -57,7 +57,7 @@ extern(C) void cb_applyForce(const NewtonBody* body_, dFloat timestep, int threa
 class TriangleRotateScript : AsyncScript
 {
 	NewtonWorld* world;
-	NewtonBody* ground, sphere, sphere2;
+	NewtonBody* ground, sphere, sphere2, boxRight;
 	Entity other;
 
 	this(Moxane moxane, Entity other) @trusted
@@ -79,11 +79,18 @@ class TriangleRotateScript : AsyncScript
 		NewtonCollision* csSphere = NewtonCreateSphere(world, 1f, 0, null);
 		NewtonCollision* csGround = NewtonCreateBox(world, 100, 0.1f, 100, 0, null);
 
+		NewtonCollision* csBoxRight = NewtonCreateBox(world, 1, 10, 100, 0, null);
+
 		ground = NewtonCreateDynamicBody(world, csGround, tm.ptr);
 		tm[13] = 3.0f;
 		sphere = NewtonCreateDynamicBody(world, csSphere, tm.ptr);
-		tm[12] = 0.1;
-		tm[13] = 6.0;
+		tm[12] = 10;
+		tm[13] = 0;
+		boxRight = NewtonCreateKinematicBody(world, csBoxRight, tm.ptr);
+		NewtonBodySetContinuousCollisionMode(boxRight, 1);
+		NewtonBodySetContinuousCollisionMode(sphere, 1);
+
+
 		//sphere2 = NewtonCreateDynamicBody(world, csSphere, tm.ptr);
 
 		NewtonBodySetMassMatrix(sphere, 1f, 1, 1, 1);
@@ -119,6 +126,10 @@ class TriangleRotateScript : AsyncScript
 			t.rotation.x = radtodeg(euler.x);
 			t.rotation.y = radtodeg(euler.y);
 			t.rotation.z = radtodeg(euler.z);
+
+			float[3] velo = [10, 0, 0];
+			//NewtonBodySetVelocity(sphere, velo.ptr);
+			//NewtonBodyIntegrateVelocity(sphere, 1/60f);
 
 			/+Transform* t1 = other.get!Transform;
 			NewtonBodyGetPosition(sphere2, arr.ptr);

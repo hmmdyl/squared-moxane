@@ -27,6 +27,7 @@ class PhysicsSystem : System
 	{
 		super(moxane, manager);
 		handle = NewtonCreate();
+		NewtonSetNumberOfSubsteps(handle, 10);
 	}
 
 	~this() @trusted

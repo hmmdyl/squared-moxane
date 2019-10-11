@@ -53,6 +53,8 @@ class Body
 		else
 			handle = NewtonCreateKinematicBody(system.handle, collider.handle, matrix.ptr);
 
+		NewtonBodySetContinuousCollisionMode(handle, 1);
+
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetForceAndTorqueCallback(handle, &newtonApplyForce);
 		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
@@ -189,6 +191,8 @@ class DynamicPlayerBody : Body
 		NewtonBodySetForceAndTorqueCallback(handle, &newtonApplyForce);
 		gravity = true;
 
+		NewtonBodySetContinuousCollisionMode(handle, 1);
+
 		upConstraint;
 
 		NewtonBodySetUserData(handle, cast(void*)this);
@@ -205,23 +209,24 @@ class DynamicPlayerBody : Body
 		transform.rotation = rot;
 		updateMatrix;
 		
-		foreach(t; 0 .. 10)
+		foreach(t; 0 .. 1)
 		{
-			auto calculatedVelocity = Vector3f(strafe, raycastHit ? vertical : vertical + velocity.y, forward);
+			auto calculatedVelocity = Vector3f(velocity.x * 0.1f, raycastHit ? vertical : vertical + velocity.y, velocity.z * 0.1f);
 			velocity = calculatedVelocity;
-
-			integrateVelocity(dt / 10);
 
 			raycastHit = false;
 			Vector3f start = transform.position;
 			Vector3f end = start - Vector3f(0, floatHeight, 0);
 			NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
 
-			if(raycastHit || velocity.y == 0f)
+			if(raycastHit)// || velocity.y == 0f)
 			{
 				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
 				updateMatrix;
 			}
+
+			integrateVelocity(dt / 1);
+			getTransform;
 		}
 	}
 
