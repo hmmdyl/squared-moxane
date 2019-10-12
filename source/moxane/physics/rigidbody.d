@@ -61,7 +61,7 @@ class Body
 	}
 
 	~this()
-	{ NewtonDestroyBody(handle); handle = null; }
+	{ if(handle !is null) NewtonDestroyBody(handle); handle = null; }
 
 	void upConstraint() {
 		Vector3f up = Vector3f(0, 1, 0);
@@ -211,7 +211,7 @@ class DynamicPlayerBody : Body
 		
 		foreach(t; 0 .. 1)
 		{
-			auto calculatedVelocity = Vector3f(velocity.x * 0.1f, raycastHit ? vertical : vertical + velocity.y, velocity.z * 0.1f);
+			auto calculatedVelocity = Vector3f(velocity.x * 0.1f, /+raycastHit ? vertical : vertical + velocity.y+/velocity.y * 0.1f, velocity.z * 0.1f);
 			velocity = calculatedVelocity;
 
 			raycastHit = false;
