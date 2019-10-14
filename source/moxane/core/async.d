@@ -228,12 +228,22 @@ class AsyncSystem
 				condition.wait;
 	}
 
-	void clearUnsafe() { synchronized(consumptionMutex) payload.clear; }
+	void clearUnsafe() { synchronized(consumptionMutex) payload = DynamicArray!T(); }
 
 	void notifyUnsafe()
 	{
 		synchronized(waitMutex)
 			condition.notifyAll;
+	}
+
+	void send(T item)
+	{
+		synchronized(consumptionMutex)
+		{
+			payload.put(item);
+			synchronized(waitMutex)
+				condition.notify;
+		}
 	}
 
 	void terminate() { clearUnsafe; notifyUnsafe; }

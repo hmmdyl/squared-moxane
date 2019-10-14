@@ -46,7 +46,7 @@ import std.datetime.systime;
 				cwrite(color("ERROR", fg.light_red));
 				return "ERROR";
 			case panic: 
-				cwrite(color("INFO", fg.red));
+				cwrite(color("PANIC", fg.red));
 				return "PANIC";
 		}
 	}
