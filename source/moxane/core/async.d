@@ -80,6 +80,8 @@ class AsyncSystem
 
 	void send(T);
 	void terminate();
+
+	@property size_t length();
 }
 
 @trusted class Channel(T) : IChannel!T
@@ -159,6 +161,8 @@ class AsyncSystem
 	}
 
 	void terminate() { clearUnsafe; notifyUnsafe; }
+
+	@property size_t length() {  synchronized(queueSyncObj) return queue.length; }
 }
 
 @trusted class ExposedChannel(T) : IChannel!T
@@ -247,4 +251,6 @@ class AsyncSystem
 	}
 
 	void terminate() { clearUnsafe; notifyUnsafe; }
+
+	@property size_t length() { synchronized(consumptionMutex) return payload.length; }
 }
