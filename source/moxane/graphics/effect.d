@@ -181,8 +181,8 @@ class Effect
 	void findUniform(string name)
 	{
 		int loc = glGetUniformLocation(id, toStringz(name));
-		if(loc == -1)
-			moxane.services.getAOrB!(GraphicsLog, Log)().write(Log.Severity.warning, "Could not get uniform " ~ name ~ " for effect " ~ effectName);
+		/+if(loc == -1)
+			moxane.services.getAOrB!(GraphicsLog, Log)().write(Log.Severity.warning, "Could not get uniform " ~ name ~ " for effect " ~ effectName);+/
 		uniforms[name] = EffectUniform(name, loc);
 	}
 

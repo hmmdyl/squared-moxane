@@ -16,3 +16,6 @@ struct NetworkSemantic
 }
 
 immutable NetworkSemantic defaultSemantic = NetworkSemantic(SyncLifetime.none);
+
+// 0 client id means either server, or singleplayer
+alias ClientID = ushort;

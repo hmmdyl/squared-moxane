@@ -3,6 +3,7 @@ module moxane.core.entity;
 
 import moxane.core.engine;
 import moxane.core.eventwaiter;
+import moxane.network.semantic;
 
 import std.typecons;
 import std.exception : enforce;
@@ -205,6 +206,8 @@ class EntityManager
 	
 	EventWaiter!OnEntityAdd onEntityAdd;
 	EventWaiter!OnEntityAdd onEntityRemove;
+
+	ClientID clientID = 0;
 
 	Moxane moxane;
 	this(Moxane moxane)

@@ -16,6 +16,6 @@ void main()
 	fWorldPos = (Model * vec4(Vertex, 1.0)).xyz;
 	gl_Position = MVP * vec4(Vertex, 1.0);
 	
-	fNormal = Normal;
+	fNormal = (Model * vec4(Normal, 1)).xyz;
 	fTexCoord = TexCoord;
 }

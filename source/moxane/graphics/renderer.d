@@ -309,7 +309,7 @@ class Renderer
 
 		gl.wireframe = false;
 
-		Matrix4f proj = orthoMatrix!float(-10, 10, -10, 10, -10, 10);
+		Matrix4f proj = orthoMatrix!float(-40, 40, -40, 40, -20, 20);
 		immutable lightDir = Vector3f(0, 0.5f, 0.5f);
 		//Matrix4f view = lookAtMatrix!float(Vector3f(20, 0, 0), Vector3f(20, 0, 0) - lightDir, Vector3f(0, 1, 0));
 		// ^^^ works
