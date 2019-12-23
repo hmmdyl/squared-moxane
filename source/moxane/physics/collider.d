@@ -10,18 +10,40 @@ import core.atomic;
 
 @trusted:
 
+enum ColliderType
+{
+	none,
+	box,
+	sphere,
+	staticMesh,
+	capsule
+}
+
 abstract class Collider
 {
 	package NewtonCollision* handle;
+	immutable ColliderType type;
 
 	PhysicsSystem system;
-	this(PhysicsSystem system) in(system !is null) { this.system = system; this.system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
+	this(PhysicsSystem system, immutable ColliderType type) 
+	in(system !is null) 
+	{
+		this.type = type;
+		this.system = system; 
+		this.system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); 
+	}
 
 	~this() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
 
 	private shared Vector3f scale_;
 	@property Vector3f scale() const { return atomicLoad(scale_); }
 	@property void scale(Vector3f s) { atomicStore(scale_, s); system.issueCommand(PhysicsCommand(PhysicsCommands.colliderUpdateFields, this)); }
+
+	package void updateFields()
+	{
+		auto s = scale;
+		NewtonCollisionSetScale(handle, s.x, s.y, s.z);
+	}
 } 
 
 class BoxCollider : Collider
@@ -31,7 +53,7 @@ class BoxCollider : Collider
 
 	this(PhysicsSystem system, Vector3f dimensions, Transform offset = Transform.init)
 	{
-		super(system);
+		super(system, ColliderType.box);
 		this.dimensions = dimensions;
 		this.offset = offset;
 		//handle = NewtonCreateBox(system.handle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
@@ -45,7 +67,7 @@ class SphereCollider : Collider
 
 	this(PhysicsSystem system, float radius, Transform offset = Transform.init)
 	{
-		super(system);
+		super(system, ColliderType.sphere);
 		this.radius = radius;
 		this.offset = offset;
 		//handle = NewtonCreateSphere(system.handle, radius, 0, offset.matrix.arrayof.ptr);
@@ -56,13 +78,16 @@ class StaticMeshCollider : Collider
 {
 	package bool duplicateArray;
 	package Vector3f[] vertexConstArr;
+	
+	bool optimiseMesh;
 
 	this(PhysicsSystem system, Vector3f[] vertices, bool dupMem = true, bool optimiseMesh = false)
 	in(vertices.length % 3 == 0, "vertices must be a triangle mesh")
 	{
-		super(system);
-
+		super(system, ColliderType.staticMesh);
+		this.optimiseMesh = optimiseMesh;
 		this.duplicateArray = dupMem;
+
 		if(dupMem)
 		{
 			import std.experimental.allocator.mallocator;
@@ -99,10 +124,13 @@ class StaticMeshCollider : Collider
 		writeln("ms.");+/
 	}
 
-	package void freeDuplicateMemory() in(duplicateMemory == true)
-	do {
-		import std.experimental.allocator.mallocator;
-		Mallocator.instance.deallocate(vertexConstArr);
+	package void freeMemory()
+	{
+		if(duplicateArray)
+		{
+			import std.experimental.allocator.mallocator;
+			Mallocator.instance.deallocate(vertexConstArr);
+		}
 		vertexConstArr = null;
 	}
 }
@@ -116,7 +144,7 @@ class CapsuleCollider : Collider
 
 	this(PhysicsSystem system, float radius, float radius1, float height, Transform offset = Transform.init)
 	{
-		super(system);
+		super(system, ColliderType.capsule);
 		this.radius = radius;
 		this.radius1 = radius1;
 		this.height = height;
