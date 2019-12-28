@@ -24,6 +24,8 @@ class BodyMT
 	enum Mode { dynamic, kinematic }
 
 	package NewtonBody* handle;
+
+
 	
 	PhysicsSystem system;
 	Collider collider;
@@ -48,13 +50,14 @@ class BodyMT
 	void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
 
 	mixin SharedPropertyDirty!(bool, "freeze");
-	mixin SharedPropertyDirty!(Vector3f, "sumForce");
-	mixin SharedPropertyDirty!(Vector3f, "sumTorque");
+	mixin SharedPropertyDirtyVector!(Vector3f, "sumForce");
+	mixin SharedPropertyDirtyVector!(Vector3f, "sumTorque");
 
 	void addForce(Vector3f force) { sumForce += force; }
 	void addTorque(Vector3f torque) { sumTorque += torque; }
 
 	mixin SharedPropertyDirty!(bool, "collidable");
+
 	mixin SharedGetter!(Vector3f, "acceleration");
 	mixin SharedGetter!(Vector3f, "angularAcceleration");
 
