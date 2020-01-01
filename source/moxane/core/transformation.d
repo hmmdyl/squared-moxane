@@ -34,7 +34,7 @@ struct Transform
 		return t;
 	}
 
-	@property Matrix4f matrix() @trusted
+	@property Matrix4f matrix() @trusted const
 	{
 		return makeMatrix(position, rotation, scale);
 	}
@@ -45,6 +45,7 @@ struct AtomicTransform
 	private shared float px_, py_, pz_;
 	private shared float rx_, ry_, rz_;
 	private shared float sx_, sy_, sz_;
+	private shared bool set_;
 
 	this(Transform t)
 	{
@@ -73,6 +74,7 @@ struct AtomicTransform
 		atomicStore(px_, p.x);
 		atomicStore(py_, p.y);
 		atomicStore(pz_, p.z);
+		atomicStore(set_, true);
 	}
 
 	@property Vector3f rotation() const
@@ -88,6 +90,7 @@ struct AtomicTransform
 		atomicStore(rx_, r.x);
 		atomicStore(ry_, r.y);
 		atomicStore(rz_, r.z);
+		atomicStore(set_, true);
 	}
 
 	@property Vector3f scale() const
@@ -103,6 +106,7 @@ struct AtomicTransform
 		atomicStore(sx_, s.x);
 		atomicStore(sy_, s.y);
 		atomicStore(sz_, s.z);
+		atomicStore(set_, true);
 	}
 
 	static AtomicTransform init()
@@ -118,6 +122,9 @@ struct AtomicTransform
 	{
 		return makeMatrix(position, rotation, scale);
 	}
+
+	@property bool set() const { return atomicLoad(set_); }
+	@property void set(bool n) { atomicStore(set_, n); }
 }
 
 Matrix4f makeMatrix(Vector3f position, Vector3f rotation, Vector3f scale) @trusted

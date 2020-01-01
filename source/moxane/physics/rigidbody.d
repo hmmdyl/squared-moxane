@@ -22,19 +22,14 @@ import std.algorithm;
 class BodyMT
 {
 	enum Mode { dynamic, kinematic }
+	immutable Mode mode;
 
 	package NewtonBody* handle;
 
-
-	
 	PhysicsSystem system;
 	Collider collider;
 
-	immutable Mode mode;
-
 	AtomicTransform transform;
-
-	mixin SharedProperty!(bool, "gravity");
 
 	this(PhysicsSystem system, Mode mode, Collider collider, AtomicTransform transform = AtomicTransform.init)
 	in(collider !is null) in(system !is null)
@@ -47,68 +42,147 @@ class BodyMT
 		system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyCreate, this));
 	}
 
-	void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
+	final void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
 
-	mixin SharedPropertyDirty!(bool, "freeze");
-	mixin SharedPropertyDirtyVector!(Vector3f, "sumForce");
-	mixin SharedPropertyDirtyVector!(Vector3f, "sumTorque");
+	package void initialise()
+	{
+		if(mode == Mode.dynamic)
+			handle = NewtonCreateDynamicBody(system.worldHandle, collider.handle, transform.matrix.arrayof.ptr);
+		else	
+			handle = NewtonCreateKinematicBody(system.worldHandle, collider.handle, transform.matrix.arrayof.ptr);
+	
+		NewtonBodySetContinuousCollisionMode(handle, 1);
+		NewtonBodySetUserData(handle, cast(void*)this);
+		NewtonBodySetForceAndTorqueCallback(handle, &applyForce);
+		NewtonBodySetTransformCallback(handle, &transformResult);
+	}
+
+	package void deinitialise()
+	{
+		NewtonDestroyBody(handle);
+		handle = null;
+	}
+
+	mixin(evaluateProperties!(bool, "gravity",
+							  bool, "freeze",
+							  Vector3f, "sumForce",
+							  Vector3f, "sumTorque",
+							  bool, "collidable",
+							  Vector3f, "angularDampening",
+							  Vector3f, "centreOfMass",
+							  float, "mass",
+							  Vector3f, "massMatrix",
+							  float, "linearDampening",
+							  Vector3f, "velocity",
+							  Vector3f, "angularVelocity")());
+
+	mixin(SharedGetter(Vector3f, "acceleration"));
+	mixin(SharedGetter(Vector3f, "angularAcceleration"));
+	mixin(SharedGetter(int, "simulationState"));
+	mixin(SharedGetter(bool, "asleep"));
 
 	void addForce(Vector3f force) { sumForce += force; }
 	void addTorque(Vector3f torque) { sumTorque += torque; }
 
-	mixin SharedPropertyDirty!(bool, "collidable");
-
-	mixin SharedGetter!(Vector3f, "acceleration");
-	mixin SharedGetter!(Vector3f, "angularAcceleration");
-
-	mixin SharedPropertyDirty!(Tuple!(float, Vector3f), "mass");
-
-	mixin SharedPropertyDirty!(Vector3f, "velocity");
-
-	package void updateFields(float deltaTime)
+	package void updateFields(float dt)
 	{
-		if(freezeDirty)
-		{
+		scope(success) resetFieldUpdates;
+		scope(success) transform.set = false;
+
+		if(transform.set)
+			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+
+		if(isFieldUpdate(FieldName.freeze))
 			NewtonBodySetFreezeState(handle, cast(int)freeze);
-			freezeDirty = false;
-		}
-		else freezeInternal = cast(bool)NewtonBodyGetFreezeState(handle);
+		else freeze = cast(bool)NewtonBodyGetFreezeState(handle);
 
-		if(collidableDirty)
-		{
+		if(isFieldUpdate(FieldName.collidable))
 			NewtonBodySetCollidable(handle, cast(int)collidable);
-			collidableDirty = false;
-		}
-		else collidableInternal = cast(bool)NewtonBodyGetCollidable(handle);
+		else collidable = cast(bool)NewtonBodyGetCollidable(handle);
 
-		if(massDirty)
+		if(isFieldUpdate(FieldName.mass) || isFieldUpdate(FieldName.massMatrix))
+			NewtonBodySetMassMatrix(handle, mass, massMatrix.x, massMatrix.y, massMatrix.z);
+		else
 		{
-			NewtonBodySetMassMatrix(handle, mass[0], mass[1].x, mass[1].y, mass[1].z);
-			massDirty = false;
-		}
-		else {
 			float m;
 			Vector3f inertia;
-			NewtonBodyGetMass(handle, &m, &inertia.arrayof[0], &inertia.arrayof[1], &interia.arrayof[2]);
-			massInternal = tuple(m, inertia);
+			NewtonBodyGetMass(handle, &m, &inertia.arrayof[0], &inertia.arrayof[1], &inertia.arrayof[2]);
+
+			mass = m;
+			massMatrix = inertia;
 		}
 
-		{
-			Vector3f temp;
-			NewtonBodyGetAcceleration(handle, temp.arrayof.ptr); 
-			acceleration = temp;
-
-			NewtonBodyGetAlpha(handle, temp.arrayof.ptr);
-			angularAcceleration = temp;
-		}
-
-		if(velocityDirty)
+		if(isFieldUpdate(FieldName.velocity))
 		{
 			NewtonBodySetVelocity(handle, velocity.arrayof.ptr);
-			NewtonBodyIntegrateVelocity(handle, deltaTime);
-			velocityDirty = false;
+			NewtonBodyIntegrateVelocity(handle, dt);
 		}
-		else { Vector3f i; NewtonBodyGetVelocity(handle, velocity.arrayof.ptr); velocityInternal = i; }
+		else 
+		{
+			Vector3f v;
+			NewtonBodyGetVelocity(handle, v.arrayof.ptr);
+			velocity = v;
+		}
+
+		// getters
+		simulationState = NewtonBodyGetSimulationState(handle);
+		asleep = cast(bool)NewtonBodyGetSleepState(handle);
+		{
+			Vector3f t;
+			NewtonBodyGetAcceleration(handle, t.arrayof.ptr);
+			acceleration = t;
+			NewtonBodyGetAlpha(handle, t.arrayof.ptr);
+			angularAcceleration = t;
+		}
+	}
+
+	private void getTransform()
+	{
+		Matrix4f m;
+		NewtonBodyGetMatrix(handle, m.arrayof.ptr);
+
+		Vector3f bodyPosition = translation(m);
+		Vector3f bodyRotation = toEuler(m);
+		bodyRotation.x = radtodeg(bodyRotation.x);
+		bodyRotation.y = radtodeg(bodyRotation.y);
+		bodyRotation.z = radtodeg(bodyRotation.z);
+
+		transform.position = bodyPosition;
+		transform.rotation = bodyRotation;
+	}
+
+	package static extern(C) nothrow void transformResult(const NewtonBody* bodyPtr, const dFloat* matrix, int threadIndex)
+	{
+		try 
+		{
+			BodyMT body_ = cast(BodyMT)NewtonBodyGetUserData(bodyPtr);
+			assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics"); 
+
+			body_.getTransform;
+		}
+		catch(Exception) {}
+	}
+
+	package static extern(C) nothrow void applyForce(const NewtonBody* bodyPtr, float timeStep, int threadIndex)
+	{
+		try 
+		{
+			BodyMT body_ = cast(BodyMT)NewtonBodyGetUserData(bodyPtr);
+			assert(body_ !is null, "All Newton Dynamics bodies should be routed through moxane.physics");
+
+			Vector3f force = body_.sumForce;
+			const float mass = body_.mass;
+
+			if(body_.gravity)
+				force += mass * body_.system.gravity;
+
+			NewtonBodySetForce(bodyPtr, force.arrayof.ptr);
+			body_.sumForce = Vector3f(0, 0, 0);
+
+			NewtonBodySetTorque(bodyPtr, body_.sumTorque.arrayof.ptr);
+			body_.sumTorque = Vector3f(0, 0, 0);
+		}
+		catch(Exception) {}
 	}
 }
 
@@ -141,7 +215,7 @@ class Body
 		this.system = system;
 		this.transform = transform;
 
-		float[16] matrix = transform.matrix.arrayof;
+		/+float[16] matrix = transform.matrix.arrayof;
 		if(mode == Mode.dynamic)
 			handle = NewtonCreateDynamicBody(system.handle, collider.handle, matrix.ptr);
 		else
@@ -151,7 +225,7 @@ class Body
 
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetForceAndTorqueCallback(handle, &newtonApplyForce);
-		NewtonBodySetTransformCallback(handle, &newtonTransformResult);
+		NewtonBodySetTransformCallback(handle, &newtonTransformResult);+/
 	}
 
 	~this()
@@ -159,7 +233,7 @@ class Body
 
 	void upConstraint() {
 		Vector3f up = Vector3f(0, 1, 0);
-		NewtonConstraintCreateUpVector(system.handle, up.arrayof.ptr, handle);
+		//NewtonConstraintCreateUpVector(system.handle, up.arrayof.ptr, handle);
 	}
 
 	@property const bool freeze() { return cast(bool)NewtonBodyGetFreezeState(handle); }
@@ -281,7 +355,7 @@ class DynamicPlayerBody : Body
 		//collider.scale = Vector3f(1, scale, scale);
 
 		float[16] matrix = transform.matrix.arrayof;
-		handle = NewtonCreateDynamicBody(system.handle, collider.handle, matrix.ptr);
+		//handle = NewtonCreateDynamicBody(system.handle, collider.handle, matrix.ptr);
 		NewtonBodySetForceAndTorqueCallback(handle, &newtonApplyForce);
 		gravity = true;
 
@@ -311,7 +385,7 @@ class DynamicPlayerBody : Body
 			raycastHit = false;
 			Vector3f start = transform.position;
 			Vector3f end = start - Vector3f(0, floatHeight, 0);
-			NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			//NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
 
 			if(raycastHit)// || velocity.y == 0f)
 			{

@@ -36,14 +36,14 @@ abstract class Collider
 	~this() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
 
 	private shared Vector3f scale_;
-	@property Vector3f scale() const { return atomicLoad(scale_); }
+	/+@property Vector3f scale() const { return atomicLoad(scale_); }
 	@property void scale(Vector3f s) { atomicStore(scale_, s); system.issueCommand(PhysicsCommand(PhysicsCommands.colliderUpdateFields, this)); }
 
 	package void updateFields()
 	{
 		auto s = scale;
 		NewtonCollisionSetScale(handle, s.x, s.y, s.z);
-	}
+	}+/
 } 
 
 class BoxCollider : Collider
@@ -97,7 +97,7 @@ class StaticMeshCollider : Collider
 			vertices.each!(v => vertexConstArr[i++] = v);
 		}
 		else
-			this.vertices = vertices;
+			this.vertexConstArr = vertices;
 
 		/+handle = NewtonCreateTreeCollision(system.handle, 1);
 		NewtonTreeCollisionBeginBuild(handle);

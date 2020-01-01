@@ -13,7 +13,7 @@ import bindbc.newton;
 
 import core.thread;
 import core.atomic;
-import std.datetime : StopWatch, AutoStart;
+import std.datetime.stopwatch;
 
 import containers.unrolledlist;
 
@@ -27,7 +27,7 @@ struct PhysicsComponent
 
 class PhysicsSystem : System
 {
-	//package NewtonWorld* handle;
+	package NewtonWorld* worldHandle;
 
 	Vector3f gravity;
 
@@ -85,9 +85,9 @@ private class PhysicsThread
 	//void terminate() { thread.send(false); }
 
 	private UnrolledList!Collider colliders;
-	private UnrolledList!Body rigidBodies;
+	private UnrolledList!BodyMT rigidBodies;
 
-	private void worker()
+	private void worker() @trusted
 	{
 		enum limitMs = 30;
 		enum commandWaitTimeMs = 5;
@@ -100,7 +100,7 @@ private class PhysicsThread
 		while(!pendTermination)
 		{
 			StopWatch commandWait = StopWatch(AutoStart.yes);
-			while(commandWait.peek().total!"msecs" <= 5)
+			while(commandWait.peek.total!"msecs" <= 5)
 			{
 				Maybe!PhysicsCommand commandWrapped = queue.tryGet;
 				if(commandWrapped.isNull)
@@ -111,10 +111,15 @@ private class PhysicsThread
 
 				handleCommand(*commandWrapped.unwrap);
 			}
+
+			foreach(BodyMT b; rigidBodies)
+			{
+				b.updateFields();
+			}
 		}
 	}
 
-	private void handleCommand(PhysicsCommand command)
+	private void handleCommand(PhysicsCommand command) @trusted
 	{
 		if(command.type == PhysicsCommands.colliderCreate)
 		{
@@ -139,7 +144,7 @@ private class PhysicsThread
 					smc.handle = NewtonCreateTreeCollision(worldHandle, 1);
 					for(size_t tidx = 0; tidx < smc.vertexConstArr.length; tidx += 3)
 						NewtonTreeCollisionAddFace(smc.handle, 3, &smc.vertexConstArr[tidx].x, Vector3f.sizeof, 1);
-					NewtonTreeCollisionEndBuild(handle, cast(int)smc.optimiseMesh);
+					NewtonTreeCollisionEndBuild(smc.handle, cast(int)smc.optimiseMesh);
 					smc.freeMemory;
 					break;
 				case capsule:
@@ -158,39 +163,20 @@ private class PhysicsThread
 		else if(command.type == PhysicsCommands.colliderDestroy)
 		{
 			Collider collider = cast(Collider)command.target;
-			NewtonDestroyCollision(worldHandle, collider.handle);
+			NewtonDestroyCollision(collider.handle);
 			colliders.remove(collider);
 		}
-		else if(command.type == PhysicsCommands.colliderUpdateFields)
+		else if(command.type == PhysicsCommands.rigidBodyCreate)
 		{
-			Collider collider = cast(Collider)command.target;
-			collider.updateFields;
+			BodyMT b = cast(BodyMT)command.target;
+			b.initialise;
+			rigidBodies ~= b;
+		}
+		else if(command.type == PhysicsCommands.rigidBodyDestroy)
+		{
+			BodyMT b = cast(BodyMT)command.target;
+			b.deinitialise;
+			rigidBodies.remove(b);
 		}
 	}
 }
-
-/+private void physicsThreadWorker(shared PhysicsThread threadS, shared Log logS)
-{
-	PhysicsThread thread = cast(PhysicsThread)threadS;
-	Log log = cast(Log)logS;
-
-	log.write(Log.Severity.info, "Physics thread started.");
-	scope(failure) log.write(Log.Severity.panic, "Panic in physics thread.");
-	scope(success) log.write(Log.Severity.info, "Physics thread terminated.");
-
-	while(!thread.terminated)
-	{
-		receive(
-			(bool m)
-			{
-				if(!m)
-				{
-					thread.terminated = true;
-					return;
-				}
-
-
-			}
-		);
-	}
-}+/
