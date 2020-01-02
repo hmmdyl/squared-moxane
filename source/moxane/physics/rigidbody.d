@@ -56,6 +56,8 @@ class BodyMT
 		NewtonBodySetUserData(handle, cast(void*)this);
 		NewtonBodySetForceAndTorqueCallback(handle, &applyForce);
 		NewtonBodySetTransformCallback(handle, &transformResult);
+
+		gravity = true;
 	}
 
 	package void deinitialise()
@@ -191,7 +193,94 @@ class DynamicPlayerBodyMT : BodyMT
 {
 	const float height, radius;
 
+	mixin(SharedProperty!(float, "strafe"));
+	mixin(SharedProperty!(float, "forward"));
+	mixin(SharedProperty!(float, "vertical"));
+	mixin(SharedProperty!(float, "floatHeight"));
+	mixin(SharedProperty!(bool, "initialised"));
 
+	this(PhysicsSystem system, float radius, float height, AtomicTransform transform = AtomicTransform.init)
+	{
+		this.height = height;
+		this.radius = radius;
+
+		strafe = 0f;
+		forward = 0f;
+		vertical = 0f;
+		floatHeight = 0.6f;
+		initialised = false;
+
+		super(system, Mode.dynamic, new BoxCollider(system, Vector3f(0.25f, 1.3f, 0.25f), Transform(Vector3f(0, 0.65f, 0))), transform);
+		system.addEvent.addCallback(&onCreateCallback);
+	}
+
+	package override void initialise()
+	{ }
+
+	private void onCreateCallback(PhysicsAddEvent addEvent)
+	{
+		if(addEvent.command == PhysicsCommands.colliderCreate && addEvent.target == collider)
+		{
+			super.initialise;
+			collidable = true;
+			mass = 80;
+			massMatrix = Vector3f(1f, 1f, 1f);
+		}
+	}
+
+	override package void updateFields(float dt) 
+	{
+		if(initialised)
+		{
+			super.updateFields(dt);
+
+			getTransform;
+			transform.rotation = Vector3f(0f, 0f, 0f);
+
+			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+			transform.set = false;
+
+			auto calcVelo = Vector3f(velocity.x * 0.1f, velocity.y * 0.1f, velocity.z * 0.1f);
+			NewtonBodySetVelocity(handle, calcVelo.arrayof.ptr);
+
+			raycastHit = false;
+			Vector3f start = transform.position;
+			Vector3f end = start - Vector3f(0f, floatHeight, 0f);
+
+			NewtonWorldRayCast(system.handle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			if(raycastHit)
+			{
+				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
+				NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+				transform.set = false;
+			}
+
+			NewtobBodyIntegrateVelocity(handle, dt);
+
+			super.updateFields(dt);
+		}
+	}
+
+	private bool raycastHit;
+	private Vector3f raycastHitCoord = Vector3f(0, 0, 0);
+
+	private static extern(C) float newtonRaycastCallback(const NewtonBody* bodyPtr, const NewtonCollision* shapeHit, const float* hitContact, const float* hitNormal, long collisionID, void* userData, float intersectionParam)
+	{
+		try
+		{
+			DynamicPlayerBodyMT dpb = cast(DynamicPlayerBodyMT)userData;
+			dpb.raycastHitCoord = Vector3f(hitContact[0], hitContact[1], hitContact[2]);
+			dpb.raycastHit = true;
+			return intersectionParam;
+		}
+		catch(Exception){}
+	}
+
+	private static extern(C) uint newtonPrefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collPtr, void* userData) nothrow
+	{
+		if(bodyPtr == userData) return 0;
+		else return 1;
+	}
 }
 
 class Body

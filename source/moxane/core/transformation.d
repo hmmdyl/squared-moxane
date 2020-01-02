@@ -118,7 +118,7 @@ struct AtomicTransform
 		return t;
 	}
 
-	@property Matrix4f matrix() @trusted
+	@property Matrix4f matrix() @trusted const
 	{
 		return makeMatrix(position, rotation, scale);
 	}

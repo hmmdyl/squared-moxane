@@ -29,6 +29,8 @@ class PhysicsSystem : System
 	private PhysicsThread physicsThread;
 	package NewtonWorld* worldHandle() { return physicsThread.worldHandle; }
 
+	ref EventWaiter!PhysicsAddEvent addEvent() { return physicsThread.addEvent; }
+
 	mixin(SharedProperty!(Vector3f, "gravity"));
 
 	this(Moxane moxane, EntityManager manager) @trusted
@@ -58,10 +60,18 @@ class PhysicsSystem : System
 	{ physicsThread.queue.send(comm); }
 }
 
+struct PhysicsAddEvent
+{
+	PhysicsCommand command;
+	Object target;
+}
+
 private class PhysicsThread
 {
 	NewtonWorld* worldHandle;
 	Channel!PhysicsCommand queue;
+
+	EventWaiter!PhysicsAddEvent addEvent;
 
 	private shared bool terminated_ = false;
 	@property bool terminated() const { return atomicLoad(terminated_); }
@@ -138,37 +148,11 @@ private class PhysicsThread
 			Collider collider = cast(Collider)command.target;
 			assert(collider !is null);
 
-			final switch(collider.type) with(ColliderType)
-			{
-				case none:
-					throw new Exception("none type not expected");
-					break;
-				case box:
-					BoxCollider boxc = cast(BoxCollider)collider;
-					boxc.handle = NewtonCreateBox(worldHandle, boxc.dimensions.x, boxc.dimensions.y, boxc.dimensions.z, 0, boxc.offset.matrix.arrayof.ptr);
-					break;
-				case sphere:
-					SphereCollider spherec = cast(SphereCollider)collider;
-					spherec.handle = NewtonCreateSphere(worldHandle, spherec.radius, 0, spherec.offset.matrix.arrayof.ptr);
-					break;
-				case staticMesh:
-					StaticMeshCollider smc = cast(StaticMeshCollider)collider;
-					smc.handle = NewtonCreateTreeCollision(worldHandle, 1);
-					for(size_t tidx = 0; tidx < smc.vertexConstArr.length; tidx += 3)
-						NewtonTreeCollisionAddFace(smc.handle, 3, &smc.vertexConstArr[tidx].x, Vector3f.sizeof, 1);
-					NewtonTreeCollisionEndBuild(smc.handle, cast(int)smc.optimiseMesh);
-					smc.freeMemory;
-					break;
-				case capsule:
-					CapsuleCollider cc = cast(CapsuleCollider)collider;
-					cc.handle = NewtonCreateCapsule(worldHandle, cc.radius, cc.radius1, cc.height, 0, cc.offset.matrix.arrayof.ptr);
-					break;
-			}
+			collider.initialise;
 
 			if(collider.type != ColliderType.none)
 			{
 				assert(collider.handle !is null);
-				NewtonCollisionSetUserData(collider.handle, cast(void*)collider);
 				colliders ~= collider;
 			}
 		}

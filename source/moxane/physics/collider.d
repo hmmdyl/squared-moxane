@@ -5,6 +5,7 @@ import moxane.physics.core;
 import moxane.physics.commands;
 import bindbc.newton;
 import dlib.math;
+import moxane.utils.sharedwrap;
 
 import core.atomic;
 
@@ -35,42 +36,53 @@ abstract class Collider
 
 	~this() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
 
-	private shared Vector3f scale_;
-	/+@property Vector3f scale() const { return atomicLoad(scale_); }
-	@property void scale(Vector3f s) { atomicStore(scale_, s); system.issueCommand(PhysicsCommand(PhysicsCommands.colliderUpdateFields, this)); }
+	void initialise() { NewtonCollisionSetData(handle, cast(void*)this); }
+	void deinitialise() {}
+
+	mixin(SharedProperty!(Vector3f, "scale"));
 
 	package void updateFields()
 	{
 		auto s = scale;
 		NewtonCollisionSetScale(handle, s.x, s.y, s.z);
-	}+/
+	}
 } 
 
 class BoxCollider : Collider
 {
-	Vector3f dimensions;
-	Transform offset;
+	const Vector3f dimensions;
+	const Transform offset;
 
 	this(PhysicsSystem system, Vector3f dimensions, Transform offset = Transform.init)
 	{
 		super(system, ColliderType.box);
 		this.dimensions = dimensions;
 		this.offset = offset;
-		//handle = NewtonCreateBox(system.handle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
+	}
+
+	override void initialise()
+	{
+		boxc.handle = NewtonCreateBox(worldHandle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
+		super.initialise;
 	}
 }
 
 class SphereCollider : Collider
 {
-	float radius;
-	Transform offset;
+	const float radius;
+	const Transform offset;
 
 	this(PhysicsSystem system, float radius, Transform offset = Transform.init)
 	{
 		super(system, ColliderType.sphere);
 		this.radius = radius;
 		this.offset = offset;
-		//handle = NewtonCreateSphere(system.handle, radius, 0, offset.matrix.arrayof.ptr);
+	}
+
+	override void initialise() 
+	{
+		handle = NewtonCreateSphere(system.handle, radius, 0, offset.matrix.arrayof.ptr);
+		super.initialise;
 	}
 }
 
@@ -98,30 +110,6 @@ class StaticMeshCollider : Collider
 		}
 		else
 			this.vertexConstArr = vertices;
-
-		/+handle = NewtonCreateTreeCollision(system.handle, 1);
-		NewtonTreeCollisionBeginBuild(handle);
-
-		import std.datetime.stopwatch;
-
-		//for(size_t triangleIndex = 0; triangleIndex < vertices.length; triangleIndex += 3)
-		//	NewtonTreeCollisionAddFace(handle, 3, &vertices[triangleIndex].x, Vector3f.sizeof, cast(int)(triangleIndex + 1));
-		
-		auto additionSw = StopWatch(AutoStart.yes);
-		for(size_t tidx = 0; tidx < vertices.length; tidx += 3)
-			NewtonTreeCollisionAddFace(handle, 3, &vertices[tidx].x, Vector3f.sizeof, 1);
-		additionSw.stop;
-
-		auto endSw = StopWatch(AutoStart.yes);
-		NewtonTreeCollisionEndBuild(handle, cast(int)optimiseMesh);
-		endSw.stop;
-
-		import std.stdio;
-		write("Physics add time: ");
-		write(additionSw.peek.total!"nsecs" / 1_000_000f);
-		write("ms. End time: ");
-		write(endSw.peek.total!"nsecs" / 1_000_000f);
-		writeln("ms.");+/
 	}
 
 	package void freeMemory()
@@ -132,6 +120,16 @@ class StaticMeshCollider : Collider
 			Mallocator.instance.deallocate(vertexConstArr);
 		}
 		vertexConstArr = null;
+	}
+
+	override void initialise() 
+	{
+		handle = NewtonCreateTreeCollision(system.worldHandle, 1);
+		for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 3)
+			NewtonTreeCollisionAddFace(handle, 3, &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
+		NewtonTreeCollisionEndBuild(handle, cast(int)optimiseMesh);
+		smc.freeMemory;
+		super.initialise;
 	}
 }
 
@@ -149,6 +147,12 @@ class CapsuleCollider : Collider
 		this.radius1 = radius1;
 		this.height = height;
 		this.offset = offset;
-		//handle = NewtonCreateCapsule(system.handle, radius, radius1, height, 0, offset.matrix.arrayof.ptr);
 	}
+
+	override void initialise() 
+	{
+		handle = NewtonCreateCapsule(system.handle, radius, radius1, height, 0, offset.matrix.arrayof.ptr);
+		super.initialise;
+	}
+
 }
