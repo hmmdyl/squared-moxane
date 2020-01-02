@@ -88,16 +88,23 @@ template SharedProperty(T, string propertyName)
 {
 	static if(is(T == Vector3f))
 	{
-		const char[] SharedProperty = "private shared float " ~ propertyName ~ "_x;" ~
-			"private shared float " ~ propertyName ~ "_y;" ~
-			"private shared float " ~ propertyName ~ "_z;" ~
-			"@property " ~ T.stringof ~ " " ~ propertyName ~"() const { 
-			Vector3f r;
-			r.x = atomicLoad(" ~ propertyName ~ "_x)
-			r.y = atomicLoad(" ~ propertyName ~ "_y);
-			r.z = atomicLoad(" ~ propertyName ~ "_z); 
-			return r; }" ~
-			"@property void " ~ propertyName ~ "(" ~ T.stringof ~ " n) { atomicStore(" ~ propertyName ~ "_, n); }";
+		const char[] SharedProperty = "
+			private shared float " ~ propertyName ~ "_0; 
+			private shared float " ~ propertyName ~ "_1; 
+			private shared float " ~ propertyName ~ "_2; 
+			@property " ~ T.stringof ~ " " ~ propertyName ~ "() const {
+			import core.atomic : atomicLoad;
+			float r0 = atomicLoad(" ~ propertyName ~ "_0); 
+			float r1 = atomicLoad(" ~ propertyName ~ "_1); 
+			float r2 = atomicLoad(" ~ propertyName ~ "_2); 
+			return Vector3f(r0, r1, r2);
+			}
+			@property void " ~ propertyName ~ "(" ~ T.stringof ~ " newVal) {
+			import core.atomic : atomicStore;
+			atomicStore(" ~ propertyName ~ "_0, newVal[0]);
+			atomicStore(" ~ propertyName ~ "_1, newVal[1]);
+			atomicStore(" ~ propertyName ~ "_2, newVal[2]);
+			}";
 	}
 	else
 	{
@@ -126,12 +133,13 @@ template SharedGetter(T, string propertyName)
 			import core.atomic : atomicStore;
 			atomicStore(" ~ propertyName ~ "_0, newVal[0]);
 			atomicStore(" ~ propertyName ~ "_1, newVal[1]);
-			atomicStore(" ~ propertyName ~ "_2, newVal[2]);";
+			atomicStore(" ~ propertyName ~ "_2, newVal[2]);
+		}";
 	}
 	else
 	{
 		const char[] SharedGetter = "private shared " ~ T.stringof ~ " " ~ propertyName ~ "_;" ~
-			"@property " ~ T.stringof ~ " " ~ propertyName ~"() const { return atomicLoad(" ~ propertyName ~ "); }" ~
+			"@property " ~ T.stringof ~ " " ~ propertyName ~ "() const { return atomicLoad(" ~ propertyName ~ "_); }" ~
 			"private @property void " ~ propertyName ~ "(" ~ T.stringof ~ " n) { atomicStore(" ~ propertyName ~ "_, n); }";
 	}
 }

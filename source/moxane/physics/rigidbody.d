@@ -16,6 +16,7 @@ import bindbc.newton;
 import std.math;
 import std.typecons;
 import std.algorithm;
+import core.atomic;
 
 @trusted:
 
@@ -76,10 +77,10 @@ class BodyMT
 							  Vector3f, "velocity",
 							  Vector3f, "angularVelocity")());
 
-	mixin(SharedGetter(Vector3f, "acceleration"));
-	mixin(SharedGetter(Vector3f, "angularAcceleration"));
-	mixin(SharedGetter(int, "simulationState"));
-	mixin(SharedGetter(bool, "asleep"));
+	mixin(SharedGetter!(Vector3f, "acceleration"));
+	mixin(SharedGetter!(Vector3f, "angularAcceleration"));
+	mixin(SharedGetter!(int, "simulationState"));
+	mixin(SharedGetter!(bool, "asleep"));
 
 	void addForce(Vector3f force) { sumForce += force; }
 	void addTorque(Vector3f torque) { sumTorque += torque; }
@@ -184,6 +185,13 @@ class BodyMT
 		}
 		catch(Exception) {}
 	}
+}
+
+class DynamicPlayerBodyMT : BodyMT
+{
+	const float height, radius;
+
+
 }
 
 class Body

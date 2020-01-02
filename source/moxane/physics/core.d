@@ -5,10 +5,9 @@ import moxane.physics.collider;
 import moxane.physics.rigidbody;
 import moxane.physics.commands;
 import moxane.utils.maybe;
+import moxane.utils.sharedwrap;
 
 import dlib.math.vector;
-import dlib.math.matrix;
-import dlib.math.transformation;
 import bindbc.newton;
 
 import core.thread;
@@ -27,27 +26,24 @@ struct PhysicsComponent
 
 class PhysicsSystem : System
 {
-	package NewtonWorld* worldHandle;
+	private PhysicsThread physicsThread;
+	package NewtonWorld* worldHandle() { return physicsThread.worldHandle; }
 
-	Vector3f gravity;
+	mixin(SharedProperty!(Vector3f, "gravity"));
 
 	this(Moxane moxane, EntityManager manager) @trusted
 	{
 		super(moxane, manager);
-		//handle = NewtonCreate();
-		//NewtonSetNumberOfSubsteps(handle, 10);
+		physicsThread = new PhysicsThread(moxane.services.get!Log);
 	}
 
-	~this() @trusted
+	~this()
 	{
-		//NewtonDestroy(handle);
-		//handle = null;
+		physicsThread.pendTermination = true;
 	}
 
 	override void update() @trusted
 	{
-		//NewtonUpdate(handle, moxane.deltaTime);
-
 		auto entities = entityManager.entitiesWith!(PhysicsComponent, Transform);
 		foreach(Entity entity; entities)
 		{
@@ -58,12 +54,13 @@ class PhysicsSystem : System
 		}
 	}
 
-	package void issueCommand(PhysicsCommand comm) {}
+	package void issueCommand(PhysicsCommand comm) 
+	{ physicsThread.queue.send(comm); }
 }
 
 private class PhysicsThread
 {
-	package NewtonWorld* worldHandle;
+	NewtonWorld* worldHandle;
 	Channel!PhysicsCommand queue;
 
 	private shared bool terminated_ = false;
@@ -74,15 +71,17 @@ private class PhysicsThread
 	@property bool pendTermination() const { return atomicLoad(pendTermination_); }
 	@property void pendTermination(bool n) { atomicStore(pendTermination_, n); }
 
-	//private Tid thread;
+	private Thread thread;
 
-	this(Log log)
+	this(Log log) @trusted
 	{
 		queue = new Channel!PhysicsCommand;
-		//thread = spawn(&physicsThreadWorker, cast(shared)this, cast(shared)log);
-	}
 
-	//void terminate() { thread.send(false); }
+		thread = new Thread(&worker);
+		thread.name = PhysicsThread.stringof;
+		thread.isDaemon = true;
+		thread.start;
+	}
 
 	private UnrolledList!Collider colliders;
 	private UnrolledList!BodyMT rigidBodies;
@@ -92,13 +91,19 @@ private class PhysicsThread
 		enum limitMs = 30;
 		enum commandWaitTimeMs = 5;
 		enum nullCommandHaltNs = 500;
+		enum limiterHaltNs = 500;
 
 		worldHandle = NewtonCreate();
+		assert(worldHandle !is null);
 		scope(exit) NewtonDestroy(worldHandle);
+
+		double deltaTime = 1.0 / (limitMs / 1000.0);
 
 		StopWatch limiter = StopWatch(AutoStart.yes);
 		while(!pendTermination)
 		{
+			limiter.start;
+
 			StopWatch commandWait = StopWatch(AutoStart.yes);
 			while(commandWait.peek.total!"msecs" <= 5)
 			{
@@ -113,9 +118,16 @@ private class PhysicsThread
 			}
 
 			foreach(BodyMT b; rigidBodies)
-			{
-				b.updateFields();
-			}
+				b.updateFields(deltaTime);
+
+			NewtonUpdate(worldHandle, cast(float)deltaTime);
+
+			while(limiter.peek.total!"msecs" < 30)
+				Thread.sleep(dur!"usecs"(limiterHaltNs));
+
+			limiter.stop;
+			deltaTime = limiter.peek.total!"nsecs" * (1.0 / 1_000_000_000.0);
+			limiter.reset;
 		}
 	}
 
