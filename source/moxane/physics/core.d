@@ -21,7 +21,7 @@ import containers.unrolledlist;
 struct PhysicsComponent
 {
 	Collider collider;
-	Body rigidBody;
+	BodyMT rigidBody;
 }
 
 class PhysicsSystem : System
@@ -29,7 +29,7 @@ class PhysicsSystem : System
 	private PhysicsThread physicsThread;
 	package NewtonWorld* worldHandle() { return physicsThread.worldHandle; }
 
-	ref EventWaiter!PhysicsAddEvent addEvent() { return physicsThread.addEvent; }
+	ref EventWaiter!PhysicsCommand addEvent() { return physicsThread.addEvent; }
 
 	mixin(SharedProperty!(Vector3f, "gravity"));
 
@@ -37,6 +37,8 @@ class PhysicsSystem : System
 	{
 		super(moxane, manager);
 		physicsThread = new PhysicsThread(moxane.services.get!Log);
+
+		gravity = Vector3f(0, 10, 0);
 	}
 
 	~this()
@@ -60,18 +62,12 @@ class PhysicsSystem : System
 	{ physicsThread.queue.send(comm); }
 }
 
-struct PhysicsAddEvent
-{
-	PhysicsCommand command;
-	Object target;
-}
-
 private class PhysicsThread
 {
 	NewtonWorld* worldHandle;
 	Channel!PhysicsCommand queue;
 
-	EventWaiter!PhysicsAddEvent addEvent;
+	EventWaiter!PhysicsCommand addEvent;
 
 	private shared bool terminated_ = false;
 	@property bool terminated() const { return atomicLoad(terminated_); }
@@ -83,8 +79,11 @@ private class PhysicsThread
 
 	private Thread thread;
 
+	Log log;
+
 	this(Log log) @trusted
 	{
+		this.log = log;
 		queue = new Channel!PhysicsCommand;
 
 		thread = new Thread(&worker);
@@ -104,7 +103,9 @@ private class PhysicsThread
 		enum limiterHaltNs = 500;
 
 		worldHandle = NewtonCreate();
+		NewtonSetNumberOfSubsteps(worldHandle, 10);
 		assert(worldHandle !is null);
+
 		scope(exit) NewtonDestroy(worldHandle);
 
 		double deltaTime = 1.0 / (limitMs / 1000.0);
@@ -126,14 +127,17 @@ private class PhysicsThread
 
 				handleCommand(*commandWrapped.unwrap);
 			}
+			commandWait.reset;
 
 			foreach(BodyMT b; rigidBodies)
 				b.updateFields(deltaTime);
+			foreach(Collider c; colliders)
+				c.updateFields();
 
-			NewtonUpdate(worldHandle, cast(float)deltaTime);
+			//while(limiter.peek.total!"msecs" < 30)
+			//	Thread.sleep(dur!"usecs"(limiterHaltNs));
 
-			while(limiter.peek.total!"msecs" < 30)
-				Thread.sleep(dur!"usecs"(limiterHaltNs));
+			NewtonUpdate(worldHandle, 0.033f);
 
 			limiter.stop;
 			deltaTime = limiter.peek.total!"nsecs" * (1.0 / 1_000_000_000.0);
@@ -155,6 +159,10 @@ private class PhysicsThread
 				assert(collider.handle !is null);
 				colliders ~= collider;
 			}
+
+			addEvent.emit(command);
+
+			log.write(Log.Severity.debug_, "added collider " ~ collider.classinfo.name);
 		}
 		else if(command.type == PhysicsCommands.colliderDestroy)
 		{

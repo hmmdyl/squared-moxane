@@ -54,6 +54,11 @@ struct AtomicTransform
 		this.scale = t.scale;
 	}
 
+	/+static AtomicTransform init()
+	{
+		return AtomicTransform(Vector3f(0f, 0f, 0f), Vector3f(0f, 0f, 0f), Vector3f(1f, 1f, 1f));
+	}+/
+
 	this(Vector3f position, Vector3f rotation, Vector3f scale)
 	{
 		this.position = position;

@@ -109,7 +109,7 @@ template SharedProperty(T, string propertyName)
 	else
 	{
 		const char[] SharedProperty = "private shared " ~ T.stringof ~ " " ~ propertyName ~ "_;" ~
-			"@property " ~ T.stringof ~ " " ~ propertyName ~"() const { return atomicLoad(" ~ propertyName ~ "); }" ~
+			"@property " ~ T.stringof ~ " " ~ propertyName ~"() const { return atomicLoad(" ~ propertyName ~ "_); }" ~
 			"@property void " ~ propertyName ~ "(" ~ T.stringof ~ " n) { atomicStore(" ~ propertyName ~ "_, n); }";
 	}
 }

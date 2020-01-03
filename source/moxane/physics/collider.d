@@ -32,11 +32,13 @@ abstract class Collider
 		this.type = type;
 		this.system = system; 
 		this.system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); 
+	
+		scale = Vector3f(1, 1, 1);
 	}
 
 	~this() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
 
-	void initialise() { NewtonCollisionSetData(handle, cast(void*)this); }
+	void initialise() { NewtonCollisionSetUserData(handle, cast(void*)this); }
 	void deinitialise() {}
 
 	mixin(SharedProperty!(Vector3f, "scale"));
@@ -62,7 +64,7 @@ class BoxCollider : Collider
 
 	override void initialise()
 	{
-		boxc.handle = NewtonCreateBox(worldHandle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
+		handle = NewtonCreateBox(system.worldHandle, dimensions.x, dimensions.y, dimensions.z, 0, offset.matrix.arrayof.ptr);
 		super.initialise;
 	}
 }
@@ -81,7 +83,7 @@ class SphereCollider : Collider
 
 	override void initialise() 
 	{
-		handle = NewtonCreateSphere(system.handle, radius, 0, offset.matrix.arrayof.ptr);
+		handle = NewtonCreateSphere(system.worldHandle, radius, 0, offset.matrix.arrayof.ptr);
 		super.initialise;
 	}
 }
@@ -128,7 +130,7 @@ class StaticMeshCollider : Collider
 		for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 3)
 			NewtonTreeCollisionAddFace(handle, 3, &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
 		NewtonTreeCollisionEndBuild(handle, cast(int)optimiseMesh);
-		smc.freeMemory;
+		freeMemory;
 		super.initialise;
 	}
 }
@@ -151,7 +153,7 @@ class CapsuleCollider : Collider
 
 	override void initialise() 
 	{
-		handle = NewtonCreateCapsule(system.handle, radius, radius1, height, 0, offset.matrix.arrayof.ptr);
+		handle = NewtonCreateCapsule(system.worldHandle, radius, radius1, height, 0, offset.matrix.arrayof.ptr);
 		super.initialise;
 	}
 
