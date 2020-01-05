@@ -44,6 +44,7 @@ class BodyMT
 	
 		sumForce = Vector3f(0, 0, 0);
 		sumTorque = Vector3f(0, 0, 0);
+		atomicStore(updatedFields_, 0);
 	}
 
 	final void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
@@ -60,7 +61,9 @@ class BodyMT
 		NewtonBodySetForceAndTorqueCallback(handle, &applyForce);
 		NewtonBodySetTransformCallback(handle, &transformResult);
 
-		gravity = false;
+		NewtonBodySetMassMatrix(handle, 10f, 1, 1, 1);
+
+		gravity = true;
 		transform.set = true;
 	}
 
@@ -82,36 +85,65 @@ class BodyMT
 							  float, "linearDampening",
 							  Vector3f, "velocity",
 							  Vector3f, "angularVelocity")());
+	pragma(msg, evaluateProperties!(bool, "gravity",
+									 bool, "freeze",
+									 Vector3f, "sumForce",
+									 Vector3f, "sumTorque",
+									 bool, "collidable",
+									 Vector3f, "angularDampening",
+									 Vector3f, "centreOfMass",
+									 float, "mass",
+									 Vector3f, "massMatrix",
+									 float, "linearDampening",
+									 Vector3f, "velocity",
+									 Vector3f, "angularVelocity")());
 
 	mixin(SharedGetter!(Vector3f, "acceleration"));
 	mixin(SharedGetter!(Vector3f, "angularAcceleration"));
 	mixin(SharedGetter!(int, "simulationState"));
 	mixin(SharedGetter!(bool, "asleep"));
 
-	void addForce(Vector3f force) { sumForce += force; }
-	void addTorque(Vector3f torque) { sumTorque += torque; }
+	void addForce(Vector3f force) { sumForce = sumForce + force; }
+	void addTorque(Vector3f torque) { sumTorque = sumTorque + torque; }
 
 	void updateFields(float dt)
 	{
-		import std.stdio;
-		writeln("update" ~ this.classinfo.name, " ", updatedFields_);
+		scope(exit) resetFieldUpdates;
+		scope(exit) transform.set = false;
 
-		scope(success) resetFieldUpdates;
-		scope(success) transform.set = false;
+		/+import std.stdio;
+		if(this.classinfo.name == DynamicPlayerBodyMT.classinfo.name)
+		{
+			writeln(this.classinfo.name, " ", atomicLoad(updatedFields_));
+			writeln("\tgravity ", isFieldUpdate(FieldName.gravity), "\t", gravity);
+			writeln("\tfreeze ", isFieldUpdate(FieldName.freeze), "\t", freeze);
+			writeln("\tsumForce ", isFieldUpdate(FieldName.sumForce), "\t", sumForce);
+			writeln("\tsumTorque ", isFieldUpdate(FieldName.sumTorque), "\t", sumTorque);
+			writeln("\tcollidable ", isFieldUpdate(FieldName.collidable), "\t", collidable);
+			writeln("\tangularDampening ", isFieldUpdate(FieldName.angularDampening), "\t", angularDampening);
+			writeln("\tcentreOfMass ", isFieldUpdate(FieldName.centreOfMass), "\t", centreOfMass);
+			writeln("\tmass ", isFieldUpdate(FieldName.mass), "\t", mass);
+			writeln("\tmassMatrix ", isFieldUpdate(FieldName.massMatrix), "\t", massMatrix);
+			writeln("\tlinearDampening ", isFieldUpdate(FieldName.linearDampening), "\t", linearDampening);
+			writeln("\tvelocity ", isFieldUpdate(FieldName.velocity), "\t", velocity);
+			writeln("\tangularVelocity ", isFieldUpdate(FieldName.angularVelocity), "\t", angularVelocity);
+		}+/
 
 		if(transform.set)
 			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
 
+		NewtonBodySetFreezeState(handle, cast(int)false);
+
 		if(isFieldUpdate(FieldName.freeze))
-		{}//	NewtonBodySetFreezeState(handle, cast(int)freeze);
+			NewtonBodySetFreezeState(handle, cast(int)freeze);
 		else freeze = cast(bool)NewtonBodyGetFreezeState(handle);
 
 		if(isFieldUpdate(FieldName.collidable))
-		{}//	NewtonBodySetCollidable(handle, cast(int)collidable);
+			NewtonBodySetCollidable(handle, cast(int)collidable);
 		else collidable = cast(bool)NewtonBodyGetCollidable(handle);
 
 		if(isFieldUpdate(FieldName.mass) || isFieldUpdate(FieldName.massMatrix))
-		{}//NewtonBodySetMassMatrix(handle, mass, massMatrix.x, massMatrix.y, massMatrix.z);
+			NewtonBodySetMassMatrix(handle, mass, massMatrix.x, massMatrix.y, massMatrix.z);
 		else
 		{
 			float m;
@@ -184,8 +216,8 @@ class BodyMT
 			const float mass = body_.mass;
 
 			if(body_.gravity)
-				force += Vector3f(0, -10000, 0);
-				//force += mass * body_.system.gravity;
+				//force += Vector3f(0, -10, 0);
+				force += mass * body_.system.gravity;
 
 			NewtonBodySetForce(bodyPtr, force.arrayof.ptr);
 			body_.sumForce = Vector3f(0, 0, 0);
@@ -231,9 +263,9 @@ class DynamicPlayerBodyMT : BodyMT
 		if(addEvent.type == PhysicsCommands.colliderCreate && addEvent.target == collider)
 		{
 			super.initialise;
-			collidable = true;
-			mass = 80;
-			massMatrix = Vector3f(1f, 1f, 1f);
+			//collidable = true;
+			//mass = 80;
+			//massMatrix = Vector3f(1f, 1f, 1f);
 			initialised = true;
 		}
 	}
@@ -242,15 +274,19 @@ class DynamicPlayerBodyMT : BodyMT
 	{
 		if(initialised)
 		{
+			if(dt == 0) dt = 1f;
+			dt *= 1000f;
+			import std.stdio;
+			//writeln(sumForce);
 			super.updateFields(dt);
-
+//return;
 			getTransform;
 			transform.rotation = Vector3f(0f, 0f, 0f);
 
 			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
 			transform.set = false;
 
-			auto calcVelo = Vector3f(velocity.x * 0.1f, velocity.y * 0.1f, velocity.z * 0.1f);
+			auto calcVelo = Vector3f(velocity.x * 0.1f *  (1f / dt), velocity.y * 0.1f * (1f / dt), velocity.z * 0.1f * (1f / dt));
 			NewtonBodySetVelocity(handle, calcVelo.arrayof.ptr);
 
 			raycastHit = false;
@@ -265,7 +301,7 @@ class DynamicPlayerBodyMT : BodyMT
 				transform.set = false;
 			}
 
-			NewtonBodyIntegrateVelocity(handle, dt);
+			//NewtonBodyIntegrateVelocity(handle, dt);
 
 			super.updateFields(dt);
 		}

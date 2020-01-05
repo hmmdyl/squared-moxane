@@ -31,6 +31,8 @@ class PhysicsSystem : System
 
 	ref EventWaiter!PhysicsCommand addEvent() { return physicsThread.addEvent; }
 
+	@property float deltaTime() const { return physicsThread.deltaTime; }
+
 	mixin(SharedProperty!(Vector3f, "gravity"));
 
 	this(Moxane moxane, EntityManager manager) @trusted
@@ -95,6 +97,8 @@ private class PhysicsThread
 	private UnrolledList!Collider colliders;
 	private UnrolledList!BodyMT rigidBodies;
 
+	float deltaTime = 0f;
+
 	private void worker() @trusted
 	{
 		enum limitMs = 30;
@@ -108,15 +112,13 @@ private class PhysicsThread
 
 		scope(exit) NewtonDestroy(worldHandle);
 
-		double deltaTime = 1.0 / (limitMs / 1000.0);
-
 		StopWatch limiter = StopWatch(AutoStart.yes);
 		while(!pendTermination)
 		{
 			limiter.start;
 
 			StopWatch commandWait = StopWatch(AutoStart.yes);
-			while(commandWait.peek.total!"msecs" <= 5)
+			while(commandWait.peek.total!"msecs" <= 1)
 			{
 				Maybe!PhysicsCommand commandWrapped = queue.tryGet;
 				if(commandWrapped.isNull)
@@ -137,10 +139,10 @@ private class PhysicsThread
 			//while(limiter.peek.total!"msecs" < 30)
 			//	Thread.sleep(dur!"usecs"(limiterHaltNs));
 
-			NewtonUpdate(worldHandle, 0.033f);
+			NewtonUpdateAsync(worldHandle, deltaTime);
 
 			limiter.stop;
-			deltaTime = limiter.peek.total!"nsecs" * (1.0 / 1_000_000_000.0);
+			deltaTime = limiter.peek.total!"nsecs" * (1f / 1_000_000_000f);
 			limiter.reset;
 		}
 	}
@@ -161,8 +163,6 @@ private class PhysicsThread
 			}
 
 			addEvent.emit(command);
-
-			log.write(Log.Severity.debug_, "added collider " ~ collider.classinfo.name);
 		}
 		else if(command.type == PhysicsCommands.colliderDestroy)
 		{

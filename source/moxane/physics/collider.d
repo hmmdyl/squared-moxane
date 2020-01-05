@@ -36,7 +36,7 @@ abstract class Collider
 		scale = Vector3f(1, 1, 1);
 	}
 
-	~this() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
+	final void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); }
 
 	void initialise() { NewtonCollisionSetUserData(handle, cast(void*)this); }
 	void deinitialise() {}
@@ -124,12 +124,40 @@ class StaticMeshCollider : Collider
 		vertexConstArr = null;
 	}
 
+	bool initted = false;
 	override void initialise() 
 	{
+		if(initted) return;
+
+		scope(exit) initted = true;
+
+		import std.datetime.stopwatch;
+		import std.stdio;
+		import std.algorithm : min;
+
 		handle = NewtonCreateTreeCollision(system.worldHandle, 1);
+		NewtonTreeCollisionBeginBuild(handle);
+
+		auto sw = StopWatch(AutoStart.yes);
+		// slow
 		for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 3)
 			NewtonTreeCollisionAddFace(handle, 3, &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
-		NewtonTreeCollisionEndBuild(handle, cast(int)optimiseMesh);
+
+		//for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 255)
+		//		NewtonTreeCollisionAddFace(handle, min(vertexConstArr.length - tidx, 255), &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
+
+		sw.stop;
+		//writeln("Addition time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f));
+		sw.reset;
+		
+		// fast
+		//	NewtonTreeCollisionAddFace(handle, 255, &vertexConstArr[0].x, Vector3f.sizeof, 1);
+		
+		sw.start;
+		NewtonTreeCollisionEndBuild(handle, cast(int)false);
+		sw.stop;
+		//writeln("End time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f), " ", vertexConstArr.length, " vertices");
+
 		freeMemory;
 		super.initialise;
 	}

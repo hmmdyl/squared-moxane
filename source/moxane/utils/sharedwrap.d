@@ -52,7 +52,7 @@ string evaluateProperties(Specs ...)()
 	foreach(size_t i, sym; Specs)
 	{
 		static if(i % 2 == 0) continue;
-		else ret ~= "\t" ~ sym ~ " = 1 << " ~ to!string(i / 2) ~ ",\n";
+		else ret ~= "\t" ~ sym ~ " = " ~ to!string(i / 2) ~ ",\n";
 	}
 	ret ~= "}\n";
 
@@ -60,15 +60,15 @@ string evaluateProperties(Specs ...)()
 		@property bool isFieldUpdate(FieldName name) const {
 		import core.atomic : atomicLoad;
 		ulong f = atomicLoad(updatedFields_);
-		return cast(bool)(f >> (cast(int)name));
+		return cast(bool)((f >> cast(ulong)name) & 1);
 		}
 		private @property void updateField(FieldName name) {
 		import core.atomic : atomicLoad, atomicStore;
 		ulong f = atomicLoad(updatedFields_);
-		f |= (1 << cast(int)name);
+		f |= (1 << cast(ulong)name);
 		atomicStore(updatedFields_, f);
 		}
-		private void resetFieldUpdates() { import core.atomic : atomicStore; atomicStore(updatedFields_, 0); }
+		private void resetFieldUpdates() { import core.atomic : atomicStore; atomicStore(updatedFields_, cast(ulong)0); }
 		";
 
 	static foreach(i, sym; Specs)
