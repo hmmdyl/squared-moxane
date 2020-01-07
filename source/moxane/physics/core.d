@@ -139,7 +139,7 @@ private class PhysicsThread
 			//while(limiter.peek.total!"msecs" < 30)
 			//	Thread.sleep(dur!"usecs"(limiterHaltNs));
 
-			NewtonUpdateAsync(worldHandle, deltaTime);
+			NewtonUpdate(worldHandle, deltaTime);
 
 			limiter.stop;
 			deltaTime = limiter.peek.total!"nsecs" * (1f / 1_000_000_000f);

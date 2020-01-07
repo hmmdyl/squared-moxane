@@ -147,7 +147,7 @@ class StaticMeshCollider : Collider
 		//		NewtonTreeCollisionAddFace(handle, min(vertexConstArr.length - tidx, 255), &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
 
 		sw.stop;
-		//writeln("Addition time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f));
+		writeln("Addition time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f));
 		sw.reset;
 		
 		// fast
@@ -156,7 +156,7 @@ class StaticMeshCollider : Collider
 		sw.start;
 		NewtonTreeCollisionEndBuild(handle, cast(int)false);
 		sw.stop;
-		//writeln("End time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f), " ", vertexConstArr.length, " vertices");
+		writeln("End time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f), " ", vertexConstArr.length, " vertices");
 
 		freeMemory;
 		super.initialise;
