@@ -136,6 +136,7 @@ private class PhysicsThread
 			foreach(Collider c; colliders)
 				c.updateFields();
 
+			// limiter
 			//while(limiter.peek.total!"msecs" < 30)
 			//	Thread.sleep(dur!"usecs"(limiterHaltNs));
 
