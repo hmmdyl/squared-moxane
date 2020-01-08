@@ -98,7 +98,6 @@ class StaticMeshCollider : Collider
 	this(PhysicsSystem system, Vector3f[] vertices, bool dupMem = true, bool optimiseMesh = false)
 	in(vertices.length % 3 == 0, "vertices must be a triangle mesh")
 	{
-		super(system, ColliderType.staticMesh);
 		this.optimiseMesh = optimiseMesh;
 		this.duplicateArray = dupMem;
 
@@ -107,11 +106,16 @@ class StaticMeshCollider : Collider
 			import std.experimental.allocator.mallocator;
 			import std.algorithm : each;
 			vertexConstArr = cast(Vector3f[])Mallocator.instance.allocate(Vector3f.sizeof * vertices.length);
+			assert(vertexConstArr !is null);
+			assert(vertexConstArr.length == vertices.length);
+			
 			size_t i;
 			vertices.each!(v => vertexConstArr[i++] = v);
 		}
 		else
 			this.vertexConstArr = vertices;
+
+		super(system, ColliderType.staticMesh);
 	}
 
 	package void freeMemory()
@@ -143,11 +147,8 @@ class StaticMeshCollider : Collider
 		for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 3)
 			NewtonTreeCollisionAddFace(handle, 3, &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
 
-		//for(size_t tidx = 0; tidx < vertexConstArr.length; tidx += 255)
-		//		NewtonTreeCollisionAddFace(handle, min(vertexConstArr.length - tidx, 255), &vertexConstArr[tidx].x, Vector3f.sizeof, 1);
-
 		sw.stop;
-		writeln("Addition time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f));
+		//writeln("Addition time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f));
 		sw.reset;
 		
 		// fast
@@ -156,7 +157,7 @@ class StaticMeshCollider : Collider
 		sw.start;
 		NewtonTreeCollisionEndBuild(handle, cast(int)false);
 		sw.stop;
-		writeln("End time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f), " ", vertexConstArr.length, " vertices");
+		//writeln("End time: ", sw.peek.total!"nsecs" * (1f / 1_000_000_000f), " ", vertexConstArr.length, " vertices");
 
 		freeMemory;
 		super.initialise;

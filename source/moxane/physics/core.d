@@ -149,6 +149,7 @@ private class PhysicsThread
 
 	private void handleCommand(PhysicsCommand command) @trusted
 	{
+		import std.stdio;
 		if(command.type == PhysicsCommands.colliderCreate)
 		{
 			Collider collider = cast(Collider)command.target;

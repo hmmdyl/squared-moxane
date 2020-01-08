@@ -111,24 +111,6 @@ class BodyMT
 		scope(exit) resetFieldUpdates;
 		scope(exit) transform.set = false;
 
-		/+import std.stdio;
-		if(this.classinfo.name == DynamicPlayerBodyMT.classinfo.name)
-		{
-			writeln(this.classinfo.name, " ", atomicLoad(updatedFields_));
-			writeln("\tgravity ", isFieldUpdate(FieldName.gravity), "\t", gravity);
-			writeln("\tfreeze ", isFieldUpdate(FieldName.freeze), "\t", freeze);
-			writeln("\tsumForce ", isFieldUpdate(FieldName.sumForce), "\t", sumForce);
-			writeln("\tsumTorque ", isFieldUpdate(FieldName.sumTorque), "\t", sumTorque);
-			writeln("\tcollidable ", isFieldUpdate(FieldName.collidable), "\t", collidable);
-			writeln("\tangularDampening ", isFieldUpdate(FieldName.angularDampening), "\t", angularDampening);
-			writeln("\tcentreOfMass ", isFieldUpdate(FieldName.centreOfMass), "\t", centreOfMass);
-			writeln("\tmass ", isFieldUpdate(FieldName.mass), "\t", mass);
-			writeln("\tmassMatrix ", isFieldUpdate(FieldName.massMatrix), "\t", massMatrix);
-			writeln("\tlinearDampening ", isFieldUpdate(FieldName.linearDampening), "\t", linearDampening);
-			writeln("\tvelocity ", isFieldUpdate(FieldName.velocity), "\t", velocity);
-			writeln("\tangularVelocity ", isFieldUpdate(FieldName.angularVelocity), "\t", angularVelocity);
-		}+/
-
 		if(transform.set)
 			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
 
@@ -216,7 +198,6 @@ class BodyMT
 			const float mass = body_.mass;
 
 			if(body_.gravity)
-				//force += Vector3f(0, -10, 0);
 				force += mass * body_.system.gravity;
 
 			NewtonBodySetForce(bodyPtr, force.arrayof.ptr);
