@@ -82,7 +82,7 @@ import std.datetime.systime;
 			file.write(prettyName);
 			cwrite(" @ ");
 			file.write(" @ ");
-			string time = Clock.currTime.toString();
+			string time = Clock.currTime.toSimpleString();
 			cwrite(time);
 			file.write(time);
 			cwrite(": ");

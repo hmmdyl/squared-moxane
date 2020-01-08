@@ -85,18 +85,6 @@ class BodyMT
 							  float, "linearDampening",
 							  Vector3f, "velocity",
 							  Vector3f, "angularVelocity")());
-	pragma(msg, evaluateProperties!(bool, "gravity",
-									 bool, "freeze",
-									 Vector3f, "sumForce",
-									 Vector3f, "sumTorque",
-									 bool, "collidable",
-									 Vector3f, "angularDampening",
-									 Vector3f, "centreOfMass",
-									 float, "mass",
-									 Vector3f, "massMatrix",
-									 float, "linearDampening",
-									 Vector3f, "velocity",
-									 Vector3f, "angularVelocity")());
 
 	mixin(SharedGetter!(Vector3f, "acceleration"));
 	mixin(SharedGetter!(Vector3f, "angularAcceleration"));
@@ -255,12 +243,49 @@ class DynamicPlayerBodyMT : BodyMT
 	{
 		if(initialised)
 		{
+			addForce(Vector3f(strafe, vertical, forward));
+
+			super.updateFields(dt);
+
+			getTransform;
+			transform.rotation = Vector3f(0f, 0f, 0f);
+
+			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+			transform.set = false;
+
+			auto calcVelo = Vector3f(
+									 strafe == 0f ? velocity.x * 0.1f : strafe * 0.1f,
+									 velocity.y * 0.9f,
+									 forward == 0f ? velocity.z * 0.1f : forward * 0.1f
+									 );
+
+			NewtonBodySetVelocity(handle, calcVelo.arrayof.ptr);
+
+			raycastHit = false;
+			Vector3f start = transform.position;
+			Vector3f end = start - Vector3f(0f, floatHeight, 0f);
+
+			NewtonWorldRayCast(system.worldHandle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			if(raycastHit)
+			{
+				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
+				NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
+				transform.set = false;
+			}
+
+			//NewtonBodyIntegrateVelocity(handle, dt);
+
+			super.updateFields(dt);
+		}
+	}
+
+	/+override void updateFields(float dt) 
+	{
+		if(initialised)
+		{
 			if(dt == 0) dt = 1f;
 			dt *= 1000f;
-			import std.stdio;
-			//writeln(sumForce);
 			super.updateFields(dt);
-//return;
 			getTransform;
 			transform.rotation = Vector3f(0f, 0f, 0f);
 
@@ -286,7 +311,7 @@ class DynamicPlayerBodyMT : BodyMT
 
 			super.updateFields(dt);
 		}
-	}
+	}+/
 
 	bool raycastHit;
 	Vector3f raycastHitCoord = Vector3f(0, 0, 0);
