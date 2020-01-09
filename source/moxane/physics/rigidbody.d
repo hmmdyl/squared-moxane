@@ -215,8 +215,16 @@ class DynamicPlayerBodyMT : BodyRootMT
 {
 	immutable float totalHeight, floatHeight, radius;
 
+	mixin(SharedProperty!(Vector3f, "influence"));
 	mixin(SharedProperty!(Vector3f, "velocity"));
 	mixin(SharedProperty!(float, "terminalVelocity"));
+
+	EventWaiter!(typeof(this)) onFrontCollision;
+	EventWaiter!(typeof(this)) onFootCollision;
+	mixin(SharedGetter!(bool, "onFootPrevious"));
+	mixin(SharedGetter!(bool, "onFrontPrevious"));
+	mixin(SharedGetter!(bool, "onFoot"));
+	mixin(SharedGetter!(bool, "onFront"));
 
 	this(PhysicsSystem system, 
 		 float radius, float totalHeight, float floatHeight, 
@@ -236,12 +244,12 @@ class DynamicPlayerBodyMT : BodyRootMT
 	private bool raycastHit;
 	private Vector3f raycastHitCoord = Vector3f(0, 0, 0);
 
-	bool footHit, dirHit;
-
 	override void updateFields(float dt) 
 	{
-		footHit = false;
-		dirHit = false;
+		onFootPrevious = onFoot;
+		onFrontPrevious = onFront;
+		onFoot = false;
+		onFront = false;
 
 		Vector3f horizontalVelocity = Vector3f(velocity.x, 0f, velocity.z);
 		horizontalVelocity.normalize;
@@ -259,7 +267,7 @@ class DynamicPlayerBodyMT : BodyRootMT
 				&newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
 			if(raycastHit)
 			{
-				footHit = true;
+				onFoot = true;
 				nextVelocity.y = 0;
 				Vector3f nt = transform.position;
 				nt.y = raycastHitCoord.y;
@@ -277,7 +285,7 @@ class DynamicPlayerBodyMT : BodyRootMT
 							   &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
 			if(raycastHit)
 			{
-				dirHit = true;
+				onFront = true;
 				nextVelocity.x = 0;
 				nextVelocity.z = 0;
 			}
@@ -287,6 +295,11 @@ class DynamicPlayerBodyMT : BodyRootMT
 		//velocity = nextVelocity;
 
 		transform.position = transform.position + nextVelocity * dt;
+	
+		if(onFoot != onFootPrevious)
+			onFootCollision.emit(this);
+		if(onFront != onFrontPrevious)
+			onFrontCollision.emit(this);
 	}
 
 	private static extern(C) float newtonRaycastCallback(const NewtonBody* bodyPtr, const NewtonCollision* shapeHit, const float* hitContact, const float* hitNormal, long collisionID, void* userData, float intersectionParam)
