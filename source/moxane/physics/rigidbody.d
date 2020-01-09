@@ -20,36 +20,48 @@ import core.atomic;
 
 @trusted:
 
-class BodyMT
+abstract class BodyRootMT
+{
+	PhysicsSystem system;
+	AtomicTransform transform;
+
+	private this(PhysicsSystem system) in(system !is null)
+	{
+		this.system = system;
+		this.system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyCreate, this));
+	}
+
+	final void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
+
+	abstract void initialise();
+	abstract void deinitialise();
+
+	abstract void updateFields(float dt);
+}
+
+class BodyMT : BodyRootMT
 {
 	enum Mode { dynamic, kinematic }
 	immutable Mode mode;
 
 	package NewtonBody* handle;
 
-	PhysicsSystem system;
 	Collider collider;
 
-	AtomicTransform transform;
-
 	this(PhysicsSystem system, Mode mode, Collider collider, AtomicTransform transform = AtomicTransform.init)
-	in(collider !is null) in(system !is null)
 	{
 		this.collider = collider; 
 		this.mode = mode;
-		this.system = system;
 		this.transform = transform;
-
-		system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyCreate, this));
 	
 		sumForce = Vector3f(0, 0, 0);
 		sumTorque = Vector3f(0, 0, 0);
 		atomicStore(updatedFields_, 0);
+
+		super(system);
 	}
 
-	final void destroy() { system.issueCommand(PhysicsCommand(PhysicsCommands.rigidBodyDestroy, this)); }
-
-	void initialise()
+	override void initialise()
 	{
 		if(mode == Mode.dynamic)
 			handle = NewtonCreateDynamicBody(system.worldHandle, collider.handle, transform.matrix.arrayof.ptr);
@@ -67,7 +79,7 @@ class BodyMT
 		transform.set = true;
 	}
 
-	void deinitialise()
+	override void deinitialise()
 	{
 		NewtonDestroyBody(handle);
 		handle = null;
@@ -94,7 +106,7 @@ class BodyMT
 	void addForce(Vector3f force) { sumForce = sumForce + force; }
 	void addTorque(Vector3f torque) { sumTorque = sumTorque + torque; }
 
-	void updateFields(float dt)
+	override void updateFields(float dt)
 	{
 		scope(exit) resetFieldUpdates;
 		scope(exit) transform.set = false;
@@ -199,122 +211,83 @@ class BodyMT
 	}
 }
 
-class DynamicPlayerBodyMT : BodyMT
+class DynamicPlayerBodyMT : BodyRootMT
 {
-	const float height, radius;
+	immutable float totalHeight, floatHeight, radius;
 
-	mixin(SharedProperty!(float, "strafe"));
-	mixin(SharedProperty!(float, "forward"));
-	mixin(SharedProperty!(float, "vertical"));
-	mixin(SharedProperty!(float, "floatHeight"));
-	mixin(SharedProperty!(bool, "initialised"));
+	mixin(SharedProperty!(Vector3f, "velocity"));
+	mixin(SharedProperty!(float, "terminalVelocity"));
 
-	this(PhysicsSystem system, float radius, float height, AtomicTransform transform = AtomicTransform.init)
+	this(PhysicsSystem system, 
+		 float radius, float totalHeight, float floatHeight, 
+		 AtomicTransform transform = AtomicTransform.init)
+	in(radius > 0) in(totalHeight > 0) in(floatHeight > 0)
 	{
-		this.height = height;
+		this.transform = transform;
 		this.radius = radius;
-
-		strafe = 0f;
-		forward = 0f;
-		vertical = 0f;
-		floatHeight = 0.6f;
-		initialised = false;
-
-		super(system, Mode.dynamic, new BoxCollider(system, Vector3f(0.25f, 1.3f, 0.25f), Transform(Vector3f(0, 0.65f, 0))), transform);
-		system.addEvent.addCallback(&onCreateCallback);
+		this.totalHeight = totalHeight;
+		this.floatHeight = floatHeight;
+		super(system);
 	}
 
-	override void initialise()
-	{ }
+	override void initialise() {}
+	override void deinitialise() {}
 
-	private void onCreateCallback(ref PhysicsCommand addEvent) @trusted
-	{
-		if(addEvent.type == PhysicsCommands.colliderCreate && addEvent.target == collider)
-		{
-			super.initialise;
-			//collidable = true;
-			//mass = 80;
-			//massMatrix = Vector3f(1f, 1f, 1f);
-			initialised = true;
-		}
-	}
+	private bool raycastHit;
+	private Vector3f raycastHitCoord = Vector3f(0, 0, 0);
+
+	bool footHit, dirHit;
 
 	override void updateFields(float dt) 
 	{
-		if(initialised)
+		footHit = false;
+		dirHit = false;
+
+		Vector3f horizontalVelocity = Vector3f(velocity.x, 0f, velocity.z);
+		horizontalVelocity.normalize;
+
+		Vector3f nextVelocity = velocity;
+
+		Vector3f start = transform.position + Vector3f(0, floatHeight, 0);
+		Vector3f end = transform.position  - Vector3f(0, 0.05f, 0);
+
+		//velocity = Vector3f(velocity.x,  -9.81, velocity.z);
+
+		if(velocity.y < 0)
 		{
-			addForce(Vector3f(strafe, vertical, forward));
-
-			super.updateFields(dt);
-
-			getTransform;
-			transform.rotation = Vector3f(0f, 0f, 0f);
-
-			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
-			transform.set = false;
-
-			auto calcVelo = Vector3f(
-									 strafe == 0f ? velocity.x * 0.1f : strafe * 0.1f,
-									 velocity.y * 0.9f,
-									 forward == 0f ? velocity.z * 0.1f : forward * 0.1f
-									 );
-
-			NewtonBodySetVelocity(handle, calcVelo.arrayof.ptr);
-
-			raycastHit = false;
-			Vector3f start = transform.position;
-			Vector3f end = start - Vector3f(0f, floatHeight, 0f);
-
-			NewtonWorldRayCast(system.worldHandle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			NewtonWorldRayCast(system.worldHandle, start.arrayof.ptr, end.arrayof.ptr, 
+				&newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
 			if(raycastHit)
 			{
-				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
-				NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
-				transform.set = false;
+				footHit = true;
+				nextVelocity.y = 0;
+				Vector3f nt = transform.position;
+				nt.y = raycastHitCoord.y;
+				transform.position = nt;
 			}
-
-			//NewtonBodyIntegrateVelocity(handle, dt);
-
-			super.updateFields(dt);
+			raycastHit = false;
 		}
+
+		if(velocity.x != 0 || velocity.z != 0)
+		{
+			start = transform.position + Vector3f(0, floatHeight + 0.1f, 0);
+			end = start + horizontalVelocity * radius;
+
+			NewtonWorldRayCast(system.worldHandle, start.arrayof.ptr, end.arrayof.ptr, 
+							   &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
+			if(raycastHit)
+			{
+				dirHit = true;
+				nextVelocity.x = 0;
+				nextVelocity.z = 0;
+			}
+			raycastHit = false;
+		}
+
+		//velocity = nextVelocity;
+
+		transform.position = transform.position + nextVelocity * dt;
 	}
-
-	/+override void updateFields(float dt) 
-	{
-		if(initialised)
-		{
-			if(dt == 0) dt = 1f;
-			dt *= 1000f;
-			super.updateFields(dt);
-			getTransform;
-			transform.rotation = Vector3f(0f, 0f, 0f);
-
-			NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
-			transform.set = false;
-
-			auto calcVelo = Vector3f(velocity.x * 0.1f *  (1f / dt), velocity.y * 0.1f * (1f / dt), velocity.z * 0.1f * (1f / dt));
-			NewtonBodySetVelocity(handle, calcVelo.arrayof.ptr);
-
-			raycastHit = false;
-			Vector3f start = transform.position;
-			Vector3f end = start - Vector3f(0f, floatHeight, 0f);
-
-			NewtonWorldRayCast(system.worldHandle, start.arrayof.ptr, end.arrayof.ptr, &newtonRaycastCallback, cast(void*)this, &newtonPrefilterCallback, 0);
-			if(raycastHit)
-			{
-				transform.position = Vector3f(transform.position.x, raycastHitCoord.y + floatHeight, transform.position.z);
-				NewtonBodySetMatrix(handle, transform.matrix.arrayof.ptr);
-				transform.set = false;
-			}
-
-			//NewtonBodyIntegrateVelocity(handle, dt);
-
-			super.updateFields(dt);
-		}
-	}+/
-
-	bool raycastHit;
-	Vector3f raycastHitCoord = Vector3f(0, 0, 0);
 
 	private static extern(C) float newtonRaycastCallback(const NewtonBody* bodyPtr, const NewtonCollision* shapeHit, const float* hitContact, const float* hitNormal, long collisionID, void* userData, float intersectionParam)
 	{
@@ -330,7 +303,6 @@ class DynamicPlayerBodyMT : BodyMT
 
 	private static extern(C) uint newtonPrefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collPtr, void* userData) nothrow
 	{
-		if(bodyPtr == userData) return 0;
-		else return 1;
+		return 1;
 	}
 }

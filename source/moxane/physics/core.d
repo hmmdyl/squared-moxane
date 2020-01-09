@@ -21,7 +21,7 @@ import containers.unrolledlist;
 struct PhysicsComponent
 {
 	Collider collider;
-	BodyMT rigidBody;
+	BodyRootMT rigidBody;
 }
 
 class PhysicsSystem : System
@@ -95,7 +95,7 @@ private class PhysicsThread
 	}
 
 	private UnrolledList!Collider colliders;
-	private UnrolledList!BodyMT rigidBodies;
+	private UnrolledList!BodyRootMT rigidBodies;
 
 	float deltaTime = 0f;
 
@@ -118,7 +118,7 @@ private class PhysicsThread
 			limiter.start;
 
 			StopWatch commandWait = StopWatch(AutoStart.yes);
-			while(commandWait.peek.total!"msecs" <= 1)
+			/+while(commandWait.peek.total!"msecs" <= 1)
 			{
 				Maybe!PhysicsCommand commandWrapped = queue.tryGet;
 				if(commandWrapped.isNull)
@@ -129,9 +129,15 @@ private class PhysicsThread
 
 				handleCommand(*commandWrapped.unwrap);
 			}
-			commandWait.reset;
+			commandWait.reset;+/
 
-			foreach(BodyMT b; rigidBodies)
+			Maybe!PhysicsCommand commandWrapped = queue.tryGet;
+			if(!commandWrapped.isNull)
+			{
+				handleCommand(*commandWrapped.unwrap);
+			}
+
+			foreach(BodyRootMT b; rigidBodies)
 				b.updateFields(deltaTime);
 			foreach(Collider c; colliders)
 				c.updateFields();
@@ -157,12 +163,7 @@ private class PhysicsThread
 			assert(collider !is null);
 
 			collider.initialise;
-
-			if(collider.type != ColliderType.none)
-			{
-				assert(collider.handle !is null);
-				colliders ~= collider;
-			}
+			colliders ~= collider;
 
 			addEvent.emit(command);
 		}
@@ -174,13 +175,13 @@ private class PhysicsThread
 		}
 		else if(command.type == PhysicsCommands.rigidBodyCreate)
 		{
-			BodyMT b = cast(BodyMT)command.target;
+			BodyRootMT b = cast(BodyRootMT)command.target;
 			b.initialise;
 			rigidBodies ~= b;
 		}
 		else if(command.type == PhysicsCommands.rigidBodyDestroy)
 		{
-			BodyMT b = cast(BodyMT)command.target;
+			BodyRootMT b = cast(BodyRootMT)command.target;
 			b.deinitialise;
 			rigidBodies.remove(b);
 		}

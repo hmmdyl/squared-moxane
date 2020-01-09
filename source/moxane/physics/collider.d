@@ -11,25 +11,14 @@ import core.atomic;
 
 @trusted:
 
-enum ColliderType
-{
-	none,
-	box,
-	sphere,
-	staticMesh,
-	capsule
-}
-
 abstract class Collider
 {
 	package NewtonCollision* handle;
-	immutable ColliderType type;
 
 	PhysicsSystem system;
-	this(PhysicsSystem system, immutable ColliderType type) 
+	this(PhysicsSystem system) 
 	in(system !is null) 
 	{
-		this.type = type;
 		this.system = system; 
 		this.system.issueCommand(PhysicsCommand(PhysicsCommands.colliderCreate, this)); 
 	
@@ -57,7 +46,7 @@ class BoxCollider : Collider
 
 	this(PhysicsSystem system, Vector3f dimensions, Transform offset = Transform.init)
 	{
-		super(system, ColliderType.box);
+		super(system);
 		this.dimensions = dimensions;
 		this.offset = offset;
 	}
@@ -76,7 +65,7 @@ class SphereCollider : Collider
 
 	this(PhysicsSystem system, float radius, Transform offset = Transform.init)
 	{
-		super(system, ColliderType.sphere);
+		super(system);
 		this.radius = radius;
 		this.offset = offset;
 	}
@@ -115,7 +104,7 @@ class StaticMeshCollider : Collider
 		else
 			this.vertexConstArr = vertices;
 
-		super(system, ColliderType.staticMesh);
+		super(system);
 	}
 
 	package void freeMemory()
@@ -160,7 +149,7 @@ class CapsuleCollider : Collider
 
 	this(PhysicsSystem system, float radius, float radius1, float height, Transform offset = Transform.init)
 	{
-		super(system, ColliderType.capsule);
+		super(system);
 		this.radius = radius;
 		this.radius1 = radius1;
 		this.height = height;
