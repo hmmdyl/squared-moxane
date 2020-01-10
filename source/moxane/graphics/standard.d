@@ -108,8 +108,9 @@ enum VertexDataType
 
 enum PrimitiveType
 {
-	triangles,
-	triangleList
+	triangles = GL_TRIANGLES,
+	triangleList = GL_TRIANGLE_STRIP,
+	lines = GL_LINES
 }
 
 private template DetermineDataType(T)
@@ -176,6 +177,11 @@ private static GLenum vdtToGL(VertexDataType vdt)
 		case double_: return GL_DOUBLE;
 		default: return GL_NONE;
 	}
+}
+
+struct LinesConfig
+{
+	float width;
 }
 
 struct VertexChannel
@@ -250,15 +256,19 @@ class StaticModel
 		material_ = mb;
 	}
 
+	immutable PrimitiveType primitiveType;
 	VertexChannel[] vertexChannels;
 	int vertexCount;
 	StandardRenderer stdRenderer;
 
+	Variant renderConfig;
+
 	Transform localTransform;
 	Transform finalTransform;
 	
-	this(StandardRenderer r, Material material, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null)
+	this(StandardRenderer r, Material material, Vector3f[] vertices, Vector3f[] normals, Vector2f[] texCoords = null, PrimitiveType primitiveType = PrimitiveType.triangles)
 	{
+		this.primitiveType = primitiveType;
 		stdRenderer = r;
 		this.material_ = material;
 		vertexCount = cast(int)vertices.length;
@@ -350,7 +360,12 @@ class StandardRenderer : IRenderable
 				}
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-				glDrawArrays(GL_TRIANGLES, 0, model.vertexCount);
+				if(model.renderConfig.type == typeid(LinesConfig))
+				{
+					glLineWidth(model.renderConfig.peek!LinesConfig().width);
+				}
+
+				glDrawArrays(cast(GLenum)model.primitiveType, 0, model.vertexCount);
 
 				drawCalls += 1;
 				numVerts += model.vertexCount;
