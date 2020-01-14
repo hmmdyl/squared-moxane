@@ -9,6 +9,7 @@ import moxane.core.asset;
 
 import dlib.math : Vector2i, Vector4f;
 
+@Component
 struct UIPicture
 {
 	Texture2D texture;
@@ -38,6 +39,7 @@ struct UIButtonEvent
 	Vector2i cursorPosition;
 }
 
+@Component
 struct UIButton
 {
 	EventWaiter!(UIButtonEvent) event;

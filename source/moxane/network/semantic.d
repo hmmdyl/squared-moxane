@@ -1,5 +1,7 @@
 module moxane.network.semantic;
 
+import moxane.core : Component;
+
 public import cerealed : NoCereal;
 alias NoSerialise = NoCereal;
 
@@ -10,6 +12,7 @@ enum SyncLifetime
 	none
 }
 
+@Component
 struct NetworkSemantic
 {
 	SyncLifetime syncLifetime;

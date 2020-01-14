@@ -9,6 +9,7 @@ import std.algorithm.mutation : remove;
 @safe:
 // TODO: Actually make this module and dependencies @safe
 
+@Component
 struct RenderComponent
 {
 	private StaticModel[] staticModels_;

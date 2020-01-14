@@ -18,6 +18,7 @@ import containers.unrolledlist;
 
 @safe:
 
+@Component 
 struct PhysicsComponent
 {
 	Collider collider;

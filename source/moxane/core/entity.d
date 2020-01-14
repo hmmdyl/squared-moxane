@@ -13,8 +13,11 @@ import std.algorithm.searching;
 import core.memory;
 import core.thread : Fiber;
 import containers;
+import std.traits : hasUDA;
 
 @safe:
+
+enum Component;
 
 /++ This is an Entity. Its functionality is represented by the components it encapsulates. +/
 class Entity
@@ -72,6 +75,8 @@ class Entity
 		Throws: Exception if component of type T is already attached. +/
 	T* createComponent(T)() @trusted
 	{
+		static assert(hasUDA!(T, Component));
+
 		assertUnattached!T();
 		T* t = entityManager_.allocateComponent!T();
 		components[typeid(T)] = cast(void*)t;
@@ -80,6 +85,8 @@ class Entity
 
 	T* createComponent(T, Args...)(Args args) @trusted
 	{
+		static assert(hasUDA!(T, Component));
+
 		assertUnattached!T();
 		T* t = entityManager_.allocateComponent!T(args);
 		components[typeid(T)] = cast(void*)t;
@@ -90,6 +97,8 @@ class Entity
 		Throws: Exception if component type T is already attached. +/
 	void attachComponent(T)(T* t) @trusted
 	{
+		static assert(hasUDA!(T, Component));
+
 		assertUnattached!T();
 		components[typeid(T)] = cast(void*)t;
 		entityManager_.onComponentAttached(OnComponentAttach(*t, this, typeid(T), false));

@@ -1,10 +1,12 @@
 module moxane.core.transformation;
 
+import moxane.core.entity : Component;
 import dlib.math;
 import core.atomic;
 
 @safe @nogc nothrow:
 
+@Component
 struct Transform
 {
 	Vector3f position;
@@ -40,6 +42,7 @@ struct Transform
 	}
 }
 
+@Component
 struct AtomicTransform
 {
 	private shared float px_, py_, pz_;
