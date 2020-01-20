@@ -1,6 +1,6 @@
 module moxane.network.semantic;
 
-import moxane.core : Component;
+import moxane.core.entity : Component;
 
 public import cerealed : NoCereal;
 alias NoSerialise = NoCereal;

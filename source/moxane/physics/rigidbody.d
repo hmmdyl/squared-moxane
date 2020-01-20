@@ -311,7 +311,7 @@ class DynamicPlayerBodyMT : BodyRootMT
 			dpb.raycastHit = true;
 			return intersectionParam;
 		}
-		catch(Exception){}
+		catch(Exception){return 0f;}
 	}
 
 	private static extern(C) uint newtonPrefilterCallback(const NewtonBody* bodyPtr, const NewtonCollision* collPtr, void* userData) nothrow
