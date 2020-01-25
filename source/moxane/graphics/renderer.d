@@ -63,6 +63,7 @@ import std.math : floor;
 		ortho.right = cast(float)width;
 		ortho.bottom = cast(float)height;
 		ortho.top = 0f;
+		isOrtho = true;
 	}
 
 	void buildProjection()
