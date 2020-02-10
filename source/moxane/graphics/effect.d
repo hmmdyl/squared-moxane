@@ -97,6 +97,14 @@ class Shader
 	~this() { if(!disposed_) dispose; }
 	void dispose() { if(compiled_) glDeleteShader(id); }
 
+	this() {}
+
+	this(string filename, GLenum shaderType, Log log = null)
+	{
+		import std.file;
+		compile(readText(filename), shaderType, log);
+	}
+
 	bool compile(string sourceCode, GLenum shaderType, Log log = null)
 	{
 		assert(!compiled_);

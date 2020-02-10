@@ -6,9 +6,15 @@ import derelict.opengl3.gl3;
 
 import std.conv : to;
 
+@safe:
+
 class RenderTexture
 {
 	uint width, height;
+	invariant {
+		assert(width > 0);
+		assert(height > 0);
+	}
 
 	GLuint fbo;
 	GLuint diffuse, worldPos, normal, spec;
@@ -19,7 +25,7 @@ class RenderTexture
 
 	private static GLenum[] allAttachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
 
-	this(uint width, uint height, DepthTexture depthTexture, GLState gl)
+	this(uint width, uint height, DepthTexture depthTexture, GLState gl) @trusted
 	{
 		this.gl = gl;
 
@@ -52,10 +58,15 @@ class RenderTexture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void createTextures()
+	void createTextures(uint w, uint h)
 	{
-		assert(width > 0 && height > 0);
+		this.width = w;
+		this.height = h;
+		createTextures;
+	}
 
+	void createTextures() @trusted
+	{
 		//gl.texture2D.push(true);
 		//scope(exit) gl.texture2D.pop;
 
@@ -87,7 +98,7 @@ class RenderTexture
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	~this() 
+	~this() @trusted
 	{
 		glDeleteTextures(1, &diffuse);
 		glDeleteTextures(1, &worldPos);
@@ -96,20 +107,25 @@ class RenderTexture
 		glDeleteFramebuffers(1, &fbo);
 	}
 
-	void bindDraw()
+	void bindDraw() @trusted
 	{
 		//glDrawBuffers(cast(int)allAttachments.length, allAttachments.ptr);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glViewport(0, 0, width, height);
 	}
 
-	void unbindDraw()
+	void unbindDraw() @trusted
 	{
-		//glDrawBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void clear()
+	void unbindDraw(uint w, uint h) @trusted
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, w, h);
+	}
+
+	void clear() @trusted
 	{
 		glClearColor(0f, 0f, 0f, 0);
 		if(depthTexture is null)
@@ -118,7 +134,7 @@ class RenderTexture
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void bindAsTexture(uint[3] textureUnits)
+	void bindAsTexture(uint[3] textureUnits) @trusted
 	{
 		glActiveTexture(GL_TEXTURE0 + textureUnits[0]);
 		glBindTexture(GL_TEXTURE_2D, diffuse);
@@ -128,7 +144,7 @@ class RenderTexture
 		glBindTexture(GL_TEXTURE_2D, normal);
 	}
 
-	void unbindTextures(uint[3] textureUnits)
+	void unbindTextures(uint[3] textureUnits) @trusted
 	{
 		foreach(uint tu; textureUnits)
 		{
@@ -137,7 +153,7 @@ class RenderTexture
 		}
 	}
 
-	void blitTo(RenderTexture target)
+	void blitTo(RenderTexture target) @trusted
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target.fbo);
@@ -154,7 +170,7 @@ class RenderTexture
 			glBlitFramebuffer(0, 0, width, height, 0, 0, target.width, target.height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	}
 
-	void blitToScreen(uint x, uint y, uint screenWidth, uint screenHeight)
+	void blitToScreen(uint x, uint y, uint screenWidth, uint screenHeight) @trusted
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -180,11 +196,15 @@ class RenderTexture
 class DepthTexture
 {
 	uint width, height;
+	invariant {
+		assert(width > 0);
+		assert(height > 0);
+	}
 	GLuint depth;
 
 	GLState gl;
 
-	this(uint width, uint height, GLState gl)
+	this(uint width, uint height, GLState gl) @trusted
 	{
 		this.width = width;
 		this.height = height;
@@ -200,10 +220,15 @@ class DepthTexture
 		createTextures;
 	}
 
-	void createTextures()
+	void createTextures(uint w, uint h)
 	{
-		assert(width > 0 && height > 0);
+		this.width = w;
+		this.height = h;
+		createTextures;
+	}
 
+	void createTextures() @trusted
+	{
 		glBindTexture(GL_TEXTURE_2D, depth);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -224,7 +249,7 @@ class PostProcessTexture
 	uint fbo;
 	uint diffuse;
 
-	this(uint width, uint height)
+	this(uint width, uint height) @trusted
 	{
 		this.width = width;
 		this.height = height;
@@ -244,7 +269,7 @@ class PostProcessTexture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void createTextures()
+	void createTextures() @trusted
 	{
 		glBindTexture(GL_TEXTURE_2D, diffuse);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -254,21 +279,21 @@ class PostProcessTexture
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void bindDraw()
+	void bindDraw() @trusted
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glViewport(0, 0, width, height);
 	}
 
-	void unbindDraw() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+	void unbindDraw() @trusted { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
-	void clear()
+	void clear() @trusted
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
-	void blitTo(RenderTexture dest)
+	void blitTo(RenderTexture dest) @trusted
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest.fbo);
