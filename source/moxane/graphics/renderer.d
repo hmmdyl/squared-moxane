@@ -395,8 +395,17 @@ class Renderer
 			
 			foreach(IRenderable r; uiRenderables) 
 			{
+				LocalContext uilc2 = 
+				{
+				projection : uiCamera.projection, 
+				view : Matrix4f.identity, 
+				model : Matrix4f.identity, 
+				camera : uiCamera,
+				type : PassType.ui
+				};
+
 				uint dc, nv;
-				r.render(this, uilc, dc, nv);
+				r.render(this, uilc2, dc, nv);
 				currentFrameDebug.uiDrawCalls += dc;
 				currentFrameDebug.uiNumVerts += nv;
 			}
