@@ -26,6 +26,8 @@ final class SpriteRenderer : IRenderable
 		Vector3f colour;
 		float alpha;
 		bool mixAlpha;
+
+		void delegate(ref SpriteOrder order, SpriteRenderer renderer) effectOverride;
 	}
 	private SpriteOrder[] spriteOrders;
 
@@ -204,7 +206,14 @@ final class SpriteRenderer : IRenderable
 			effect["Colour"].set(Vector4f(order.colour.x, order.colour.y, order.colour.z, order.alpha));
 			effect["MixAlpha"].set(order.mixAlpha);
 
+			if(order.effectOverride !is null)
+				order.effectOverride(order, this);
+
 			glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+
+			if(order.effectOverride !is null)
+				effect.bind;
+
 			drawCalls++;
 			numVerts += 6;
 		}
