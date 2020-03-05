@@ -18,25 +18,23 @@ import std.typecons;
 
 final class SpriteRenderer : IRenderable
 {
-	private struct SpriteOrder
+	private struct Order
 	{
-		Vector2i position;
-		Vector2i dimensions;
+		ivec4 destinationCoords;
+        vec4 textureCoords;
 		Texture2D texture;
-		Vector3f colour;
+		vec3 colour;
 		float alpha;
 		bool mixAlpha;
-
-		void delegate(ref SpriteOrder order, SpriteRenderer renderer) effectOverride;
 	}
-	private SpriteOrder[] spriteOrders;
+	private Order[] spriteOrders;
 
 	private struct TextSpriteOrder
 	{
 		SpriteFont font;
 		string text;
-		Vector2i position;
-		Vector3f colour;
+		ivec2 position;
+		vec3 colour;
 		float alpha;
 		float scale;
 	}
@@ -45,9 +43,10 @@ final class SpriteRenderer : IRenderable
 	void drawSprite(Vector2i position, Vector2i dimensions, Vector3f colour, float alpha = 1.0f, bool mixAlpha = false)
 	{ drawSprite(position, dimensions, null, colour, alpha, mixAlpha); }
 
-	void drawSprite(Vector2i position, Vector2i dimensions, Texture2D texture, Vector3f colour = Vector3f(1f, 1f, 1f), float alpha = 1f, bool mixAlpha = true)
+	void drawSprite(Vector2i position, Vector2i dimensions, Texture2D texture, 
+        Vector3f colour = Vector3f(1f, 1f, 1f), float alpha = 1f, bool mixAlpha = true)
 	{
-		SpriteOrder order = {
+		Order order = {
 			position : position,
 			dimensions : dimensions,
 			texture : texture,
@@ -58,7 +57,8 @@ final class SpriteRenderer : IRenderable
 		spriteOrders ~= order;
 	}
 
-	void drawText(string text, SpriteFont font, Vector2i position, Vector3f colour = Vector3f(1f, 1f, 1f), float alpha = 1f, float scale = 1f)
+	void drawText(string text, SpriteFont font, Vector2i position, 
+        Vector3f colour = Vector3f(1f, 1f, 1f), float alpha = 1f, float scale = 1f)
 	{
 		TextSpriteOrder order = {
 			text : text,
@@ -193,7 +193,7 @@ final class SpriteRenderer : IRenderable
 		effect["MVP"].set(&mvp);
 
 		scope(exit) spriteOrders.length = 0;
-		foreach(ref SpriteOrder order; spriteOrders)
+		foreach(ref Order order; spriteOrders)
 		{
 			if(order.texture !is null) order.texture.bind;
 			scope(exit) if(order.texture !is null) order.texture.unbind;
