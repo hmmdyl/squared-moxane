@@ -1,4 +1,4 @@
-module moxane.graphics.spite;
+module moxane.graphics.sprite2;
 
 import moxane.core;
 import moxane.graphics;
@@ -48,9 +48,9 @@ final class Sprites : IRenderable
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, verts.length * Vector2f.sizeof, verts.ptr, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glGenBuffers(1, &tbo);
+        glBindBuffer(GL_ARRAY_BUFFER, tbo);
         glBufferData(GL_ARRAY_BUFFER, verts.length * Vector2f.sizeof, null, GL_STREAM_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -69,6 +69,7 @@ final class Sprites : IRenderable
 		effect.findUniform("Texture");
 		effect.findUniform("Colour");
         effect.findUniform("Alpha");
+		effect.findUniform("Text");
 		effect.unbind;
     }
 
@@ -154,20 +155,20 @@ final class Sprites : IRenderable
 		font.size = Vector2u(width, height);
 
 		FT_Face face;
-		const(char)* fi = toStringz(dir);
+		const(char)* fi = toStringz(directory);
 		FT_New_Face(ftLib, fi, 0, &face);
 		FT_Set_Pixel_Sizes(face, width, height);
 		font.face = face;
 		font.newLineOffset = cast(uint)face.size.metrics.height;
 		font.hasKerning = FT_HAS_KERNING(face);
 
-        if(renderer !is null)
+        //if(renderer !is null)
 		    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		for(uint i = 0; i < 256; i++) {
 			FT_Load_Char(face, i, FT_LOAD_RENDER);
 
 			uint texture;
-            if(renderer !is null)
+            //if(renderer !is null)
             {
                 glGenTextures(1, &texture);
 
@@ -247,6 +248,7 @@ final class Sprites : IRenderable
         glEnableVertexAttribArray(1);
         scope(exit) glDisableVertexAttribArray(0);
 
+        glActiveTexture(GL_TEXTURE0);
         effect.bind;
         scope(exit) effect.unbind;
         effect["Texture"].set(0);
@@ -254,8 +256,6 @@ final class Sprites : IRenderable
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, null);
         scope(exit) glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glActiveTexture(GL_TEXTURE0);
 
         renderer.gl.blend.push(true);
         scope(exit) renderer.gl.blend.pop;
@@ -270,10 +270,10 @@ final class Sprites : IRenderable
         foreach(ref Order order; orders)
         {
             if(order.texture !is null && order.text is null)
-                renderSprite(order, drawCalls, numVerts);
+				renderSprite(order, drawCalls, numVerts);
             else if(order.texture is null && order.text !is null)
                 renderText(order, drawCalls, numVerts);
-            else throw new Exception("impossible");
+            //else throw new Exception("impossible");
         }
     }
 
@@ -292,19 +292,23 @@ final class Sprites : IRenderable
         glBufferData(GL_ARRAY_BUFFER, texCoords.length * Vector2f.sizeof, null, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, texCoords.length * Vector2f.sizeof, texCoords.ptr);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, null);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     private void renderSprite(ref Order order, ref uint drawCalls, ref uint numVerts) @trusted
     {
-        order.texture.bind;
-        scope(exit) order.texture.unbind;
-
         streamTexCoord(order.texLow, order.texHigh);
 
         effect["Position"].set(order.position);
         effect["Dimensions"].set(order.size);
         effect["Colour"].set(order.colour);
         effect["Alpha"].set(order.alpha);
+        effect["Texture"].set(0);
+		effect["Text"].set(false);
+
+        glActiveTexture(GL_TEXTURE0);
+        order.texture.bind;
+        scope(exit) order.texture.unbind;
 
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 		drawCalls++;
@@ -314,6 +318,9 @@ final class Sprites : IRenderable
     private void renderText(ref Order order, ref uint drawCalls, ref uint numVerts) @trusted
     {
         streamTexCoord(Vector2f(0, 0), Vector2f(1, 1));
+        scope(exit) glBindTexture(GL_TEXTURE_2D, 0);
+
+        import std.stdio;
 
         int cx = order.position.x;
         int cy = order.position.y;
@@ -351,12 +358,14 @@ final class Sprites : IRenderable
                     size.x = cd.size.x * order.scale;
                     size.y = cd.size.y * order.scale;
 
-                    effect["Position"].set(pos);
-                    effect["Dimensions"].set(size);
+                    effect["Position"].set(Vector2i(pos.x, pos.y));
+                    effect["Dimensions"].set(Vector2i(size.x, size.y));
+                    glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, cd.textureID);
-                    scope(exit) glBindTexture(GL_TEXTURE_2D, 0);
-                    effect["Colour"].set(Vector4f(order.colour.x, order.colour.y, order.colour.z, order.alpha));
+                    effect["Colour"].set(order.colour);
                     effect["Alpha"].set(1f);
+                    effect["Texture"].set(0);
+					effect["Text"].set(true);
 
                     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
                     drawCalls++;

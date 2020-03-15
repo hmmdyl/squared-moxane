@@ -3,26 +3,23 @@
 in vec2 fTexCoord;
 
 uniform sampler2D Texture;
-uniform bool UseTexture;
-
-uniform vec4 Colour;
-uniform bool MixAlpha;
+uniform vec3 Colour;
+uniform float Alpha;
+uniform bool Text;
 
 layout(location = 0) out vec4 Fragment;
 
 void main()
 {
-	if(UseTexture)
-	{
-		vec4 tex = texture(Texture, fTexCoord);
-		Fragment.rgb = tex.rgb * Colour.rgb;
-		if(MixAlpha)
-			Fragment.a = tex.a * Colour.a;
-		else
-			Fragment.a = Colour.a;
-	}
-	else
-	{
-		Fragment = Colour;
-	}
+	vec4 tex = texture(Texture, fTexCoord);
+    if(Text)
+    {
+        Fragment.rgb = tex.r * Colour.rgb;
+        Fragment.a = tex.r * Alpha;
+    }
+    else
+    {
+	    Fragment.rgb = tex.rgb * Colour.rgb;
+	    Fragment.a = tex.a * Alpha;
+    }
 }

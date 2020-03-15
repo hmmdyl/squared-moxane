@@ -2,7 +2,7 @@ module moxane.ui.ecs;
 
 import moxane.graphics.renderer;
 import moxane.graphics.texture;
-import moxane.graphics.sprite;
+import moxane.graphics.sprite2;
 import moxane.io;
 import moxane.core;
 import moxane.core.asset;
@@ -78,7 +78,7 @@ final class UISystem : System
 
 	private void updateButtons() @trusted
 	{
-		SpriteRenderer sprites = moxane.services.get!SpriteRenderer;
+		Sprites sprites = moxane.services.get!Sprites;
 		if(sprites is null) return;
 
 		auto entities = entityManager.entitiesWith!(Transform, UIButton);
@@ -120,13 +120,13 @@ final class UISystem : System
 			}
 
 			Vector4f colour = button.state == UIButtonState.click ? button.clickColour : button.state == UIButtonState.hover ? button.hoverColour : button.inactiveColour;
-			sprites.drawSprite(buttonBegin, button.dimensions, colour.xyz, colour.w);
+			//sprites.drawSprite(buttonBegin, button.dimensions, colour.xyz, colour.w);
 		}
 	}
 
 	private void updatePictures() @trusted
 	{
-		SpriteRenderer sprites = moxane.services.get!SpriteRenderer;
+		Sprites sprites = moxane.services.get!Sprites;
 		if(sprites is null) return;
 
 		auto entities = entityManager.entitiesWith!(Transform, UIPicture);
@@ -137,7 +137,8 @@ final class UISystem : System
 			Transform* transform = entity.get!Transform;
 			UIPicture* pic = entity.get!UIPicture;
 			Vector2i begin = cast(Vector2i)transform.position.xy + pic.offset;
-			sprites.drawSprite(begin, pic.dimensions, pic.texture);
+			//sprites.drawSprite(begin, pic.dimensions, pic.texture);
+            sprites.draw(pic.texture, begin, pic.dimensions);
 		}
 	}
 }
