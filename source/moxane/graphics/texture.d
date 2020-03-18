@@ -8,22 +8,6 @@ import std.conv : to;
 import derelict.freeimage.freeimage;
 import derelict.opengl3.gl3;
 
-/*class Texture2DLoader : IAssetLoader
-{
-	Object handle(AssetManager am, TypeInfo ti, string dir)
-	{
-		FIBITMAP* bitmap;
-		auto filez = AssetManager.translateToAbsoluteDir(dir).toStringz;
-		FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(filez, 0);
-		if(fif == FIF_UNKNOWN) fif = FreeImage_GetFIFFromFilename(filez);
-		if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
-			bitmap = FreeImage_Load(fif, filez, 0);
-		if(bitmap is null) throw new Exception("Could not load Texture2D " ~ dir);
-
-
-	}
-}*/
-
 enum Filter
 {
 	nearest = GL_NEAREST,
@@ -110,7 +94,8 @@ enum ImageFilter {
 enum TextureBitDepth
 {
 	eight,
-	sixteen
+	sixteen,
+	thirtyTwo
 }
 
 class Texture2D
@@ -143,47 +128,13 @@ class Texture2D
 	private ConstructionInfo meta_;
 	@property ConstructionInfo meta() const { return meta; }
 
-	/+this(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps, bool clamp = true)
-	{ upload(data, width, height, minification, magnification, genMipMaps, clamp); }
-
-	this(string dir, Filter minification = Filter.linear, Filter magnification = Filter.linear, bool genMipMaps = false)
+	package this(uint handle, uint width, uint height, ConstructionInfo ci)
 	{
-		FIBITMAP* bitmap;
-		//scope(exit) FreeImage_Unload(bitmap);
-
-		auto filez = dir.toStringz;
-		FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(filez, 0);
-		if(fif == FIF_UNKNOWN) fif = FreeImage_GetFIFFromFilename(filez);
-
-		if((fif != FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fif))
-			bitmap = FreeImage_Load(fif, filez, 0);
-		if(bitmap is null) throw new Exception("Could not load Texture2D " ~ dir);
-
-		FIBITMAP* bitmap32 = FreeImage_ConvertTo32Bits(bitmap);
-		FreeImage_Unload(bitmap);
-		scope(exit) FreeImage_Unload(bitmap32);
-
-		upload(FreeImage_GetBits(bitmap32), FreeImage_GetWidth(bitmap32), FreeImage_GetHeight(bitmap32), minification, magnification, genMipMaps, false);
-	}
-
-	void upload(void* data, uint width, uint height, Filter minification, Filter magnification, bool genMipMaps, bool clamp = false)
-	{
-		glGenTextures(1, &handle);
-		bind;
-		scope(exit) unbind;
-
+		this.handle = handle;
 		this.width = width;
 		this.height = height;
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minification);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnification);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
-
-		if(genMipMaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-	}+/
+		this.meta_ = ci;
+	}
 
 	this(void* data, uint width, uint height, ConstructionInfo ci)
 	{

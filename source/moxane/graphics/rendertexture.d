@@ -1,6 +1,7 @@
 module moxane.graphics.rendertexture;
 
 import moxane.graphics.gl;
+import moxane.graphics.texture;
 
 import derelict.opengl3.gl3;
 
@@ -17,13 +18,21 @@ class RenderTexture
 	}
 
 	GLuint fbo;
-	GLuint diffuse, worldPos, normal, spec;
-	GLuint depth;
+	//GLuint diffuse, worldPos, normal, spec;
+	private GLuint[4] handles;
+	@property ref GLuint diffuse() { return handles[0]; }
+	@property ref GLuint worldPos() { return handles[1]; }
+	@property ref GLuint normal() { return handles[2]; }
+	@property ref GLuint spec() { return handles[3]; }
+	//GLuint depth;
 	DepthTexture depthTexture;
 
 	GLState gl;
 
-	private static GLenum[] allAttachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2];
+	private static GLenum[] allAttachments = [GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3];
+
+	private Texture2D[4] textures_;
+	@property Texture2D[4] textures() { return textures_; }
 
 	this(uint width, uint height, DepthTexture depthTexture, GLState gl) @trusted
 	{
@@ -33,10 +42,14 @@ class RenderTexture
 		this.height = height;
 		this.depthTexture = depthTexture;
 
-		glGenTextures(1, &diffuse);
-		glGenTextures(1, &worldPos);
-		glGenTextures(1, &normal);
-		glGenTextures(1, &spec);
+		glGenTextures(4, &handles[0]);
+
+		textures_ = new Texture2D[](allAttachments.length);
+		auto ci = Texture2D.ConstructionInfo.standard;
+		ci.bitDepth = TextureBitDepth.thirtyTwo;
+		foreach(i, ref texture; textures_)
+			texture = new Texture2D(handles[i], width, height, ci);
+
 		createTextures;
 
 		glGenFramebuffers(1, &fbo);
@@ -67,13 +80,11 @@ class RenderTexture
 
 	void createTextures() @trusted
 	{
-		//gl.texture2D.push(true);
-		//scope(exit) gl.texture2D.pop;
-
-		//glBindTexture(GL_TEXTURE_2D, depth);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, null);
+		foreach(texture; textures_)
+		{
+			texture.width = width;
+			texture.height = height;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, diffuse);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -100,10 +111,7 @@ class RenderTexture
 
 	~this() @trusted
 	{
-		glDeleteTextures(1, &diffuse);
-		glDeleteTextures(1, &worldPos);
-		glDeleteTextures(1, &normal);
-		glDeleteTextures(1, &spec);
+		glDeleteTextures(4, &handles[0]);
 		glDeleteFramebuffers(1, &fbo);
 	}
 
@@ -134,7 +142,7 @@ class RenderTexture
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void bindAsTexture(uint[3] textureUnits) @trusted
+	void bindAsTexture(uint[4] textureUnits) @trusted
 	{
 		glActiveTexture(GL_TEXTURE0 + textureUnits[0]);
 		glBindTexture(GL_TEXTURE_2D, diffuse);
@@ -142,9 +150,11 @@ class RenderTexture
 		glBindTexture(GL_TEXTURE_2D, worldPos);
 		glActiveTexture(GL_TEXTURE0 + textureUnits[2]);
 		glBindTexture(GL_TEXTURE_2D, normal);
+		glActiveTexture(GL_TEXTURE0 + textureUnits[3]);
+		glBindTexture(GL_TEXTURE_2D, spec);
 	}
 
-	void unbindTextures(uint[3] textureUnits) @trusted
+	void unbindTextures(uint[4] textureUnits) @trusted
 	{
 		foreach(uint tu; textureUnits)
 		{
@@ -204,6 +214,9 @@ class DepthTexture
 
 	GLState gl;
 
+	private Texture2D texture_;
+	@property Texture2D texture() { return texture_; }
+
 	this(uint width, uint height, GLState gl) @trusted
 	{
 		this.width = width;
@@ -217,6 +230,10 @@ class DepthTexture
 
 		glGenTextures(1, &depth);
 
+		auto ci = Texture2D.ConstructionInfo.standard;
+		ci.bitDepth = TextureBitDepth.thirtyTwo;
+		texture_ = new Texture2D(depth, width, height, ci);
+
 		createTextures;
 	}
 
@@ -224,6 +241,8 @@ class DepthTexture
 	{
 		this.width = w;
 		this.height = h;
+		texture_.width = w;
+		texture_.height = h;
 		createTextures;
 	}
 
