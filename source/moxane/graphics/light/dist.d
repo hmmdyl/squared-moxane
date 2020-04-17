@@ -187,7 +187,7 @@ immutable string directionalLightShadowFrag = q{
 
 		vec4 lps = LPV * vec4(worldPos, 1);
 		float vis = calcShadow(lps, normal);
-		DiffuseOut = (vec4(diffuse, 1.0) * calculateDirectionalLight(worldPos, normal, vis, spec.x, spec.y)).xyz;
+		DiffuseOut = (vec4(diffuse, 1.0) * (normal == vec3(0) ? vec4(1) : calculateDirectionalLight(worldPos, normal, vis, spec.x, spec.y))).xyz;
 	}
 };
 

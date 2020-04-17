@@ -406,6 +406,11 @@ class EntityManager
 		onSystemAdded.emit(OnSystemAdded(system, this));
 	}
 
+	void hasSystem(T)()
+	{
+		return canFind!((target, needle) => target == typeid(needle))(systems, typeid(T));
+	}
+
 	void opOpAssign(string op)(System system) if(op == "~")
 	{ add(system); }
 

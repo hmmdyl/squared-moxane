@@ -55,5 +55,5 @@ void main() {
 	vec2 spec = texture(SpecTexture, texCoord).rg;
 	
 	float shadow = 0.0;
-	DiffuseOut = (vec4(diffuse, 1.0) * calculateDirectionalLight(worldPos, normal, shadow, spec.x, spec.y)).xyz;
+	DiffuseOut = (vec4(diffuse, 1.0) * (normal == vec3(0) ? vec4(1) : calculateDirectionalLight(worldPos, normal, shadow, spec.x, spec.y))).xyz;
 }

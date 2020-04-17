@@ -223,11 +223,6 @@ class DepthTexture
 		this.height = height;
 		this.gl = gl;
 
-		//gl.texture2D.push(true);
-		//scope(exit) gl.texture2D.pop();
-
-		//glActiveTexture(GL_TEXTURE0);
-
 		glGenTextures(1, &depth);
 
 		auto ci = Texture2D.ConstructionInfo.standard;
