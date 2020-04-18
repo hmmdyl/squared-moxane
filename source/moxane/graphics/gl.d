@@ -99,7 +99,144 @@ class GLState
 		wireframe_ = w;
 	}
 
-	@nogc nothrow
+	struct blendT {
+		private bool[8] stack;
+		private ubyte next;
+		@property bool current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = bool.init;
+			next--;
+			if(next < 0) next = 0;
+			bool par = stack[next]; 
+			if(par) glEnable(cast(GLenum)3042);
+			else glDisable(cast(GLenum)3042);	}
+		void push(bool par) {
+			stack[next] = par; next++;
+			if(par) glEnable(cast(GLenum)3042);
+			else glDisable(cast(GLenum)3042);
+		}
+	}
+	blendT blend;
+
+
+	struct blendEquationT {
+		private GLenum[8] stack;
+		private ubyte next;
+		@property GLenum current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = GLenum.init;
+			next--;
+			if(next < 0) next = 0;
+			GLenum par = stack[next]; 
+			glBlendEquation(par);	}
+		void push(GLenum par) {
+			stack[next] = par; next++;
+			glBlendEquation(par);
+		}
+	}
+	blendEquationT blendEquation;
+
+
+	struct blendFuncT {
+		private Tuple!(GLenum, GLenum)[8] stack;
+		private ubyte next;
+		@property Tuple!(GLenum, GLenum) current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = Tuple!(GLenum, GLenum).init;
+			next--;
+			if(next < 0) next = 0;
+			Tuple!(GLenum, GLenum) par = stack[next]; 
+			glBlendFunc(par[0], par[1]);	}
+		void push(Tuple!(GLenum, GLenum) par) {
+			stack[next] = par; next++;
+			glBlendFunc(par[0], par[1]);
+		}
+	}
+	blendFuncT blendFunc;
+
+
+	struct depthTestT {
+		private bool[8] stack;
+		private ubyte next;
+		@property bool current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = bool.init;
+			next--;
+			if(next < 0) next = 0;
+			bool par = stack[next]; 
+			if(par) glEnable(cast(GLenum)2929);
+			else glDisable(cast(GLenum)2929);	}
+		void push(bool par) {
+			stack[next] = par; next++;
+			if(par) glEnable(cast(GLenum)2929);
+			else glDisable(cast(GLenum)2929);
+		}
+	}
+	depthTestT depthTest;
+
+
+	struct depthMaskT {
+		private bool[8] stack;
+		private ubyte next;
+		@property bool current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = bool.init;
+			next--;
+			if(next < 0) next = 0;
+			bool par = stack[next]; 
+			glDepthMask(par);	}
+		void push(bool par) {
+			stack[next] = par; next++;
+			glDepthMask(par);
+		}
+	}
+	depthMaskT depthMask;
+
+
+	struct depthTestExprT {
+		private GLenum[8] stack;
+		private ubyte next;
+		@property GLenum current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = GLenum.init;
+			next--;
+			if(next < 0) next = 0;
+			GLenum par = stack[next]; 
+			glDepthFunc(par);	}
+		void push(GLenum par) {
+			stack[next] = par; next++;
+			glDepthFunc(par);
+		}
+	}
+	depthTestExprT depthTestExpr;
+
+
+	struct polyModeT {
+		private GLenum[8] stack;
+		private ubyte next;
+		@property GLenum current() {
+			return stack[next-1]; }
+		void pop() {
+			stack[next-1] = GLenum.init;
+			next--;
+			if(next < 0) next = 0;
+			GLenum par = stack[next]; 
+			glPolygonMode(GL_FRONT_AND_BACK, par);	}
+		void push(GLenum par) {
+			stack[next] = par; next++;
+			glPolygonMode(GL_FRONT_AND_BACK, par);
+		}
+	}
+	polyModeT polyMode;
+
+
+	/+@nogc nothrow
 	{
 		mixin(Setting!(bool, "blend", enable!GL_BLEND));
 		mixin(Setting!(GLenum, "blendEquation", "glBlendEquation(par);"));
@@ -112,5 +249,56 @@ class GLState
 
 		mixin(Setting!(bool, "texture2D", enable!GL_TEXTURE_2D));
 		mixin(Setting!(bool, "texture2DArray", enable!GL_TEXTURE_2D_ARRAY));
-	}
+	}+/
 }
+
+/+enum GLenum {
+GL_BLEND = 3042,
+GL_DEPTH_TEST = 2929,
+GL_SCISSOR_TEST = 3089
+
+}
+
+enum stackDepth = 8;
+
+private template Setting(T, string name, string customFunction)
+{
+const char[] Setting = "struct " ~ name ~ "T {\n" ~
+"\tprivate " ~ T.stringof ~ "[" ~ stackDepth.stringof ~ "] stack;\n" ~
+"\tprivate ubyte next;\n" ~
+"\t@property " ~ T.stringof ~ " current() {\n" ~
+"\t\treturn stack[next-1]; }\n" ~
+"\tvoid pop() {\n" ~ 
+"\t\tstack[next-1] = " ~ T.stringof ~ ".init;\n" ~
+"\t\tnext--;\n" ~
+"\t\tif(next < 0) next = 0;\n\t\t" ~
+T.stringof ~ " par = stack[next]; \n\t" ~
+customFunction ~ 
+"\t}\n" ~
+"\tvoid push(" ~ T.stringof ~ " par) {\n" ~
+"\t\tstack[next] = par; next++;\n\t" ~
+customFunction ~ 
+"\n\t}\n}\n" ~ name ~ "T " ~ name ~ ";\n";
+}
+
+private static string enable(GLenum enumVal)()
+{
+return "\tif(par) glEnable(" ~ enumVal.stringof ~ ");\n\t\telse glDisable(" ~ enumVal.stringof ~ ");";
+}
+
+void main(string[] args)
+{
+writeln(Setting!(bool, "blend", enable!(GLenum.GL_BLEND)));
+writeln;
+writeln(Setting!(GLenum, "blendEquation", "glBlendEquation(par);"));
+writeln;
+writeln(Setting!(Tuple!(GLenum, GLenum), "blendFunc", "glBlendFunc(par[0], par[1]);"));
+writeln;
+writeln(Setting!(bool, "depthTest", enable!(GLenum.GL_DEPTH_TEST)));
+writeln;
+writeln(Setting!(bool, "depthMask", "glDepthMask(par);"));
+writeln;
+writeln(Setting!(GLenum, "depthTestExpr", "glDepthFunc(par);"));
+writeln;
+writeln(Setting!(GLenum, "polyMode", "glPolygonMode(GL_FRONT_AND_BACK, par);"));
+}+/
