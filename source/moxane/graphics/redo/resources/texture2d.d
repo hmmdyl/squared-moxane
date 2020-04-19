@@ -83,9 +83,9 @@ class Texture2D
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
 
 		GLenum internalFormat;
-		if(meta_.bitDepth == TextureBitDepth.eight)
+		if(depth == TextureBitDepth.eight)
 			internalFormat = GL_RGBA;
-		else if(meta_.bitDepth == TextureBitDepth.sixteen)
+		else if(depth == TextureBitDepth.sixteen)
 			internalFormat = GL_RGBA16;
 
 		GLenum bitDepth;

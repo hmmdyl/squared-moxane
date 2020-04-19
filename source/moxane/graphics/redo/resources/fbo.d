@@ -4,10 +4,11 @@ import moxane.graphics.gl;
 
 import std.conv : to;
 import derelict.opengl3.gl3;
+import dlib.math;
 
 @safe:
 
-class DepthTexture
+final class DepthTexture
 {
 	uint width, height;
 	invariant {
@@ -16,35 +17,19 @@ class DepthTexture
 	}
 	GLuint depth;
 
-	private Texture2D texture_;
-	@property Texture2D texture() { return texture_; }
-
 	this(uint width, uint height) @trusted
 	{
 		this.width = width;
 		this.height = height;
-		this.gl = gl;
-
 		glGenTextures(1, &depth);
-
-		auto ci = Texture2D.ConstructionInfo.standard;
-		ci.bitDepth = TextureBitDepth.thirtyTwo;
-		texture_ = new Texture2D(depth, width, height, ci);
-
-		createTextures;
+		update(width, height);
 	}
 
-	void createTextures(uint w, uint h)
+	void update(uint w, uint h) @trusted
 	{
 		this.width = w;
 		this.height = h;
-		texture_.width = w;
-		texture_.height = h;
-		createTextures;
-	}
-
-	void createTextures() @trusted
-	{
+		
 		glBindTexture(GL_TEXTURE_2D, depth);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -52,6 +37,14 @@ class DepthTexture
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	void read(GLenum[] textureUnits) @trusted
+	{
+		assert(textureUnits.length > 0);
+		glActiveTexture(textureUnits[0]);
+		glBindTexture(GL_TEXTURE_2D, depth);
+	}
+	void endRead(GLenum[] textureUnits) { IFramebuffer.endRead(textureUnits); }
 }
 
 @trusted interface IFramebuffer 
@@ -68,13 +61,18 @@ class DepthTexture
 	void beginDraw();
 	void endDraw();
 	void read(GLenum[] textureUnits);
-	final void endRead(GLenum[] textureUnits)
+	static final void endRead(GLenum[] textureUnits)
 	{
-		foreach(uint tu; textureUnits)
+		foreach(tu; textureUnits)
 		{
-			glActiveTexture(GL_TEXTURE0 + tu);
+			glActiveTexture(tu);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+	}
+
+	final void setClearColor(Vector4f colour = Vector4f(0f, 0f, 0f, 1f))
+	{
+		glClearColor(colour.x, colour.y, colour.z, colour.w);
 	}
 }
 
@@ -111,7 +109,7 @@ class DepthTexture
 	@property uint height() { return height_; }
 	@property uint handle() { return handle_; }
 
-	invariant { assert(width > 0); assert(height > 0); }
+	invariant { assert(width_ > 0); assert(height_ > 0); }
 
 	private DepthTexture depth_;
 	@property DepthTexture depthTexture() { return depth_; }
@@ -131,6 +129,8 @@ class DepthTexture
 
 	this(uint w, uint h, DepthTexture depth = null)
 	{
+		this.height_ = h;
+		this.width_ = w;
 		this.depth_ = depth;
 
 		glGenTextures(4, textures.ptr);
@@ -149,7 +149,7 @@ class DepthTexture
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if(status != GL_FRAMEBUFFER_COMPLETE)
-			throw new Exception("FBO " ~ to!string(fbo) ~ " could not be created. Status: " ~ to!string(status));
+			throw new Exception("FBO " ~ to!string(handle_) ~ " could not be created. Status: " ~ to!string(status));
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -157,7 +157,7 @@ class DepthTexture
 	~this()
 	{
 		glDeleteTextures(cast(int)textures.length, textures.ptr);
-		glDeleteFramebuffers(1, &handle);
+		glDeleteFramebuffers(1, &handle_);
 	}
 
 	void update(uint w, uint h)
@@ -189,15 +189,18 @@ class DepthTexture
 	}
 
 	void clear()
-	{ glClear(GL_COLOR_BUFFER_BIT | (depth !is null ? GL_DEPTH_BUFFER_BIT : GL_NONE)); }
+	{ 
+		glClearColor(0f, 0f, 0f, 1f);
+		glClear(GL_COLOR_BUFFER_BIT | (depth_ !is null ? GL_DEPTH_BUFFER_BIT : GL_NONE)); 
+	}
 
 	void beginDraw() 
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glViewport(0, 0, width_, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, handle);
+		glViewport(0, 0, width_, height_);
 	}
 
-	void endDraw() { glFramebuffer(GL_FRAMEBUFFER, 0); }
+	void endDraw() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 	void read(GLenum[] textureUnits) 
 	{ 
@@ -216,7 +219,7 @@ class DepthTexture
 	@property uint height() { return height_; }
 	@property uint handle() { return handle_; }
 
-	invariant { assert(width > 0); assert(height > 0); }
+	invariant { assert(width_ > 0); assert(height_ > 0); }
 
 	@property DepthTexture depthTexture() { return null; }
 
@@ -229,8 +232,8 @@ class DepthTexture
 
 	this(uint w, uint h)
 	{
-		this.depth_ = depth;
-
+		this.width_ = w;
+		this.height_ = h;
 		glGenTextures(1, &texture);
 		update(w, h);
 
@@ -242,7 +245,7 @@ class DepthTexture
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if(status != GL_FRAMEBUFFER_COMPLETE)
-			throw new Exception("FBO " ~ to!string(fbo) ~ " could not be created. Status: " ~ to!string(status));
+			throw new Exception("FBO " ~ to!string(handle_) ~ " could not be created. Status: " ~ to!string(status));
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -250,7 +253,7 @@ class DepthTexture
 	~this()
 	{
 		glDeleteTextures(1, &texture);
-		glDeleteFramebuffers(1, &handle);
+		glDeleteFramebuffers(1, &handle_);
 	}
 
 	void update(uint w, uint h)
@@ -271,15 +274,15 @@ class DepthTexture
 
 	void beginDraw() 
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glViewport(0, 0, width_, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, handle_);
+		glViewport(0, 0, width_, height_);
 	}
 
-	void endDraw() { glFramebuffer(GL_FRAMEBUFFER, 0); }
+	void endDraw() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 	void read(GLenum[] textureUnits) 
 	{ 
-		glActiveTexture(GL_TEXTURE0 + textureUnits[0]);
+		glActiveTexture(textureUnits[0]);
 		glBindTexture(GL_TEXTURE_2D, texture);
 	}
 }

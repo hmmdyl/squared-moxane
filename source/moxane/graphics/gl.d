@@ -3,7 +3,7 @@ module moxane.graphics.gl;
 import moxane.core.engine;
 import moxane.core.log;
 
-import moxane.graphics.log;
+import moxane.graphics.redo.resources.log;
 
 import std.typecons : Tuple;
 import std.conv : to;

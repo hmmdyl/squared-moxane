@@ -4,6 +4,8 @@ public import moxane.graphics.redo.resources.texture;
 
 import derelict.opengl3.gl3;
 
+import std.conv : to;
+
 @safe:
 
 class Texture2DArray

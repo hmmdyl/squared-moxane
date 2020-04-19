@@ -1,6 +1,9 @@
 module moxane.graphics.redo.resources.texture;
 
 import derelict.freeimage.freeimage;
+import derelict.opengl3.gl3;
+
+import std.string;
 
 enum Filter
 {

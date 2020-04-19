@@ -57,6 +57,7 @@ import dlib.math;
 {
 	void moveOnAxes(Vector3f vec)
 	{
+		import std.math;
 		// strafe
 		float yr = degtorad(rotation.y);
 		position.x += cos(yr) * vec.x;
