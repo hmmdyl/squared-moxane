@@ -1,6 +1,45 @@
 module moxane.network.common;
 
+import moxane.core;
+import moxane.utils.maybe;
+
 import cerealed;
+
+@safe:
+
+abstract class PacketMap(TEvent)
+{
+	protected string[PacketID] idToName;
+	protected PacketID[string] nameToID;
+	protected EventWaiter!TEvent[string] distribution;
+	@property ref EventWaiter!TEvent event(string name) { return distribution[name]; }
+
+	this()
+	{
+		nameToID[LoginPacket.technicalName] = LoginPacket.id;
+		idToName[LoginPacket.id] = LoginPacket.technicalName;
+		nameToID[LoginVerificationPacket.technicalName] = LoginVerificationPacket.id;
+		idToName[LoginVerificationPacket.id] = LoginVerificationPacket.technicalName;
+		nameToID[AnnounceLoginPacket.technicalName] = AnnounceLoginPacket.id;
+		idToName[AnnounceLoginPacket.id] = AnnounceLoginPacket.technicalName;
+	}
+
+	bool has(string packetName) { return (packetName in nameToID) !is null; }
+	bool has(PacketID id) { return (id in idToName) !is null; }
+
+	Maybe!PacketID get(string packetName) @trusted
+	{
+		PacketID* id = packetName in nameToID;
+		if(id is null)return Maybe!PacketID();
+		else return Maybe!PacketID(*id);
+	}
+
+	string get(PacketID id) @trusted
+	{
+		string* name = id in idToName;
+		return *name;
+	}
+}
 
 alias PacketID = ushort;
 alias UserID = ushort;
@@ -9,8 +48,8 @@ enum PacketID availablePacketID = 3;
 
 struct LoginPacket
 {
-	@NoCereal enum technicalName = typeid(LoginPacket).name;
-	@NoCereal enum id = 0;
+	static string technicalName() { return typeid(LoginPacket).name; };
+	static PacketID id() { return 0; }
 
 	PacketID packetID;
 
@@ -20,31 +59,31 @@ struct LoginPacket
 
 struct LoginVerificationPacket
 {
-	@NoCereal enum technicalName = typeid(LoginVerificationPacket).name;
-	@NoCereal enum id = 1;
+	static string technicalName() { return typeid(LoginVerificationPacket).name; };
+	static PacketID id() { return 1; }
 
 	PacketID packetID;
 
 	bool accepted;
-	UserID id;
+	UserID userID;
 
 	string[] packetMap;
 }
 
 struct AnnounceLoginPacket
 {
-	@NoCereal enum technicalName = typeid(AnnounceLoginPacket).name;
-	@NoCereal enum id = 2;
+	static string technicalName() { return typeid(AnnounceLoginPacket).name; };
+	static PacketID id() { return 2; }
 
 	PacketID packetID;
 
 	string username;
-	UserID id;
+	UserID userID;
 }
 
 struct MessagePacket
 {
-	@NoCereal enum technicalName = typeid(MessagePacket).name;
+	static string technicalName() { return typeid(MessagePacket).name; };
 
 	PacketID packetID;
 
