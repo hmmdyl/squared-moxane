@@ -16,7 +16,7 @@ import moxane.core.scene;
 import moxane.io.input;
 
 /// Provides a singleton like system for systems, accessible by type.
-class ServiceHandler
+class ServiceRegistry
 {
 	private Object[TypeInfo] services;
 
@@ -130,7 +130,7 @@ class ServiceHandler
 class Moxane 
 {
 	const MoxaneBootSettings bootSettings;
-	ServiceHandler services;
+	ServiceRegistry services;
 
 	private StopWatch deltaSw, oneSecondSw;
 	float deltaTime;
@@ -147,7 +147,7 @@ class Moxane
 	{
 		this.bootSettings = settings;
 		this.appName = appName;
-		services = new ServiceHandler;
+		services = new ServiceRegistry;
 	
 		import moxane.utils.deps;
 		loadDependencies;
@@ -262,9 +262,9 @@ class Moxane
 
 	protected EntityManager registerEntityManager()
 	{
-		EntityManager em = new EntityManager(this);
-		services.register!EntityManager(em);
-		return em;
+		//EntityManager em = new EntityManager(this);
+		//services.register!EntityManager(em);
+		return null;
 	}
 
 	protected AssetManager registerAsset()

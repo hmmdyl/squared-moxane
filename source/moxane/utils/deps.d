@@ -5,6 +5,7 @@ import derelict.freetype.ft : DerelictFT;
 import derelict.freeimage.freeimage : DerelictFI;
 import derelict.glfw3 : DerelictGLFW3;
 import derelict.assimp3.assimp : DerelictASSIMP3;
+import derelict.enet.enet : DerelictENet;
 import bindbc.newton;
 
 private void loadFT()
@@ -50,6 +51,11 @@ private void loadASSIMP3()
 	DerelictASSIMP3.load();
 }
 
+private void loadENet()
+{
+	DerelictENet.load;
+}
+
 void loadDependencies()
 {
 	loadGLFW3;
@@ -57,4 +63,5 @@ void loadDependencies()
 	loadFI;
 	loadASSIMP3;
 	loadNewton;
+	loadENet;
 }

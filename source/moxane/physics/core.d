@@ -38,7 +38,7 @@ class PhysicsSystem : System
 
 	this(Moxane moxane, EntityManager manager) @trusted
 	{
-		super(moxane, manager);
+		super(manager);
 		physicsThread = new PhysicsThread(moxane.services.get!Log);
 
 		gravity = Vector3f(0, 10, 0);

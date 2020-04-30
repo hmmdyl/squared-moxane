@@ -40,6 +40,8 @@ class Client
 		this.port = port;
 		this.username_ = username;
 
+		enet_initialize();
+
 		enet_address_set_host(&serverAddress, cast(char*)address);
 		serverAddress.port = port;
 
@@ -51,10 +53,15 @@ class Client
 
 		nameToID[LoginPacket.technicalName] = LoginPacket.id;
 		idToName[LoginPacket.id] = LoginPacket.technicalName;
+		distribution[LoginPacket.technicalName] = EventWaiter!(Tuple!(string, ubyte[]))();
+
 		nameToID[LoginVerificationPacket.technicalName] = LoginVerificationPacket.id;
 		idToName[LoginVerificationPacket.id] = LoginVerificationPacket.technicalName;
+		distribution[LoginVerificationPacket.technicalName] = EventWaiter!(Tuple!(string, ubyte[]))();
+
 		nameToID[AnnounceLoginPacket.technicalName] = AnnounceLoginPacket.id;
 		idToName[AnnounceLoginPacket.id] = AnnounceLoginPacket.technicalName;
+		distribution[AnnounceLoginPacket.technicalName] = EventWaiter!(Tuple!(string, ubyte[]))();
 
 		distribution[LoginVerificationPacket.technicalName].addCallback(&onLoginVerify);
 	}
@@ -72,6 +79,7 @@ class Client
 		{
 			nameToID[map] = cast(ushort)(id + availablePacketID);
 			idToName[cast(ushort)(id + availablePacketID)] = map;
+			distribution[map] = EventWaiter!(Tuple!(string, ubyte[]))();
 		}
 
 		isConfigured_ = true;

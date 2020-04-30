@@ -67,7 +67,7 @@ final class UISystem : System
 {
 	this(Moxane moxane, EntityManager em)
 	{
-		super(moxane, em);
+		super(em);
 	}
 
 	override void update()
@@ -78,11 +78,11 @@ final class UISystem : System
 
 	private void updateButtons() @trusted
 	{
-		Sprites sprites = moxane.services.get!Sprites;
+		Sprites sprites = entityManager.moxane.services.get!Sprites;
 		if(sprites is null) return;
 
 		auto entities = entityManager.entitiesWith!(Transform, UIButton);
-		Window window = moxane.services.get!Window;
+		Window window = entityManager.moxane.services.get!Window;
 
 		Vector2i cursorPos = cast(Vector2i)window.cursorPos;
 		bool leftMB = window.isMouseButtonDown(MouseButton.left);
@@ -126,7 +126,7 @@ final class UISystem : System
 
 	private void updatePictures() @trusted
 	{
-		Sprites sprites = moxane.services.get!Sprites;
+		Sprites sprites = entityManager.moxane.services.get!Sprites;
 		if(sprites is null) return;
 
 		auto entities = entityManager.entitiesWith!(Transform, UIPicture);

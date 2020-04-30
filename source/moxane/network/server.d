@@ -65,18 +65,23 @@ class Server : PacketMap!IncomingPacket
 
 		super();
 
+		enet_initialize();
+
 		foreach(i, packetname; packetNames)
 		{
 			PacketID id = cast(PacketID)(i + availablePacketID);
 			idToName[id] = packetname;
 			nameToID[packetname] = id;
+			distribution[packetname] = EventWaiter!IncomingPacket();
 		}
 
 		serverAddress.host = ENET_HOST_ANY;
 		serverAddress.port = port;
 		host = enet_host_create(&serverAddress, 32, 2, 0, 0);
 	
-		distribution[LoginPacket.technicalName].addCallback(&onLogin);
+		//distribution[LoginPacket.technicalName].addCallback(&onLogin);
+		EventWaiter!IncomingPacket* e = LoginPacket.technicalName in distribution;
+		e.addCallback(&onLogin);
 	}
 
 	void send(T)(User* user, string packetName, ref T data) @trusted
@@ -95,6 +100,10 @@ class Server : PacketMap!IncomingPacket
 
 	private void onLogin(ref IncomingPacket packet)
 	{
+		LoginPacket login = decerealize!LoginPacket(packet.data);
+		packet.user.name = login.username;
+		import std.stdio : writeln;
+		writeln(login.username);
 		LoginVerificationPacket verification;
 		verification.accepted = true;
 		verification.userID = packet.user.id;

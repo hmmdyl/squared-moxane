@@ -22,7 +22,7 @@ class EntityRenderSystem : System
 
 	this(Moxane moxane)
 	{
-		super(moxane, moxane.services.get!EntityManager());
+		super(moxane.services.get!EntityManager());
 		renderer = moxane.services.get!StandardRenderer;
 		entityManager.add(this);
 	}

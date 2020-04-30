@@ -14,14 +14,19 @@ abstract class PacketMap(TEvent)
 	protected EventWaiter!TEvent[string] distribution;
 	@property ref EventWaiter!TEvent event(string name) { return distribution[name]; }
 
-	this()
+	this() @trusted
 	{
 		nameToID[LoginPacket.technicalName] = LoginPacket.id;
 		idToName[LoginPacket.id] = LoginPacket.technicalName;
+		distribution[LoginPacket.technicalName] = EventWaiter!TEvent();
+
 		nameToID[LoginVerificationPacket.technicalName] = LoginVerificationPacket.id;
 		idToName[LoginVerificationPacket.id] = LoginVerificationPacket.technicalName;
+		distribution[LoginVerificationPacket.technicalName] = EventWaiter!TEvent();
+
 		nameToID[AnnounceLoginPacket.technicalName] = AnnounceLoginPacket.id;
 		idToName[AnnounceLoginPacket.id] = AnnounceLoginPacket.technicalName;
+		distribution[AnnounceLoginPacket.technicalName] = EventWaiter!TEvent();
 	}
 
 	bool has(string packetName) { return (packetName in nameToID) !is null; }

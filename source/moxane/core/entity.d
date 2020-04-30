@@ -2,6 +2,7 @@
 module moxane.core.entity;
 
 import moxane.core.engine;
+import moxane.core.scene;
 import moxane.core.eventwaiter;
 import moxane.network.semantic;
 
@@ -219,10 +220,13 @@ class EntityManager
 	ClientID clientID = 0;
 
 	Moxane moxane;
-	this(Moxane moxane)
+	Scene scene;
+	this(Moxane moxane, Scene scene)
+	in(moxane !is null)
 	{
 		this.moxane = moxane;
-		add(new ScriptSystem(moxane, this));
+		this.scene = scene;
+		add(new ScriptSystem(this));
 	}
 
 	void add(Entity entity)
@@ -426,11 +430,9 @@ class EntityManager
 abstract class System
 {
 	EntityManager entityManager;
-	Moxane moxane;
 
-	this(Moxane moxane, EntityManager manager)
+	this(EntityManager manager) in(manager !is null)
 	{
-		this.moxane = moxane;
 		this.entityManager = manager;
 	}
 	
@@ -447,11 +449,13 @@ abstract class AsyncScript
 	private Entity entity_;
 	@property Entity entity() { return entity_; }
 	@property void entity(Entity e) { entity_ = e; if(!running && runOnAttach) run; }
-	Moxane moxane;
 
-	this(Moxane moxane, bool runOnAttach = true, bool runByDefault = false) @trusted
+	EntityManager entityManager;
+
+	this(EntityManager entityManager, bool runOnAttach = true, bool runByDefault = false) @trusted
+		in(entityManager !is null)
 	{
-		this.moxane = moxane;
+		this.entityManager = entityManager;
 		fiber = new Fiber(&execute);
 		if(runByDefault)
 			run;
@@ -486,11 +490,11 @@ abstract class AsyncScript
 abstract class Script
 {
 	Entity entity;
-	Moxane moxane;
+	final @property EntityManager entityManager() { return entity is null ? null : entity.entityManager_; }
 
-	this(Moxane moxane)
+	this(Entity entity)
 	{
-		this.moxane = moxane;
+		this.entity = entity;
 	}
 
 	void onDetach() {}
@@ -501,9 +505,9 @@ abstract class Script
 
 class ScriptSystem : System
 {
-	this(Moxane moxane, EntityManager em)
+	this(EntityManager em)
 	{
-		super(moxane, em);
+		super(em);
 	}
 
 	override void update()

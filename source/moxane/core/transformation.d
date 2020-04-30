@@ -62,7 +62,7 @@ struct AtomicTransform
 		return AtomicTransform(Vector3f(0f, 0f, 0f), Vector3f(0f, 0f, 0f), Vector3f(1f, 1f, 1f));
 	}+/
 
-	this(Vector3f position, Vector3f rotation, Vector3f scale)
+	this(Vector3f position, Vector3f rotation = Vector3f(0, 0, 0), Vector3f scale = Vector3f(1, 1, 1))
 	{
 		this.position = position;
 		this.rotation = rotation;
