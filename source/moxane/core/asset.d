@@ -28,7 +28,7 @@ class AssetManager
 		loaders[typeid(T)] = loader;
 	}
 
-	static string translateToAbsoluteDir(string dir)
+	static string translateToAbsoluteDir(string dir) @safe
 	{
 		assert(dir[0] != '/' && dir[0] != '\\', "dir[0] must not be a slash");
 		return buildPath(getcwd, dir);

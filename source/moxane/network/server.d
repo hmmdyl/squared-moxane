@@ -86,6 +86,7 @@ class Server : PacketMap!IncomingPacket
 
 	void send(T)(User* user, string packetName, ref T data) @trusted
 	{
+		data.packetID = nameToID[packetName];
 		ubyte[] bytes = cerealize(data);
 		ENetPacket* packet = enet_packet_create(bytes.ptr, bytes.length, ENET_PACKET_FLAG_RELIABLE);
 		enet_peer_send(user.peer, 0, packet);
@@ -93,6 +94,7 @@ class Server : PacketMap!IncomingPacket
 
 	void broadcast(T)(string packetName, ref T data) @trusted
 	{
+		data.packetID = nameToID[packetName];
 		ubyte[] bytes = cerealize(data);
 		ENetPacket* packet = enet_packet_create(bytes.ptr, bytes.length, ENET_PACKET_FLAG_RELIABLE);
 		enet_host_broadcast(host, 0, packet);
@@ -129,9 +131,7 @@ class Server : PacketMap!IncomingPacket
 	{
 		ubyte[] data = event.packet.data[0 .. event.packet.dataLength];
 
-		PacketID id;
-		ubyte[] idArr = (*cast(ubyte[PacketID.sizeof]*)&id);
-		idArr[0..$] = data[0..PacketID.sizeof];
+		PacketID id = decerealize!ushort(data[0..PacketID.sizeof]);
 
 		string* name = id in idToName;
 		if(name is null) throw new Exception("lel");

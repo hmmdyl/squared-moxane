@@ -10,12 +10,16 @@ import std.typecons;
 
 @trusted:
 
+alias ClientIncomingPacket = Tuple!(string, ubyte[]);
+
 class Client
 {
 	private string[PacketID] idToName;
 	private PacketID[string] nameToID;
 	private EventWaiter!(Tuple!(string, ubyte[]))[string] distribution;
 	@property ref EventWaiter!(Tuple!(string, ubyte[])) event(string name) { return distribution[name]; }
+
+	EventWaiter!LoginVerificationPacket onLoginComplete;
 
 	private UserID id_;
 	@property UserID id() const { return id_; }
@@ -83,6 +87,8 @@ class Client
 		}
 
 		isConfigured_ = true;
+
+		onLoginComplete.emit(loginVerification);
 	}
 
 	private void onConnect(ref ENetEvent event)
@@ -100,9 +106,7 @@ class Client
 	{
 		ubyte[] data = event.packet.data[0 .. event.packet.dataLength];
 
-		PacketID id;
-		ubyte[] idArr = (*cast(ubyte[PacketID.sizeof]*)&id);
-		idArr[0..$] = data[0..PacketID.sizeof];
+		PacketID id = decerealize!ushort(data[0..PacketID.sizeof]);
 
 		string* name = id in idToName;
 		if(name is null) throw new Exception("lel");

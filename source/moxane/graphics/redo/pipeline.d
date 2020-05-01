@@ -77,6 +77,9 @@ final class Pipeline
 	this(Moxane moxane, Scene scene) @trusted
 		in { assert(moxane !is null); assert(scene !is null); }
 	do {
+		this.moxane = moxane;
+		this.scene_ = scene;
+
 		moxane.services.register!GraphicsLog(new GraphicsLog);
 		common = moxane.services.get!PipelineCommon;
 		if(common is null)
@@ -104,11 +107,21 @@ final class Pipeline
 		fog = new FogPostProcess(moxane, common);
 
 		DirectionalLight dl = new DirectionalLight;
-		dl.direction = Vector3f(0, 1, 0);
+		dl.direction = Vector3f(0, 1, 1);
 		dl.colour = Vector3f(1, 1, 1);
 		dl.ambientIntensity = 0.5f;
 		dl.diffuseIntensity = 1f;
 		directionalLights ~= dl;
+
+		PointLight pl = new PointLight;
+		pl.position = Vector3f(0, 52, 0);
+		pl.colour = Vector3f(1, 1, 1);
+		pl.ambientIntensity = 0.5f;
+		pl.diffuseIntensity = 1f;
+		pl.constAtt = 0f;
+		pl.linAtt = 1f;
+		pl.expAtt = 1f;
+		//pointLights ~= pl;
 	}
 
 	~this() @trusted
@@ -123,6 +136,8 @@ final class Pipeline
 	{
 		if(output is null) output = screenFramebuffer;
 
+		PipelineStatics stats;
+
 		void scenePass()
 		{
 			sceneFramebuffer.beginDraw;
@@ -133,7 +148,6 @@ final class Pipeline
 			scope(exit) openGL_.depthTest.pop;
 
 			auto state = PipelineDrawState.scene;
-			PipelineStatics stats;
 			LocalContext context = LocalContext(camera, Matrix4f.identity, state);
 
 			foreach(IDrawable drawable; physicalQueue)

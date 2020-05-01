@@ -2,6 +2,8 @@ module moxane.utils.pool;
 
 import std.container.array;
 
+@safe:
+
 struct Pool(T)
 {
 	T delegate() constructor;
@@ -10,7 +12,7 @@ struct Pool(T)
 	private Array!T arr;
 	private Object obj;
 
-	this(T delegate() constructor, int defaultAmount = 8, bool expands = true)
+	this(T delegate() @safe constructor, int defaultAmount = 8, bool expands = true) @trusted
 	{
 		this.constructor = constructor;
 		this.expands = expands;
@@ -38,7 +40,7 @@ struct Pool(T)
 		}
 	}
 
-	void give(T item)
+	void give(T item) @trusted
 	in { assert(item !is null); }
 	do {
 		synchronized(obj)

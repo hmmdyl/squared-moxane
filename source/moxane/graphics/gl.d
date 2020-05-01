@@ -66,7 +66,7 @@ class GLState
 {
 	Moxane moxane;
 
-	this(Moxane moxane, bool bindDebugCallback = false)
+	this(Moxane moxane, bool bindDebugCallback = true)
 	{
 		this.moxane = moxane;
 		if(bindDebugCallback)
