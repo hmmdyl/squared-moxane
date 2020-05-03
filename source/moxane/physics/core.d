@@ -36,10 +36,10 @@ class PhysicsSystem : System
 
 	mixin(SharedProperty!(Vector3f, "gravity"));
 
-	this(Moxane moxane, EntityManager manager) @trusted
+	this(Log log, EntityManager manager) @trusted
 	{
 		super(manager);
-		physicsThread = new PhysicsThread(moxane.services.get!Log);
+		physicsThread = new PhysicsThread(log);
 
 		gravity = Vector3f(0, 10, 0);
 	}

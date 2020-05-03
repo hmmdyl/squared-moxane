@@ -104,8 +104,6 @@ class Server : PacketMap!IncomingPacket
 	{
 		LoginPacket login = decerealize!LoginPacket(packet.data);
 		packet.user.name = login.username;
-		import std.stdio : writeln;
-		writeln(login.username);
 		LoginVerificationPacket verification;
 		verification.accepted = true;
 		verification.userID = packet.user.id;
@@ -114,6 +112,9 @@ class Server : PacketMap!IncomingPacket
 			verification.packetMap ~= idToName[i];
 		}
 		send(packet.user, verification.technicalName, verification);
+
+		import std.stdio;
+		writeln("User ", login.username, " signed in");
 	}
 
 	private void onConnect(ref ENetEvent event) @trusted

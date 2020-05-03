@@ -109,15 +109,19 @@ class Client
 		PacketID id = decerealize!ushort(data[0..PacketID.sizeof]);
 
 		string* name = id in idToName;
-		if(name is null) throw new Exception("lel");
+		if(name is null) return; //throw new Exception("lel");
 
 		distribution[*name].emit(tuple(*name, data));
 	}
+
+	void send(T)(ref T data) { send(data.technicalName, data); }
 
 	void send(T)(string name, ref T data)
 	{
 		PacketID* id = name in nameToID;
 		if(id is null) throw new Exception("Packet not mapped");
+
+		data.packetID = *id;
 
 		ubyte[] bytes = cerealise(data);
 		ENetPacket* packet = enet_packet_create(bytes.ptr, bytes.length, 
